@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "postbuild": "node scripts/postbuild-hostinger.cjs",
     "build:ssr": "ng build --configuration=production ; ng run my-ssr-app:server",
     "serve:ssr": "node dist/my-ssr-app/server/server.mjs",
     "watch": "ng build --watch --configuration development",
