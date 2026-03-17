@@ -1,0 +1,38 @@
+<div class="forums-page">
+  <header class="forums-header">
+    <div class="header-content">
+      <h1>NYC360 Forums</h1>
+      <p>Connect, share, and find answers in our specialized neighborhood forums.</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="forums-grid" *ngIf="!isLoading && forums.length > 0">
+      <div class="forum-card" *ngFor="let forum of forums" [routerLink]="['/public/forums', forum.slug]">
+        <div class="card-icon-wrapper">
+          <img [src]="resolveIcon(forum.iconUrl)" [alt]="forum.title" class="forum-icon">
+        </div>
+        <div class="card-content">
+          <h3>{{ forum.title }}</h3>
+          <p>{{ forum.description }}</p>
+          <div class="card-stats">
+            <span class="stat-item">
+              <i class="bi bi-chat-text"></i>
+              {{ forum.questionsCount }} Questions
+            </span>
+          </div>
+        </div>
+        <div class="card-arrow">
+          <i class="bi bi-chevron-right"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && forums.length === 0">
+      <i class="bi bi-chat-square-dots"></i>
+      <h3>No Forums Available</h3>
+      <p>We're currently setting up our forums. Please check back soon!</p>
+    </div>
+  </div>
+</div>

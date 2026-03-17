@@ -1,0 +1,342 @@
+<div class="modal-body" *ngIf="!isSuccess; else successTemplate">
+    <div class="modal-header-premium">
+        <h2>Contact the Agent</h2>
+        <button class="close-x" (click)="cancel()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <!-- Agent Availability & Welcome Note -->
+    <div class="agent-welcome-card" *ngIf="authorization">
+        <div class="card-importance-tag">
+            <i class="bi bi-exclamation-octagon-fill"></i>
+            <span>ACTION REQUIRED: AGENT PREFERENCES</span>
+        </div>
+
+        <div class="agent-profile-mini">
+            <div class="agent-avatar-ring">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div class="agent-identity">
+                <h4>{{ authorization.fullName }}</h4>
+                <div class="id-row">
+                    <span class="org-tag" *ngIf="authorization.organizationName">{{ authorization.organizationName
+                        }}</span>
+                    <span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="welcome-message text-center">
+            <h3>Optimize Your Request</h3>
+            <p>To ensure a prioritized response, please select from the <strong>exclusive availability windows</strong>
+                specified by the agent below:</p>
+
+            <div class="avail-item clickable" *ngFor="let avail of availabilities"
+                (click)="selectDate(avail.availabilityType, formatDateForInput(avail.dates[0])); selectTimeWindow(avail.availabilityType, avail)">
+                <span class="a-label">
+                    <ng-container [ngSwitch]="avail.availabilityType">
+                        <span *ngSwitchCase="1">Preferred Contact</span>
+                        <span *ngSwitchCase="2">Virtual Tours</span>
+                        <span *ngSwitchCase="3">In-Person Tours</span>
+                        <span *ngSwitchDefault>Available Slot</span>
+                    </ng-container>
+                </span>
+                <span class="a-value">
+                    <i class="bi" [ngClass]="{
+                            'bi-chat-dots-fill': avail.availabilityType === 1,
+                            'bi-camera-video-fill': avail.availabilityType === 2,
+                            'bi-geo-alt-fill': avail.availabilityType === 3
+                        }"></i>
+                    <ng-container *ngFor="let d of avail.dates; let last = last">
+                        {{ d | date:'MMM d' }}{{ !last ? ', ' : '' }}
+                    </ng-container>
+                    <span *ngIf="avail.timeFrom" class="ms-1">
+                        at {{ avail.timeFrom.split(':').length === 3 ? avail.timeFrom.substring(0, 5) : avail.timeFrom
+                        }}
+                        <span *ngIf="avail.timeTo">- {{ avail.timeTo.split(':').length === 3 ? avail.timeTo.substring(0,
+                            5) : avail.timeTo }}</span>
+                    </span>
+                    <div class="click-hint">Click to Select</div>
+                </span>
+            </div>
+
+            <ng-template #oldAuthStyle>
+                <div class="availability-grid">
+                    <div class="avail-item" *ngIf="authorization?.preferredContactDate">
+                        <span class="a-label">Preferred Contact</span>
+                        <span class="a-value">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            {{ authorization.preferredContactDate | date:'MMM d' }} at {{
+                            authorization.preferredContactTime }}
+                        </span>
+                    </div>
+                    <div class="avail-item" *ngIf="authorization?.preferredVirtualTourDate">
+                        <span class="a-label">Virtual Tours</span>
+                        <span class="a-value">
+                            <i class="bi bi-camera-video-fill"></i>
+                            {{ authorization.preferredVirtualTourDate | date:'MMM d' }} at {{
+                            authorization.preferredVirtualTourTime }}
+                        </span>
+                    </div>
+                    <div class="avail-item" *ngIf="authorization?.preferredInPersonTourDate">
+                        <span class="a-label">In-Person Tours</span>
+                        <span class="a-value">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            {{ authorization.preferredInPersonTourDate | date:'MMM d' }} at {{
+                            authorization.preferredInPersonTourTime }}
+                        </span>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+
+        <div class="banner-footer-note">
+            <i class="bi bi-lightning-charge-fill"></i>
+            Tip: Requests aligned with these hours are usually answered within 1-2 hours.
+        </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="premium-form">
+        <!-- Section 1: Your Information -->
+        <div class="form-section-premium">
+            <div class="section-badge">
+                <span class="step-number">1</span>
+                <h3>Your Information</h3>
+            </div>
+
+            <div class="form-group-premium">
+                <label>Full Name</label>
+                <input type="text" formControlName="Name" placeholder="Jane Doe"
+                    [class.invalid]="isFieldInvalid('Name')">
+            </div>
+
+            <div class="form-row-premium">
+                <div class="form-group-premium">
+                    <label>Email Address</label>
+                    <input type="email" formControlName="Email" placeholder="Jane@gmail.com"
+                        [class.invalid]="isFieldInvalid('Email')">
+                </div>
+                <div class="form-group-premium">
+                    <label>Phone Number</label>
+                    <input type="tel" formControlName="PhoneNumber" placeholder="(555) 000 - 0000"
+                        [class.invalid]="isFieldInvalid('PhoneNumber')">
+                </div>
+            </div>
+
+            <div class="form-group-premium">
+                <label>Preferred Contact Method *</label>
+                <div class="custom-select-premium" (click)="toggleContactDropdown($event)">
+                    <span class="selected-value">{{ selectedContactLabel }}</span>
+                    <i class="bi bi-chevron-down"></i>
+                    <div class="dropdown-menu-premium" *ngIf="showContactDropdown">
+                        <div class="dropdown-item-premium" *ngFor="let type of contactTypes"
+                            (click)="selectContactType(type, $event)">
+                            {{ type.label }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row-premium date-time-row">
+                <div class="form-group-premium">
+                    <label>Preferred Contact Date *</label>
+                    <ng-container *ngIf="getAvailableDates(1).length > 0; else manualContactDate">
+                        <div class="strict-selection-grid">
+                            <button type="button" *ngFor="let d of getAvailableDates(1)" class="slot-btn"
+                                [class.active]="form.get('PrefContactDate')?.value === d" (click)="selectDate(1, d)">
+                                {{ d | date:'EEE, MMM d' }}
+                            </button>
+                        </div>
+                    </ng-container>
+                    <ng-template #manualContactDate>
+                        <div class="date-input-wrapper">
+                            <i class="bi bi-calendar3"></i>
+                            <input type="date" formControlName="PrefContactDate" [min]="minContactDate">
+                        </div>
+                    </ng-template>
+                </div>
+                <div class="form-group-premium">
+                    <label>Preferred Contact Time *</label>
+                    <div class="date-input-wrapper"
+                        [class.highlight-available]="getTimeWindowsForDate(1, form.get('PrefContactDate')?.value).length > 0">
+                        <i class="bi bi-clock"></i>
+                        <input type="time" formControlName="PrefContactTime" (change)="validateSelectedTime(1)"
+                            (input)="validateSelectedTime(1)" [class.invalid]="timeErrors[1]">
+                    </div>
+                    <div class="validation-error-banner" *ngIf="timeErrors[1]">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ timeErrors[1] }}</span>
+                    </div>
+                    <div class="available-slots-hint mt-2"
+                        *ngIf="getTimeWindowsForDate(1, form.get('PrefContactDate')?.value).length > 0">
+                        <span class="hint-text text-muted small d-block mb-1">Select an agent's preferred slot:</span>
+                        <div class="strict-selection-grid">
+                            <button type="button"
+                                *ngFor="let w of getTimeWindowsForDate(1, form.get('PrefContactDate')?.value)"
+                                class="slot-btn" [class.active]="form.get('PrefContactTime')?.value === w.from"
+                                (click)="selectTimeWindow(1, w)">
+                                {{ w.from }} <span *ngIf="w.to"> - {{ w.to }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Interest Details -->
+        <div class="form-section-premium">
+            <div class="section-badge gold">
+                <span class="step-number">2</span>
+                <h3>Interest Details</h3>
+            </div>
+
+            <div class="form-group-premium">
+                <label>Household Type</label>
+                <div class="toggle-group-premium">
+                    <button type="button" *ngFor="let type of householdTypes"
+                        [class.active]="form.get('HouseholdType')?.value === type.value"
+                        (click)="selectHouseholdType(type, $event)">
+                        {{ type.label }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-row-premium">
+                <div class="form-group-premium">
+                    <label>Select Move-in Date *</label>
+                    <div class="date-input-wrapper">
+                        <i class="bi bi-calendar-event"></i>
+                        <input type="date" formControlName="MoveInDate" [min]="todayDate">
+                    </div>
+                </div>
+                <div class="form-group-premium">
+                    <label>Select Move-out Date</label>
+                    <div class="date-input-wrapper">
+                        <i class="bi bi-calendar-x"></i>
+                        <input type="date" formControlName="MoveOutDate">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row-premium date-time-row">
+                <div class="form-group-premium">
+                    <label>Schedule Virtual Tour</label>
+                    <ng-container *ngIf="getAvailableDates(2).length > 0; else manualVirtualDate">
+                        <div class="strict-selection-grid">
+                            <button type="button" *ngFor="let d of getAvailableDates(2)" class="slot-btn"
+                                [class.active]="form.get('ScheduleVirtualDate')?.value === d"
+                                (click)="selectDate(2, d)">
+                                {{ d | date:'EEE, MMM d' }}
+                            </button>
+                        </div>
+                    </ng-container>
+                    <ng-template #manualVirtualDate>
+                        <div class="date-input-wrapper">
+                            <i class="bi bi-camera-video"></i>
+                            <input type="date" formControlName="ScheduleVirtualDate" [min]="minVirtualDate">
+                        </div>
+                    </ng-template>
+                </div>
+                <div class="form-group-premium">
+                    <label>Time Window</label>
+                    <div class="date-input-wrapper"
+                        [class.highlight-available]="getTimeWindowsForDate(2, form.get('ScheduleVirtualDate')?.value).length > 0">
+                        <i class="bi bi-clock-history"></i>
+                        <input type="time" formControlName="VirtualTime" (change)="validateSelectedTime(2)"
+                            (input)="validateSelectedTime(2)" [class.invalid]="timeErrors[2]">
+                    </div>
+                    <div class="validation-error-banner" *ngIf="timeErrors[2]">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ timeErrors[2] }}</span>
+                    </div>
+                    <div class="available-slots-hint mt-2"
+                        *ngIf="getTimeWindowsForDate(2, form.get('ScheduleVirtualDate')?.value).length > 0">
+                        <span class="hint-text text-muted small d-block mb-1">Agent available during:</span>
+                        <div class="strict-selection-grid">
+                            <button type="button"
+                                *ngFor="let w of getTimeWindowsForDate(2, form.get('ScheduleVirtualDate')?.value)"
+                                class="slot-btn" [class.active]="form.get('VirtualTime')?.value === w.from"
+                                (click)="selectTimeWindow(2, w)">
+                                {{ w.from }} <span *ngIf="w.to"> - {{ w.to }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row-premium date-time-row">
+                <div class="form-group-premium">
+                    <label>Schedule In-Person Tour</label>
+                    <ng-container *ngIf="getAvailableDates(3).length > 0; else manualInPersonDate">
+                        <div class="strict-selection-grid">
+                            <button type="button" *ngFor="let d of getAvailableDates(3)" class="slot-btn"
+                                [class.active]="form.get('InPersonTourDate')?.value === d" (click)="selectDate(3, d)">
+                                {{ d | date:'EEE, MMM d' }}
+                            </button>
+                        </div>
+                    </ng-container>
+                    <ng-template #manualInPersonDate>
+                        <div class="date-input-wrapper">
+                            <i class="bi bi-geo-alt"></i>
+                            <input type="date" formControlName="InPersonTourDate" [min]="minInPersonDate">
+                        </div>
+                    </ng-template>
+                </div>
+                <div class="form-group-premium">
+                    <label>Time Window</label>
+                    <div class="date-input-wrapper"
+                        [class.highlight-available]="getTimeWindowsForDate(3, form.get('InPersonTourDate')?.value).length > 0">
+                        <i class="bi bi-alarm"></i>
+                        <input type="time" formControlName="InPersonTime" (change)="validateSelectedTime(3)"
+                            (input)="validateSelectedTime(3)" [class.invalid]="timeErrors[3]">
+                    </div>
+                    <div class="validation-error-banner" *ngIf="timeErrors[3]">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ timeErrors[3] }}</span>
+                    </div>
+                    <div class="available-slots-hint mt-2"
+                        *ngIf="getTimeWindowsForDate(3, form.get('InPersonTourDate')?.value).length > 0">
+                        <span class="hint-text text-muted small d-block mb-1">Agent available during:</span>
+                        <div class="strict-selection-grid">
+                            <button type="button"
+                                *ngFor="let w of getTimeWindowsForDate(3, form.get('InPersonTourDate')?.value)"
+                                class="slot-btn" [class.active]="form.get('InPersonTime')?.value === w.from"
+                                (click)="selectTimeWindow(3, w)">
+                                {{ w.from }} <span *ngIf="w.to"> - {{ w.to }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-premium">
+                <label>Personal Message *</label>
+                <textarea formControlName="Message" rows="4"
+                    placeholder="Hi, I'm interested in this property. I'd love to schedule a viewing ......."></textarea>
+            </div>
+        </div>
+
+        <div class="form-footer-premium">
+            <div class="response-time">
+                <span class="label">AGENT RESPONSE TIME</span>
+                <span class="value">Avg. 4 hours</span>
+            </div>
+            <button type="submit" class="btn-send-premium"
+                [disabled]="isSubmitting || form.invalid || timeErrors[1] || timeErrors[2] || timeErrors[3]">
+                <span>Send Inquiry</span>
+                <i class="bi bi-send-fill" *ngIf="!isSubmitting"></i>
+                <span class="spinner-border spinner-border-sm" *ngIf="isSubmitting"></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<ng-template #successTemplate>
+    <div class="success-view-premium">
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2>Inquiry Sent!</h2>
+        <p>The agent will get back to you within 4 hours. You can track your requests in your dashboard.</p>
+        <button class="btn-send-premium" (click)="cancel()">Close</button>
+    </div>
+</ng-template>

@@ -1,0 +1,209 @@
+// --- Variables (Light & Gold Theme) ---
+$bg-page: #f8f9fa;
+$card-bg: #ffffff;
+$text-main: #333;
+$text-muted: #6c757d;
+$gold: #DAA520; // The primary accent color
+$border: #e9ecef;
+$danger: #dc3545;
+
+.page-container {
+  padding: 15px; /* تم التصغير */
+  min-height: 100vh;
+  background-color: $bg-page;
+  font-family: 'Segoe UI', sans-serif;
+  color: $text-main;
+}
+
+// --- Header ---
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px; /* تم التصغير */
+
+  .title-section {
+    h2 { font-weight: 800; color: $text-main; margin-bottom: 2px; } /* تم التصغير */
+    p { color: $text-muted; font-size: 0.85rem; } /* تم التصغير */
+  }
+
+  .btn-back {
+    color: $text-muted;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px; /* تم التصغير */
+    transition: 0.2s;
+    &:hover { color: $gold; }
+  }
+}
+
+// --- Card Container ---
+.form-card {
+  background: $card-bg;
+  padding: 25px; /* تم التصغير */
+  border-radius: 8px; /* تم التصغير */
+  border: 1px solid $border;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05); 
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+// --- Inputs Styling ---
+.form-section {
+  margin-bottom: 15px; /* تم التصغير */
+  
+  .section-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px; /* تم التصغير */
+    color: $text-main;
+    font-size: 0.9rem; /* تم التصغير */
+  }
+
+  .input-group {
+    position: relative;
+    
+    .input-icon {
+      position: absolute;
+      left: 10px; /* تم التصغير */
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+      font-size: 0.85rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 12px 8px 35px; /* تم التصغير */
+      border: 1px solid $border;
+      border-radius: 5px; /* تم التصغير */
+      font-size: 0.9rem;
+      background: #fdfdfd;
+      transition: all 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: $gold;
+        box-shadow: 0 0 0 2px rgba($gold, 0.15);
+        background: #fff;
+      }
+    }
+  }
+}
+
+.divider { border: 0; border-top: 1px solid $border; margin: 15px 0; } /* تم التصغير */
+
+// --- Permissions Grid ---
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* تم التصغير */
+  gap: 8px; /* تم التصغير */
+}
+
+.permission-item {
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    padding: 8px; /* تم التصغير */
+    background: #fff;
+    border: 1px solid $border;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+
+    &:hover {
+      border-color: $gold;
+      background: rgba($gold, 0.03);
+    }
+
+    // Hide default checkbox
+    input { position: absolute; opacity: 0; height: 0; width: 0; }
+
+    // Custom Checkmark
+    .custom-checkmark {
+      flex-shrink: 0;
+      height: 16px; /* تم التصغير */
+      width: 16px; /* تم التصغير */
+      background-color: #eee;
+      border-radius: 3px; /* تم التصغير */
+      margin-right: 8px; /* تم التصغير */
+      position: relative;
+      transition: 0.2s;
+
+      &::after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 5px; top: 2px;
+        width: 4px; height: 8px; /* تم التصغير */
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    }
+
+    input:checked ~ .custom-checkmark {
+      background-color: $gold;
+      &::after { display: block; }
+    }
+
+    // Text Logic
+    .perm-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1; /* تم التصغير */
+      .perm-module { font-size: 0.6rem; color: $text-muted; text-transform: uppercase; font-weight: 600; } /* تم التصغير */
+      .perm-action { font-size: 0.8rem; font-weight: 700; color: $text-main; } /* تم التصغير */
+    }
+  }
+}
+
+// --- Actions ---
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px; /* تم التصغير */
+  margin-top: 25px; /* تم التصغير */
+  padding-top: 12px; /* تم التصغير */
+  border-top: 1px solid $border;
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid transparent;
+    color: $text-muted;
+    padding: 6px 15px; /* تم التصغير */
+    font-weight: 600;
+    border-radius: 4px; /* تم التصغير */
+    cursor: pointer;
+    &:hover { color: $text-main; background: #f1f1f1; }
+  }
+
+  .btn-gold {
+    background: $gold;
+    color: #fff;
+    border: none;
+    padding: 8px 20px; /* تم التصغير */
+    font-weight: 700;
+    border-radius: 4px; /* تم التصغير */
+    cursor: pointer;
+    transition: 0.3s;
+    
+    &:hover:not(:disabled) { 
+      background: darken($gold, 10%); 
+      box-shadow: 0 2px 5px rgba($gold, 0.3); /* تم التصغير */
+    }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+}
+
+// --- Utilities ---
+.text-danger { color: $danger; font-size: 0.75rem; margin-top: 3px; display: block; } /* تم التصغير */
+.text-gold { color: $gold; }
+.spinner-container { text-align: center; padding: 10px; } /* تم التصغير */
+
+// --- Animation ---
+.page-fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }

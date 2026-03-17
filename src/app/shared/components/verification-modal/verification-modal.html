@@ -1,0 +1,68 @@
+
+<div class="custom-modal-backdrop" (click)="closeModal()">
+    <div class="verification-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header-premium">
+            <div class="icon-badge">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h3>Request {{ categoryName }} Access</h3>
+            <p>To access contributor features in {{ categoryName }}, you need to verify your status.</p>
+            <button class="btn-close-modal" (click)="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body-premium">
+            <form [formGroup]="verificationForm" (ngSubmit)="submitVerification()">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label-premium">Occupation / Role *</label>
+                        <select class="form-control-premium" formControlName="occupationId">
+                            <option *ngFor="let occ of occupations" [value]="occ.id">{{occ.name}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label-premium">Document Type *</label>
+                        <select class="form-control-premium" formControlName="documentType">
+                            <option *ngFor="let type of documentTypes" [value]="type.id">{{type.name}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label-premium">Reason for Request *</label>
+                    <textarea class="form-control-premium" formControlName="reason"
+                        placeholder="Explain why you need access (e.g., I am a licensed agent in NYC)"></textarea>
+                    <small class="text-danger"
+                        *ngIf="verificationForm.get('reason')?.touched && verificationForm.get('reason')?.invalid">
+                        Required (min 10 characters).
+                    </small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label-premium">Supporting Document *</label>
+                        <div class="file-upload-wrapper" (click)="docInput.click()">
+                            <input type="file" (change)="onFileSelected($event)" class="d-none" #docInput
+                                accept=".jpg,.jpeg,.png,.pdf">
+                            <button type="button" class="btn-upload-trigger">
+                                <i class="bi bi-cloud-arrow-up me-2"></i>
+                                {{ selectedDocFile ? selectedDocFile.name : 'Choose File' }}
+                            </button>
+                            <small class="text-danger d-block mt-1"
+                                *ngIf="verificationForm.get('file')?.touched && !selectedDocFile">
+                                Please upload a document.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer-premium">
+                    <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit-verification" [disabled]="isSubmittingVerification">
+                        <span *ngIf="isSubmittingVerification" class="spinner-border spinner-border-sm me-2"></span>
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

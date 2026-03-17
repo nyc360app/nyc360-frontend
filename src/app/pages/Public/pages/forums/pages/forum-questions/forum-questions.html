@@ -1,0 +1,106 @@
+<div class="questions-page">
+    <header class="questions-header">
+        <div class="container header-container">
+            <div class="header-top">
+                <div class="back-link" routerLink="/public/forums">
+                    <i class="bi bi-arrow-left"></i>
+                    Back to Forums
+                </div>
+            </div>
+
+            <div class="forum-main-info" *ngIf="forum">
+                <div class="forum-icon-large">
+                    <img [src]="resolveForumIcon(forum.iconUrl)" [alt]="forum.title">
+                </div>
+                <div class="header-text">
+                    <h1>{{ forum.title }}</h1>
+                    <p>{{ forum.description }}</p>
+                    <div class="forum-meta">
+                        <span class="meta-item">
+                            <i class="bi bi-chat-text"></i>
+                            {{ forum.questionsCount }} Discussions
+                        </span>
+                    </div>
+                </div>
+                <button class="btn-create-question" [routerLink]="['/public/forums', slug, 'create']">
+                    <i class="bi bi-plus-lg"></i>
+                    Ask a Question
+                </button>
+            </div>
+
+            <!-- Loading state -->
+            <div class="forum-main-info" *ngIf="!forum && isLoading">
+                <div class="skeleton-icon"></div>
+                <div class="header-text">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-description"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-content">
+        <div class="questions-list" *ngIf="!isLoading && questions.length > 0">
+            <div class="question-card" *ngFor="let question of questions" [class.pinned]="question.isPinned">
+                <div class="card-left">
+                    <app-initials-avatar
+                        class="author-avatar"
+                        [name]="question.author.fullName || question.author.username"
+                        [src]="question.author.imageUrl"
+                        [alt]="question.author.fullName || question.author.username">
+                    </app-initials-avatar>
+                </div>
+                <div class="card-center">
+                    <div class="question-meta">
+                        <span class="pinned-badge" *ngIf="question.isPinned">
+                            <i class="bi bi-pin-angle-fill"></i> Pinned
+                        </span>
+                        <span class="locked-badge" *ngIf="question.isLocked">
+                            <i class="bi bi-lock-fill"></i> Locked
+                        </span>
+                        <span class="author-name">{{ question.author.fullName }}</span>
+                        <span class="separator">•</span>
+                        <span class="created-at">{{ question.createdAt | date:'mediumDate' }}</span>
+                    </div>
+                    <h3 class="question-title">
+                        <a [routerLink]="['/public/forums/questions', question.id]">{{ question.title }}</a>
+                    </h3>
+                    <p class="question-excerpt">{{ question.content | slice:0:150 }}{{ question.content.length > 150 ?
+                        '...' : '' }}</p>
+                </div>
+                <div class="card-right">
+                    <div class="stat-box">
+                        <span class="stat-value">{{ question.answersCount }}</span>
+                        <span class="stat-label">Answers</span>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="totalPages > 1">
+            <button class="pagination-btn" [disabled]="page === 1" (click)="onPageChange(page - 1)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <span class="page-info">Page {{ page }} of {{ totalPages }}</span>
+            <button class="pagination-btn" [disabled]="page === totalPages" (click)="onPageChange(page + 1)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!isLoading && questions.length === 0">
+            <div class="empty-icon">
+                <i class="bi bi-chat-dots"></i>
+            </div>
+            <h3>No questions yet</h3>
+            <p>Be the first one to ask a question in this forum!</p>
+            <button class="btn-create-question secondary" [routerLink]="['/public/forums', slug, 'create']">
+                Ask a Question
+            </button>
+        </div>
+    </div>
+</div>

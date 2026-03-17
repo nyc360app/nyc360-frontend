@@ -1,0 +1,257 @@
+<div class="posts-dashboard animate__animated animate__fadeIn">
+  <div class="container-fluid py-4 px-md-5">
+
+    <!-- Header -->
+    <div class="header-section d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+      <div class="title-area">
+        <h1 class="gold-title merriweather-font mb-0">POSTS MANAGER</h1>
+        <p class="text-muted small mb-0">Oversee community content and engagement</p>
+      </div>
+      <a routerLink="/admin/posts/create" class="btn-luxury-gold shadow-sm text-decoration-none">
+        <i class="bi bi-pencil-square me-2"></i> CREATE POST
+      </a>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+      <div class="col-md-4" *ngFor="let stat of dashboardStats; let i = index">
+        <div class="stat-card glass-panel" [ngClass]="stat.color">
+          <div class="icon-box">
+            <i class="bi" [ngClass]="stat.icon"></i>
+          </div>
+          <div class="info-box">
+            <h3 class="count">{{ stat.value }}</h3>
+            <span class="label">{{ stat.title }}</span>
+          </div>
+          <div class="bg-shape"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel glass-panel mb-4">
+      <div class="row g-3 align-items-center">
+        <!-- Search -->
+        <div class="col-12 col-lg-5">
+          <div class="search-box">
+            <i class="bi bi-search text-gold"></i>
+            <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()"
+              placeholder="Search by title, content, or author...">
+          </div>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="col-6 col-lg-3">
+          <select class="luxury-select" [(ngModel)]="selectedCategoryId" (change)="applyFilters()">
+            <option [value]="-1">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.label }}</option>
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="col-6 col-lg-3">
+          <select class="luxury-select" [(ngModel)]="sortBy" (change)="applyFilters()">
+            <option value="latest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+
+        <!-- Subtle Loading Indicator -->
+        <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+          <div class="progress" style="height: 3px; border-radius: 0;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-card glass-panel">
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && filteredPosts.length === 0" class="text-center py-5">
+          <i class="bi bi-inbox text-muted display-4"></i>
+          <p class="mt-3 text-muted">No posts found matching your criteria.</p>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="table-responsive d-none d-md-block" *ngIf="filteredPosts.length > 0">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th width="60">ID</th>
+                <th width="35%">POST DETAILS</th>
+                <th>AUTHOR</th>
+                <th>CATEGORY</th>
+                <th>ENGAGEMENT</th>
+                <th class="text-end">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let post of filteredPosts; let i = index" class="table-row">
+
+                <!-- ID -->
+                <td class="id-cell"><span class="id-badge">#{{ post.id }}</span></td>
+
+                <!-- Details -->
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="post-thumb-wrapper">
+                      <img [src]="getMainImage(post) || 'assets/images/placeholder-post.png'" class="post-thumb"
+                        loading="lazy" (error)="post.imageUrl = null">
+                    </div>
+                    <div class="post-info">
+                      <h5 class="post-title text-truncate-2">{{ post.title }}</h5>
+                      <small class="text-muted"><i class="bi bi-clock"></i> {{ post.createdAt | date:'mediumDate'
+                        }}</small>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Author -->
+                <td>
+                  <div class="d-flex align-items-center gap-2 author-info">
+                    <img [src]="getAvatar(post.author)" class="author-avatar" loading="lazy">
+                    <span>{{ $any(post.author)?.fullName || 'Unknown' }}</span>
+                  </div>
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="category-badge" [style.background-color]="getCategoryTheme(post.category).color + '20'"
+                    [style.color]="getCategoryTheme(post.category).color">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
+                    {{ getCategoryTheme(post.category).label }}
+                  </span>
+                </td>
+
+                <!-- Stats -->
+                <td>
+                  <div class="d-flex gap-3 stats-group">
+                    <span title="Likes" class="text-primary"><i class="bi bi-hand-thumbs-up-fill"></i> {{
+                      post.stats?.likes || 0 }}</span>
+                    <span title="Comments" class="text-secondary"><i class="bi bi-chat-fill"></i> {{
+                      post.stats?.comments
+                      || 0 }}</span>
+                  </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="text-end">
+                  <div class="action-btns">
+                    <button [routerLink]="['/admin/posts/details', post.id]" class="btn-icon view" title="View Details">
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                    <button [routerLink]="['/admin/posts/edit', post.id]" class="btn-icon edit" title="Edit Post">
+                      <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    <button (click)="openReportModal(post)" class="btn-icon report" title="Report/Flag">
+                      <i class="bi bi-flag-fill"></i>
+                    </button>
+                    <button (click)="onDelete(post.id)" class="btn-icon delete" title="Delete Post">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="d-md-none p-3" *ngIf="filteredPosts.length > 0">
+          <div class="post-card-mobile glass-panel mb-3 p-3" *ngFor="let post of filteredPosts">
+
+            <!-- Header: Category & ID -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="category-badge" [style.background-color]="getCategoryTheme(post.category).color + '20'"
+                [style.color]="getCategoryTheme(post.category).color">
+                <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
+                {{ getCategoryTheme(post.category).label }}
+              </span>
+              <span class="id-badge">#{{ post.id }}</span>
+            </div>
+
+            <!-- Content: Thumb & Title -->
+            <div class="d-flex gap-3 mb-3">
+              <div class="post-thumb-wrapper mobile-thumb">
+                <img [src]="getMainImage(post) || 'assets/images/placeholder-post.png'" class="post-thumb"
+                  loading="lazy" (error)="post.imageUrl = null">
+              </div>
+              <div class="post-info flex-grow-1">
+                <h5 class="post-title text-truncate-2 mb-2">{{ post.title }}</h5>
+                <div class="d-flex align-items-center gap-2 author-info small text-muted">
+                  <img [src]="getAvatar(post.author)" class="author-avatar" loading="lazy">
+                  <span>{{ $any(post.author)?.fullName || 'Unknown' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded bg-light-subtle">
+              <div class="d-flex gap-3 stats-group">
+                <span title="Likes" class="text-primary"><i class="bi bi-hand-thumbs-up-fill"></i> {{ post.stats?.likes
+                  || 0 }}</span>
+                <span title="Comments" class="text-secondary"><i class="bi bi-chat-fill"></i> {{ post.stats?.comments ||
+                  0 }}</span>
+              </div>
+              <small class="text-muted"><i class="bi bi-clock"></i> {{ post.createdAt | date:'mediumDate' }}</small>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-btns dflex justify-content-between w-100">
+              <button [routerLink]="['/admin/posts/details', post.id]" class="btn-icon view flex-grow-1"
+                title="View Details">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+              <button [routerLink]="['/admin/posts/edit', post.id]" class="btn-icon edit flex-grow-1 text-center"
+                title="Edit Post">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button (click)="openReportModal(post)" class="btn-icon report flex-grow-1" title="Report/Flag">
+                <i class="bi bi-flag-fill"></i>
+              </button>
+              <button (click)="onDelete(post.id)" class="btn-icon delete flex-grow-1" title="Delete Post">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-info p-3 text-muted small text-center border-top">
+          Showing {{ filteredPosts.length }} of {{ allPosts.length }} total posts
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal-backdrop" *ngIf="isReportModalOpen">
+      <div class="modal-content glass-panel p-0">
+        <div class="modal-header p-4 border-bottom">
+          <h3 class="gold-title mb-0" style="font-size: 1.2rem;">REPORT CONTENT</h3>
+          <button class="btn-close" (click)="closeReportModal()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="instruction mb-3">Please specify the reason for flagging this post:</p>
+          <div class="form-group mb-3">
+            <select class="luxury-select w-100" [(ngModel)]="reportReason">
+              <option [ngValue]="null" disabled>Select Reason...</option>
+              <option *ngFor="let r of reportReasonsList" [ngValue]="r.id">{{ r.label }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <textarea class="luxury-input w-100 p-3" [(ngModel)]="reportDetails" rows="4"
+              placeholder="Additional details (optional)..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer p-4 border-top d-flex gap-2 justify-content-end">
+          <button class="text-muted btn btn-link text-decoration-none" (click)="closeReportModal()">Cancel</button>
+          <button class="btn-luxury-gold py-2 px-4" (click)="submitReport()" [disabled]="!reportReason || isReporting">
+            {{ isReporting ? 'SUBMITTING...' : 'SUBMIT REPORT' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>

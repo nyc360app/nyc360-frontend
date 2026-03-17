@@ -1,0 +1,74 @@
+<div class="rss-connect-container">
+    <div class="rss-card">
+        <div class="header">
+            <h2><i class="fa fa-rss"></i> Connect RSS Feed</h2>
+            <p>Integrate your favorite content sources seamlessly into NYC360</p>
+
+            <!-- Category Badge -->
+            <div class="category-badge" *ngIf="categoryInfo()"
+                [style.background]="'linear-gradient(135deg, ' + categoryInfo().color + ' 0%, ' + categoryInfo().color + 'dd 100%)'">
+                <i [class]="categoryInfo().biIcon"></i>
+                <span>{{ categoryName() }}</span>
+            </div>
+        </div>
+
+        <form [formGroup]="rssForm" (ngSubmit)="onSubmit()">
+
+            <div class="form-group">
+                <label for="url">
+                    <i class="fa fa-link"></i> RSS Feed URL
+                </label>
+                <input type="url" id="url" formControlName="Url" placeholder="https://example.com/feed.xml"
+                    autocomplete="off">
+                <div class="error" *ngIf="rssForm.get('Url')?.touched && rssForm.get('Url')?.invalid">
+                    Please enter a valid URL (starting with http:// or https://)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">
+                    <i class="fa fa-tag"></i> Feed Name
+                </label>
+                <input type="text" id="name" formControlName="Name" placeholder="e.g. NYC Housing News"
+                    autocomplete="off">
+                <div class="error" *ngIf="rssForm.get('Name')?.touched && rssForm.get('Name')?.invalid">
+                    Name is required
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">
+                    <i class="fa fa-align-left"></i> Description
+                </label>
+                <textarea id="description" formControlName="Description" rows="4"
+                    placeholder="Briefly describe what this feed covers..."></textarea>
+                <div class="error" *ngIf="rssForm.get('Description')?.touched && rssForm.get('Description')?.invalid">
+                    Description is required
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="imageUrl">
+                    <i class="fa fa-image"></i> Image URL (Optional)
+                </label>
+                <input type="url" id="imageUrl" formControlName="ImageUrl" placeholder="https://example.com/logo.png"
+                    autocomplete="off">
+            </div>
+
+            <div class="message error-msg" *ngIf="errorMessage()">
+                <i class="fa fa-exclamation-circle"></i> {{ errorMessage() }}
+            </div>
+            <div class="message success-msg" *ngIf="successMessage()">
+                <i class="fa fa-check-circle"></i> {{ successMessage() }}
+            </div>
+
+            <button type="submit" [disabled]="isSubmitting() || rssForm.invalid" class="submit-btn">
+                <span *ngIf="!isSubmitting()">
+                    <i class="fa fa-plug"></i> Connect Feed
+                </span>
+                <span *ngIf="isSubmitting()" class="loader"></span>
+            </button>
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,504 @@
+$primary: #000000;
+$secondary: #444444;
+$accent: #0066cc;
+$border: #eeeeee;
+$white: #ffffff;
+$primary-purple: #6366F1;
+
+.post-card-premium {
+    background: $white;
+    border-radius: 32px;
+    padding: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    margin-bottom: 24px;
+
+    &:hover {
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .post-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+
+        .author-info {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+
+            .author-avatar {
+                width: 48px;
+                height: 48px;
+                border-radius: 16px;
+                object-fit: cover;
+            }
+
+            .author-meta {
+                h3 {
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: #111;
+                    margin: 0;
+                    cursor: pointer;
+
+                    &:hover {
+                        color: $primary-purple;
+                    }
+                }
+
+                span {
+                    font-size: 0.8rem;
+                    color: #999;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+
+    .post-content-area {
+        margin-bottom: 24px;
+
+        .post-title-link {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #111;
+            margin-bottom: 12px;
+            display: block;
+            text-decoration: none;
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+
+            &:hover {
+                color: $primary-purple;
+            }
+        }
+
+        .post-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        .post-media-main {
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 16px;
+
+            img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+        }
+
+        /* ✅ Job Discovery Styles */
+        .job-preview-container {
+            background: #F8FAFC;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #6366F1;
+
+            .job-main-stats {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+
+                .salary-range {
+                    color: #10B981;
+                    font-weight: 800;
+                    font-size: 1.1rem;
+                }
+
+                .company-name {
+                    color: #64748B;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+            }
+
+            .job-tags-premium {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+
+                .job-tag {
+                    background: #fff;
+                    border: 1px solid #E2E8F0;
+                    padding: 6px 12px;
+                    border-radius: 8px;
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    color: #475569;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+
+                    i {
+                        color: #6366F1;
+                    }
+
+                    &.tag-remote {
+                        background: #EEF2FF;
+                        border-color: #C7D2FE;
+                        color: #4338CA;
+                    }
+                }
+            }
+        }
+    }
+
+    .post-footer-actions {
+        padding-top: 24px;
+        border-top: 1px solid #F3F3F3;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .left-actions {
+            display: flex;
+            gap: 24px;
+
+            .action-pill {
+                background: none;
+                border: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 700;
+                font-size: 0.95rem;
+                color: #777;
+                cursor: pointer;
+                transition: 0.2s;
+                padding: 4px 0;
+
+                i {
+                    font-size: 1.2rem;
+                }
+
+                &:hover {
+                    color: #111;
+                }
+
+                &.active-like {
+                    color: #FF5A1F;
+                }
+
+                &.active-comment {
+                    color: $primary-purple;
+                }
+            }
+        }
+
+        .share-icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #F9F9FB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            cursor: pointer;
+            transition: 0.2s;
+
+            &:hover {
+                background: #111;
+                color: $white;
+            }
+        }
+    }
+
+    /* ✅ Housing Discovery Styles */
+    .housing-preview-container {
+        background: #F0FDFA;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 15px 0;
+        border-left: 4px solid #10B981;
+
+        .housing-main-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+
+            .house-price {
+                color: #059669;
+                font-weight: 800;
+                font-size: 1.25rem;
+                letter-spacing: -0.01em;
+
+                small {
+                    font-size: 0.8rem;
+                    opacity: 0.7;
+                    font-weight: 600;
+                }
+            }
+
+            .house-location {
+                color: #64748B;
+                font-size: 0.85rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+        }
+
+        .house-specs-premium {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+
+            .spec-item {
+                background: white;
+                border: 1px solid #CCFBF1;
+                padding: 6px 12px;
+                border-radius: 8px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                color: #0F766E;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+
+                i {
+                    color: #10B981;
+                }
+            }
+        }
+
+        .house-description {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.5;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    }
+
+    /* ✅ Job Author Link */
+    .job-author-link {
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: #F8F9FA;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748B;
+        cursor: pointer;
+        transition: 0.2s;
+
+        i {
+            font-size: 1rem;
+            color: #6366F1;
+        }
+
+        &:hover {
+            background: #EEF2FF;
+            color: #6366F1;
+            transform: translateX(2px);
+        }
+    }
+}
+
+.repost-box {
+    border-radius: 20px;
+    background: #F8F8FA;
+    padding: 20px;
+    border: 1px solid #EEE;
+    margin-top: 16px;
+    transition: 0.3s;
+
+    &:hover {
+        border-color: $primary-purple;
+        background: #F0F0F5;
+    }
+
+    &:active {
+        transform: scale(0.995);
+    }
+}
+
+.premium-comments {
+    .comment-entry {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 24px;
+
+        input {
+            flex: 1;
+            background: #F9F9FB;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+
+            &:focus {
+                outline: 1px solid $primary-purple;
+            }
+        }
+
+        .btn-submit-comment {
+            background: #111;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            &:hover:not(:disabled) {
+                background: #333;
+            }
+        }
+    }
+
+    .comment-content-box {
+        background: #F9F9FB;
+        padding: 12px 16px;
+        border-radius: 12px;
+        flex: 1;
+    }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal-card {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+
+    .modal-header {
+        padding: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #F3F3F3;
+
+        h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #999;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+    }
+
+    .modal-body {
+        padding: 24px;
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            border: none;
+            background: #F9F9FB;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+
+            &:focus {
+                background: #F3F3F3;
+            }
+        }
+    }
+
+    .modal-actions {
+        padding: 0 24px 24px;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+
+        button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-cancel {
+            background: none;
+            border: 1px solid #EEE;
+            color: #666;
+
+            &:hover {
+                background: #F9F9FB;
+            }
+        }
+
+        .btn-confirm {
+            background: #111;
+            color: white;
+            border: none;
+
+            &:hover:not(:disabled) {
+                background: #333;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .post-card-premium {
+        padding: 24px;
+        border-radius: 24px;
+    }
+}

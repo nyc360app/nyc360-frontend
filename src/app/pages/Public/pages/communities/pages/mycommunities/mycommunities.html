@@ -1,0 +1,108 @@
+<div class="mycommunities-page">
+
+  <header class="discovery-header">
+    <div class="header-inner">
+      <h1>My Communities</h1>
+      <p>The places you call home in NYC360</p>
+
+      <div class="filter-bar">
+
+        <div class="search-input">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Search your communities..." [(ngModel)]="searchText"
+            (keyup.enter)="onSearch()">
+        </div>
+
+        <div class="type-select">
+          <i class="bi bi-funnel"></i>
+          <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+            <option [ngValue]="null">All Categories</option>
+            <option *ngFor="let type of communityTypes" [ngValue]="type.id">
+              {{ type.name }}
+            </option>
+          </select>
+        </div>
+
+        <button class="btn-search" (click)="onSearch()">Filter</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Skeleton Loading -->
+    <div class="comm-grid" *ngIf="isLoading">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8]">
+        <div class="sk-head"></div>
+        <div class="sk-body">
+          <div class="sk-line title"></div>
+          <div class="sk-line desc"></div>
+          <div class="sk-line desc"></div>
+          <div class="sk-line meta"></div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && communities.length === 0" class="empty-state">
+      <i class="bi bi-people"></i>
+      <h3>No joined communities found</h3>
+      <p>You haven't joined any communities matching your search yet.</p>
+      <a routerLink="/public/community/explore" class="btn-explore">Explore New Communities</a>
+    </div>
+
+    <div class="comm-grid" *ngIf="communities.length > 0">
+      <div class="comm-card" *ngFor="let comm of communities">
+
+        <div class="card-head">
+          <img [src]="getAvatar(comm.avatarUrl)" class="comm-img" [routerLink]="['/public/community', comm.slug]"
+            [alt]="comm.name">
+          <div class="badges">
+            <span class="type-badge" *ngIf="comm.type">{{ getTypeName(comm.type) }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <h3 [routerLink]="['/public/community', comm.slug]" [title]="comm.name">{{ comm.name }}</h3>
+
+          <p class="desc" title="{{comm.description}}">
+            {{ (comm.description || 'No description available.') | slice:0:80 }}
+            {{ (comm.description && comm.description.length > 80) ? '...' : '' }}
+          </p>
+
+          <div class="meta">
+            <span><i class="bi bi-people-fill"></i> {{ comm.memberCount }} Members</span>
+            <span [class.private]="comm.isPrivate" [class.public]="!comm.isPrivate">
+              <i class="bi" [ngClass]="comm.isPrivate ? 'bi-lock-fill' : 'bi-globe'"></i>
+              {{ comm.isPrivate ? 'Private' : 'Public' }}
+            </span>
+          </div>
+
+          <div class="actions">
+            <a [routerLink]="['/public/community', comm.slug]" class="btn-visit">
+              Visit
+            </a>
+            <button class="btn-leave" (click)="leaveCommunity(comm, $event)" [disabled]="comm.isLoadingJoin">
+              <i class="bi bi-box-arrow-right"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button [disabled]="currentPage <= 1 || isLoading" (click)="onPageChange(currentPage - 1)">
+        <i class="bi bi-chevron-left"></i> Prev
+      </button>
+
+      <span class="page-info">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <button [disabled]="currentPage >= totalPages || isLoading" (click)="onPageChange(currentPage + 1)">
+        Next <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</div>

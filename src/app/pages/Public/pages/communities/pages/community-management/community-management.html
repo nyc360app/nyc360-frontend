@@ -1,0 +1,348 @@
+<div class="management-wrapper">
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading community settings...</p>
+    </div>
+
+    <!-- Main Content -->
+    <ng-container *ngIf="!isLoading && community">
+
+        <!-- Header -->
+        <div class="management-header">
+            <button type="button" class="back-btn" (click)="goBack()">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <div class="header-info">
+                <h1>Manage: {{ community.name }}</h1>
+                <p class="subtitle">Configure your community settings, members, and more.</p>
+            </div>
+        </div>
+
+        <!-- Layout -->
+        <div class="management-layout">
+
+            <!-- Sidebar Navigation -->
+            <aside class="management-sidebar">
+                <nav class="sidebar-nav">
+                    <button type="button" *ngFor="let tab of tabs" class="nav-item"
+                        [class.active]="activeTab === tab.id" [class.danger]="tab.id === 'danger'"
+                        (click)="setTab(tab.id)">
+                        <i class="bi" [ngClass]="tab.icon"></i>
+                        <span>{{ tab.label }}</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Panel -->
+            <main class="management-panel">
+
+                <!-- Overview Tab -->
+                <section class="tab-section" *ngIf="activeTab === 'overview'">
+                    <div class="section-header">
+                        <h2>Community Overview</h2>
+                        <p>Quick stats and information about your community.</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="bi bi-people-fill"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">{{ community.memberCount }}</span>
+                                <span class="stat-label">Members</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="bi bi-shield-check"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">{{ community.type === 5 ? 'Public' : 'Community' }}</span>
+                                <span class="stat-label">Type</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="bi bi-bookmark-star"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">Owner</span>
+                                <span class="stat-label">Your Role</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="community-preview">
+                        <div class="preview-cover"
+                            [style.backgroundImage]="'url(' + resolveCommunityImage(community.coverUrl) + ')'">
+                            <div class="preview-overlay"></div>
+                        </div>
+                        <div class="preview-body">
+                            <img [src]="resolveCommunityImage(community.imageUrl)" alt="Logo" class="preview-logo">
+                            <div class="preview-info">
+                                <h3>{{ community.name }}</h3>
+                                <p>{{ community.description || 'No description set.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Members Tab -->
+                <section class="tab-section" *ngIf="activeTab === 'members'">
+                    <div class="section-header">
+                        <h2>Manage Members</h2>
+                        <p>View, promote, or remove members from your community.</p>
+                    </div>
+
+                    <div class="members-loading" *ngIf="isMembersLoading">
+                        <div class="spinner"></div>
+                    </div>
+
+                    <div class="members-list" *ngIf="!isMembersLoading">
+                        <div class="member-card" *ngFor="let member of members">
+                            <div class="member-left">
+                                <img [src]="resolveUserAvatar(member.avatarUrl)" alt="Avatar" class="member-avatar">
+                                <div class="member-info">
+                                    <h4>{{ member.name || 'Unknown User' }}</h4>
+                                    <div class="member-meta">
+                                        <span class="role-badge" [class.owner]="member.role === 'Owner'"
+                                            [class.mod]="member.role === 'Moderator'">
+                                            {{ member.role }}
+                                        </span>
+                                        <span class="joined">Joined {{ member.joinedAt | date:'mediumDate' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="member-actions" *ngIf="member.userId !== ownerId">
+                                <!-- Promote / Demote Toggle -->
+                                <button type="button" *ngIf="member.role === 'Member'" class="action-btn promote"
+                                    (click)="onPromoteToModerator(member.userId)" title="Promote to Moderator">
+                                    <i class="bi bi-arrow-up-circle"></i>
+                                </button>
+                                <button type="button" *ngIf="member.role === 'Moderator' || member.role === 'Admin'"
+                                    class="action-btn demote" (click)="onDemoteToMember(member.userId)"
+                                    title="Demote to Member">
+                                    <i class="bi bi-arrow-down-circle"></i>
+                                </button>
+                                <button type="button" class="action-btn remove" (click)="onRemoveMember(member.userId)"
+                                    title="Remove Member">
+                                    <i class="bi bi-person-x"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="empty-members" *ngIf="members.length === 0">
+                            <i class="bi bi-people"></i>
+                            <p>No members yet.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Tab -->
+                <section class="tab-section" *ngIf="activeTab === 'settings'">
+                    <div class="section-header">
+                        <h2>Community Settings</h2>
+                        <p>Update your community's name, description, and visibility.</p>
+                    </div>
+
+                    <form class="settings-form" (ngSubmit)="onSaveSettings()">
+                        <div class="form-group">
+                            <label for="name">Community Name</label>
+                            <input type="text" id="name" [(ngModel)]="editForm.name" name="name"
+                                placeholder="Enter community name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" [(ngModel)]="editForm.description" name="description" rows="4"
+                                placeholder="Describe your community..."></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="avatar">Avatar Image</label>
+                                    <input type="file" id="avatar" (change)="onAvatarSelected($event)" accept="image/*"
+                                        class="form-control">
+                                    <small class="text-muted">Recommended: 200x200px (PNG/JPG)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cover">Cover Image</label>
+                                    <input type="file" id="cover" (change)="onCoverSelected($event)" accept="image/*"
+                                        class="form-control">
+                                    <small class="text-muted">Recommended: 1200x400px</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type">Community Type</label>
+                            <select id="type" [(ngModel)]="editForm.type" name="type">
+                                <option [value]="1">Standard Community</option>
+                                <option [value]="2">Organization</option>
+                                <option [value]="5">Public Resources</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-toggles">
+                            <div class="toggle-item">
+                                <div class="toggle-info">
+                                    <label>Private Community</label>
+                                    <p>Only approved members can see the community content.</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="editForm.isPrivate"
+                                        name="isPrivate">
+                                </div>
+                            </div>
+
+                            <div class="toggle-item">
+                                <div class="toggle-info">
+                                    <label>Requires Approval</label>
+                                    <p>New members must be approved by a moderator.</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox"
+                                        [(ngModel)]="editForm.requiresApproval" name="requiresApproval">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save" [disabled]="isSaving">
+                                <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
+                                <span *ngIf="!isSaving"><i class="bi bi-check-lg"></i> Save Changes</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Danger Zone Tab -->
+                <section class="tab-section" *ngIf="activeTab === 'danger'">
+                    <div class="section-header danger">
+                        <h2><i class="bi bi-exclamation-triangle"></i> Danger Zone</h2>
+                        <p>Irreversible actions. Proceed with caution.</p>
+                    </div>
+
+                    <div class="danger-actions">
+                        <div class="danger-card">
+                            <div class="danger-info">
+                                <h4>Transfer Ownership</h4>
+                                <p>Transfer this community to another member. You will lose all owner privileges.</p>
+                            </div>
+                            <button type="button" class="btn-danger-outline" (click)="onTransferOwnership()">
+                                <i class="bi bi-arrow-left-right"></i> Transfer
+                            </button>
+                        </div>
+
+                        <div class="danger-card">
+                            <div class="danger-info">
+                                <h4>Disband Community</h4>
+                                <p>Permanently disband this community and all its content. This action cannot be undone.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-danger" (click)="onDisbandCommunity()"
+                                [disabled]="isDisbanding">
+                                <span *ngIf="isDisbanding" class="spinner-border spinner-border-sm me-2"></span>
+                                <i class="bi bi-trash3" *ngIf="!isDisbanding"></i> Disband Community
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+
+    </ng-container>
+
+    <!-- Ownership Transfer Modal -->
+    <div class="modal-overlay" *ngIf="showTransferModal" (click)="showTransferModal = false">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Transfer Ownership</h3>
+                <button type="button" class="close-btn" (click)="showTransferModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p class="modal-desc">Select a member to transfer the ownership of this community to. This action is
+                    irreversible.</p>
+
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" [(ngModel)]="memberSearchQuery" placeholder="Search members...">
+                </div>
+
+                <div class="members-results" [class.loading]="isMembersLoading">
+                    <div class="member-item" *ngFor="let member of filteredMembers"
+                        [class.selected]="selectedNewOwner?.userId === member.userId"
+                        (click)="onSelectNewOwner(member)">
+                        <img [src]="resolveUserAvatar(member.avatarUrl)" alt="User">
+                        <div class="item-info">
+                            <span class="name">{{ member.name }}</span>
+                            <span class="role">{{ member.role }}</span>
+                        </div>
+                        <i class="bi bi-check-circle-fill select-icon"
+                            *ngIf="selectedNewOwner?.userId === member.userId"></i>
+                    </div>
+
+                    <div class="empty-results" *ngIf="filteredMembers.length === 0 && !isMembersLoading">
+                        <p>No members found.</p>
+                    </div>
+
+                    <div class="modal-loader" *ngIf="isMembersLoading">
+                        <div class="spinner-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" (click)="showTransferModal = false">Cancel</button>
+                <button type="button" class="btn-confirm" [disabled]="!selectedNewOwner || isTransferring"
+                    (click)="onConfirmTransfer()">
+                    <span *ngIf="isTransferring" class="spinner-border spinner-border-sm me-2"></span>
+                    Transfer Ownership
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disband Community Modal -->
+    <div class="modal-overlay" *ngIf="showDisbandModal" (click)="showDisbandModal = false">
+        <div class="modal-card disband-modal" *ngIf="community" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Disband Community</h3>
+                <button type="button" class="close-btn" (click)="showDisbandModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="warning-box">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Warning:</strong> This action is permanent. All posts, members, and data associated with
+                        <strong>{{ community.name }}</strong> will be permanently deleted.
+                    </div>
+                </div>
+
+                <p class="modal-desc mt-3">Please type the name of the community to confirm:</p>
+
+                <div class="search-box">
+                    <input type="text" [(ngModel)]="disbandConfirmName" [placeholder]="'Type: ' + community.name"
+                        style="padding-left: 14px;">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" (click)="showDisbandModal = false">Cancel</button>
+                <button type="button" class="btn-confirm btn-danger-action"
+                    [disabled]="disbandConfirmName.trim().toLowerCase() !== community.name.trim().toLowerCase() || isDisbanding"
+                    (click)="onConfirmDisband()">
+                    <span *ngIf="isDisbanding" class="spinner-border spinner-border-sm me-2"></span>
+                    Disband Community
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

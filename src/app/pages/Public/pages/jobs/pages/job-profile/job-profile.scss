@@ -1,0 +1,779 @@
+@use "sass:color";
+// --- Theme Variables ---
+$primary-green: #00695C;
+$accent-teal: #26A69A;
+$light-green: #E0F2F1;
+$bg-faint: #f8fafb;
+$text-dark: #2c2c2c;
+$text-gray: #666;
+$white: #ffffff;
+$radius: 16px;
+
+$font-header: 'Merriweather', serif;
+$font-body: 'Inter', sans-serif;
+
+.job-profile-page {
+  background-color: $bg-faint;
+  min-height: 100vh;
+  font-family: $font-body;
+  padding-bottom: 60px;
+}
+
+.font-header {
+  font-family: $font-header;
+  color: $text-dark;
+}
+
+// Loader
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  color: $primary-green;
+  font-weight: 700;
+}
+
+// Header Section
+.cover-photo {
+  height: 280px;
+  background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.header-card-wrapper {
+  margin-top: -80px;
+  position: relative;
+  z-index: 10;
+}
+
+.floating-card {
+  background: $white;
+  border-radius: $radius;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 40px rgba(0, 105, 92, 0.08);
+
+  @media (max-width: 992px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 25px;
+  }
+
+  .card-left {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+
+    .logo-wrapper {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #f0f0f0;
+      background: #fff;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .job-main-info {
+      .badge-category {
+        background: $light-green;
+        color: $primary-green;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-family: $font-header;
+        font-size: clamp(1.5rem, 5vw, 2.2rem);
+        margin: 8px 0;
+      }
+
+      .meta-row {
+        color: $text-gray;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        @media (max-width: 768px) {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        .sep {
+          width: 5px;
+          height: 5px;
+          background: #ccc;
+          border-radius: 50%;
+        }
+
+        i {
+          color: $primary-green;
+        }
+      }
+    }
+  }
+
+  .card-right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    .btn-primary-action {
+      background: $primary-green;
+      color: $white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+
+      &:hover {
+        background: color.adjust($primary-green, $lightness: -5%);
+      }
+
+      &.applied {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+        cursor: default;
+        pointer-events: none; // Ensure no clicks
+
+        &:hover {
+          background: #e8f5e9;
+        }
+      }
+    }
+
+    .secondary-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+
+      .btn-outline-action {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+
+        &:hover {
+          border-color: $primary-green;
+          color: $primary-green;
+        }
+      }
+    }
+  }
+}
+
+// Layout Grid
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  margin-top: 40px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+    max-width: 800px;
+    margin: 40px auto;
+  }
+}
+
+// --- TABS NAVIGATION (RESPONSIVE 2x2) ---
+.tabs-nav {
+  display: flex;
+  gap: 20px;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 30px;
+
+  // Mobile Grid Layout (2x2)
+  @media (max-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr; // Two columns equal width
+    gap: 10px;
+    border-bottom: none;
+  }
+
+  button {
+    background: none;
+    border: none;
+    padding-bottom: 12px;
+    font-weight: 700;
+    color: #888;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: 0.3s;
+    font-size: 0.95rem;
+
+    @media (max-width: 768px) {
+      background: $white;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      text-align: center;
+      white-space: normal;
+
+      &::after {
+        display: none;
+      }
+    }
+
+    &.active {
+      color: $primary-green;
+
+      // Desktop Underline
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: $primary-green;
+        border-radius: 3px 3px 0 0;
+      }
+
+      // Mobile Active State
+      @media (max-width: 768px) {
+        background: $light-green;
+        color: $white;
+        border-color: $primary-green;
+      }
+    }
+
+    &:hover {
+      color: $primary-green;
+    }
+
+    .applicants-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #E74C3C;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 3px 7px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+      transition: 0.2s;
+    }
+
+    &:hover .applicants-badge {
+      transform: scale(1.15);
+    }
+  }
+}
+
+.content-section {
+  background: $white;
+  border-radius: $radius;
+  padding: 35px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+
+  &.no-border {
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
+    box-shadow: none;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    border-left: 5px solid $accent-teal;
+    padding-left: 15px;
+  }
+
+  .text-body {
+    line-height: 1.8;
+    color: #444;
+    font-size: 1.05rem;
+    white-space: pre-line;
+  }
+}
+
+.styled-list {
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 18px;
+    line-height: 1.6;
+
+    i {
+      color: $accent-teal;
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.requirements-grid .essential {
+  background: #fdfdfd;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 20px;
+
+  h4 {
+    color: $primary-green;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+// Applicants Section Styles
+.applicants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+
+  .applicant-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    transition: 0.2s;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+
+      .app-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .app-info {
+        h5 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 600;
+
+          a {
+            color: $primary-green;
+            font-weight: 700;
+            transition: all 0.2s ease;
+
+            &:hover {
+              color: $accent-teal;
+              text-decoration: underline;
+            }
+          }
+        }
+
+        small {
+          color: $text-gray;
+          font-size: 0.8rem;
+        }
+      }
+    }
+
+    .cover-preview {
+      font-size: 0.9rem;
+      color: #555;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-style: italic;
+      max-height: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #e0f2f1;
+      color: $primary-green;
+
+      &.new {
+        background: #ffebee;
+        color: #d32f2f;
+      }
+    }
+  }
+}
+
+.work-model-card {
+  display: flex;
+  background: $white;
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
+  .model-info {
+    flex: 1;
+    padding: 30px;
+
+    .model-stats {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin-top: 25px;
+
+      .stat {
+        text-align: center;
+
+        strong {
+          display: block;
+          font-size: 1.8rem;
+          color: $primary-green;
+        }
+
+        span {
+          font-size: 0.75rem;
+          color: $text-gray;
+          text-transform: uppercase;
+        }
+      }
+
+      .divider {
+        width: 1px;
+        height: 40px;
+        background: #eee;
+      }
+    }
+  }
+
+  .model-map-placeholder {
+    width: 40%;
+    background: #e8eef0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=400&q=60');
+    background-size: cover;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 180px;
+    }
+
+    .location-pin {
+      background: $white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 800;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// Sidebar Widgets
+.sidebar-column .widget {
+  background: $white;
+  border-radius: $radius;
+  padding: 25px;
+  margin-bottom: 30px;
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    color: $text-dark;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+  }
+}
+
+.glance-list {
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+
+    span {
+      color: $text-gray;
+    }
+
+    strong {
+      color: $text-dark;
+    }
+  }
+}
+
+.related-job-item {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    transform: translateX(5px);
+
+    .job-icon {
+      background: $primary-green;
+      color: white;
+    }
+  }
+
+  .job-icon {
+    width: 45px;
+    height: 45px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $primary-green;
+    transition: 0.3s;
+  }
+
+  .job-meta {
+    strong {
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    small {
+      color: $text-gray;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .path-tag {
+    background: #f0f4f3;
+    color: $text-gray;
+    padding: 6px 15px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: $light-green;
+      color: $primary-green;
+    }
+  }
+}
+
+// Modal Overlay
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 105, 92, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.apply-modal-card {
+  background: $white;
+  border-radius: $radius;
+  width: 95%;
+  max-width: 550px;
+  padding: 30px;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .btn-close-modal {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: #ccc;
+      cursor: pointer;
+    }
+  }
+
+  textarea {
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    font-size: 0.95rem;
+
+    &:focus {
+      border-color: $primary-green;
+      box-shadow: 0 0 0 4px rgba(0, 105, 92, 0.1);
+      outline: none;
+    }
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+
+    .btn-cancel {
+      background: #f5f5f5;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      background: $primary-green;
+      color: $white;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  }
+}
+
+// --- Existing SCSS Variables ---
+$primary-green: #00695C;
+$primary-orange: #ff7f50; // Added based on your saved info
+$white: #ffffff;
+$radius: 16px;
+$text-gray: #666;
+
+// ... (Rest of existing styles) ...
+
+// ✅ New Styles for Applicant Card Dropdown
+.applicants-grid {
+
+  // ... existing ...
+  .applicant-card {
+    // ... existing ...
+
+    .status-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      background: #fcfcfc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+
+      .small-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $text-gray;
+      }
+
+      .status-select {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        background-color: white;
+        cursor: pointer;
+        outline: none;
+        transition: 0.2s;
+
+        &:focus {
+          border-color: $primary-green;
+        }
+
+        // Dynamic Colors based on selection
+        &.status-hired {
+          border-color: #4caf50;
+          color: #2e7d32;
+          background-color: #e8f5e9;
+        }
+
+        &.status-rejected {
+          border-color: #ef5350;
+          color: #c62828;
+          background-color: #ffebee;
+        }
+      }
+    }
+
+    .resume-link-box {
+      .btn-outline-primary {
+        border-color: #26A69A; // Use $accent-teal value directly if needed, but here it's accessible
+        color: #26A69A;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        &:hover {
+          background-color: #26A69A;
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// Ensure Modal Styles work for both modals
+.apply-modal-card {
+
+  // ... existing properties ...
+  // Just ensuring the share link box looks okay
+  .share-link-box {
+    border: 1px solid #eee;
+    align-items: center;
+  }
+}

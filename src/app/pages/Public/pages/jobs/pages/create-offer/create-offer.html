@@ -1,0 +1,199 @@
+<div class="create-offer-page">
+  <div class="hero-section">
+    <div class="container text-center">
+      <span class="badge-accent">NYC360 PROFESSION</span>
+      <h1>Post a Job Opportunity</h1>
+      <p class="lead">Connect with the best talent in New York City. Quality talent starts with a quality post.</p>
+    </div>
+  </div>
+
+  <div class="container form-wrapper">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="offer-form">
+
+      <!-- Position Section -->
+      <section class="form-section">
+        <div class="section-header">
+          <div class="icon-box"><i class="bi bi-briefcase-fill"></i></div>
+          <div class="header-text">
+            <h3>Position Details</h3>
+            <p>Define the core aspects of the role.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Job Title <span class="required">*</span></label>
+            <input type="text" formControlName="title" placeholder="e.g. Senior Frontend Developer (Remote)">
+            <div class="field-error" *ngIf="isFieldInvalid('title')">
+              <i class="bi bi-exclamation-circle"></i> Job Title is required (min 5 characters).
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Employment Type <span class="required">*</span></label>
+            <select formControlName="employmentType">
+              <option [value]="0">Full-time</option>
+              <option [value]="1">Part-time</option>
+              <option [value]="2">Contract</option>
+              <option [value]="3">Internship</option>
+              <option [value]="4">Freelance</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Work Arrangement <span class="required">*</span></label>
+            <select formControlName="workArrangement">
+              <option [value]="0">On-site</option>
+              <option [value]="1">Remote</option>
+              <option [value]="2">Hybrid</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Experience Level <span class="required">*</span></label>
+            <select formControlName="employmentLevel">
+              <option [value]="1">Junior</option>
+              <option [value]="2">Mid</option>
+              <option [value]="3">Senior</option>
+              <option [value]="4">Executive</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Advanced Details -->
+      <section class="form-section">
+        <div class="section-header">
+          <div class="icon-box"><i class="bi bi-card-list"></i></div>
+          <div class="header-text">
+            <h3>Job Description</h3>
+            <p>Provide a detailed overview and responsibilities.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>General Description <span class="required">*</span></label>
+          <textarea formControlName="description" rows="5"
+            placeholder="What is this role about? What is the team like?"></textarea>
+          <div class="field-error" *ngIf="isFieldInvalid('description')">
+            <i class="bi bi-exclamation-circle"></i> Description is required (min 20 characters).
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Key Responsibilities <span class="optional">(Optional)</span></label>
+          <textarea formControlName="responsibilities" rows="4"
+            placeholder="List the primary tasks and goals..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Requirements <span class="optional">(Optional)</span></label>
+          <textarea formControlName="requirements" rows="4"
+            placeholder="Skills, qualifications, and experience needed..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Benefits & Perks <span class="optional">(Optional)</span></label>
+          <textarea formControlName="benefits" rows="3"
+            placeholder="What do you offer? Insurance, gym, remote work?"></textarea>
+        </div>
+      </section>
+
+      <!-- Salary Section -->
+      <section class="form-section accent-green">
+        <div class="section-header">
+          <div class="icon-box"><i class="bi bi-cash-stack"></i></div>
+          <div class="header-text">
+            <h3>Salary Range</h3>
+            <p>What is the budget for this position?</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Min Salary (USD) <span class="optional">(Optional)</span></label>
+            <div class="salary-input">
+              <span class="currency">$</span>
+              <input type="number" formControlName="salaryMin" placeholder="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Max Salary (USD) <span class="optional">(Optional)</span></label>
+            <div class="salary-input">
+              <span class="currency">$</span>
+              <input type="number" formControlName="salaryMax" placeholder="0">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Location Section -->
+      <section class="form-section">
+        <div class="section-header">
+          <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="header-text">
+            <h3>{{ form.get('workArrangement')?.value == 1 ? 'Organization Location' : 'Location' }}</h3>
+            <p>{{ form.get('workArrangement')?.value == 1 ? 'Where is the organization based?' : 'Where is the job
+              located?' }}</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width search-container">
+            <label>
+              {{ form.get('workArrangement')?.value == 1 ? 'Organization Location' : 'Primary Location' }}
+              <span class="optional">(Optional)</span>
+            </label>
+            <div class="search-input-wrapper">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" [formControl]="locationSearchControl"
+                placeholder="Search NYC neighborhood or borough...">
+              <div class="search-loader" *ngIf="isSearchingLocation"></div>
+            </div>
+
+            <div class="results-dropdown" *ngIf="showLocationResults">
+              <div class="result-card" *ngFor="let loc of locationResults" (click)="selectLocation(loc)">
+                <div class="loc-icon"><i class="bi bi-geo-fill"></i></div>
+                <div class="loc-info">
+                  <strong>{{ loc.neighborhood }}</strong>
+                  <small>{{ loc.borough }}, {{ loc.zipCode }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Street, Building<span class="optional">(Optional)</span></label>
+            <input type="text" formControlName="street" placeholder="e.g. 5th Ave">
+          </div>
+
+          <div class="form-group">
+            <label>Suite <span class="optional">(Optional)</span></label>
+            <input type="text" formControlName="buildingNumber" placeholder="e.g. 101 / Suite 4B">
+          </div>
+
+          <div class="form-group">
+            <label>Zip Code <span class="optional">(Optional)</span></label>
+            <input type="text" formControlName="zipCode" placeholder="e.g. 10001" (blur)="onZipCodeBlur()"
+              (keyup.enter)="onZipCodeBlur()">
+            <div class="field-error" *ngIf="isFieldInvalid('zipCode')">
+              <i class="bi bi-exclamation-circle"></i> Zip Code must be numeric.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" routerLink="/public/profession/feed">Discard</button>
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting">Publish Offer</span>
+          <span *ngIf="isSubmitting" class="d-flex align-items-center">
+            <span class="spinner-border spinner-border-sm me-2"></span> Publishing...
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

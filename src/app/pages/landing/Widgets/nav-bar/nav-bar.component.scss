@@ -1,0 +1,205 @@
+// --- Variables based on design ---
+$top-border-color: #000000;
+$btn-blue: #003380; // Dark Blue from image
+$btn-hover: #002255;
+$text-color: #000000;
+$bg-color: #ffffff;
+$sidebar-width: 280px;
+
+// 1. The Thick Top Border Line
+.top-border-line {
+  height: 6px; // سمك الخط الأسود العلوي
+  background-color: $top-border-color;
+  width: 100%;
+}
+
+// 2. Main Navbar Container
+.nav-bar-container {
+  background-color: $bg-color;
+  height: 80px; // ارتفاع مناسب للشعار
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%; // مسافات جانبية مريحة
+  box-shadow: 0 2px 15px rgba(0,0,0,0.04); // ظل خفيف جداً
+
+  @media (max-width: 768px) {
+    padding: 0 20px;
+    height: 70px;
+  }
+}
+
+// --- Left Side (Logo + Link) ---
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+
+  .mobile-toggle {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+    display: none; // Hidden on desktop
+    margin-right: 15px;
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    
+    .logo-img {
+      height: 45px; // حجم اللوجو
+      width: auto;
+      object-fit: contain;
+
+      @media (max-width: 768px) {
+        height: 35px;
+      }
+    }
+  }
+
+  .nav-link-item {
+    text-decoration: none;
+    color: $text-color;
+    font-weight: 600;
+    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// --- Right Side (Button) ---
+.nav-right {
+  display: flex;
+  align-items: center;
+
+  // The "Join NYC360" Button
+  .btn-join-custom {
+    background-color: $btn-blue;
+    color: white;
+    text-decoration: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: background 0.2s;
+    letter-spacing: 0.5px;
+
+    &:hover {
+      background-color: $btn-hover;
+    }
+  }
+
+  // Logged In State
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    
+    .welcome-text { font-weight: 600; font-size: 14px; }
+    
+    .btn-logout {
+      background: none; border: 1px solid #ccc;
+      padding: 6px 15px; border-radius: 4px;
+      cursor: pointer; font-size: 13px;
+      &:hover { background: #f8f9fa; }
+    }
+  }
+
+  .mobile-profile-icon {
+    font-size: 24px;
+    color: $btn-blue;
+  }
+}
+
+/* =========================================
+   MOBILE DRAWER STYLES
+   ========================================= */
+.sidebar-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1040; display: none;
+  &.show { display: block; }
+}
+
+.sidebar-menu {
+  position: fixed; top: 0; left: 0;
+  width: $sidebar-width; height: 100vh;
+  background-color: #fff; z-index: 1050;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  display: flex; flex-direction: column;
+
+  &.open { transform: translateX(0); }
+
+  .sidebar-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px; border-bottom: 1px solid #eee;
+
+    .sidebar-logo {
+      font-size: 20px; font-weight: 800; color: #000;
+      span { color: #F05A28; } // Orange accent for logo text
+    }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+  }
+
+  .sidebar-content {
+    padding: 20px; flex-grow: 1; overflow-y: auto;
+
+    .mobile-links {
+      display: flex; flex-direction: column; gap: 15px;
+      
+      .mobile-link {
+        text-decoration: none; color: #333; font-weight: 600; font-size: 16px;
+        display: flex; align-items: center; gap: 10px;
+        &:hover { color: $btn-blue; }
+      }
+    }
+
+    .mobile-auth-section {
+      margin-top: 20px;
+      text-align: center;
+      p { color: #666; font-size: 14px; margin-bottom: 15px; }
+
+      .btn-join-mobile {
+        display: block; width: 100%;
+        background-color: $btn-blue; color: white;
+        padding: 12px; border-radius: 6px; text-decoration: none;
+        font-weight: 700; margin-bottom: 10px;
+      }
+      
+      .btn-login-mobile {
+        display: block; width: 100%;
+        border: 1px solid #ccc; color: #333;
+        padding: 12px; border-radius: 6px; text-decoration: none;
+        font-weight: 600;
+      }
+    }
+
+    .user-info {
+       display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;
+       .avatar { font-size: 20px; color: #555; }
+       .details { display: flex; flex-direction: column; }
+       .username { font-weight: 700; }
+       .view-profile { font-size: 12px; color: $btn-blue; }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 20px; border-top: 1px solid #eee;
+    .mobile-logout-btn {
+      width: 100%; background: #ffebeb; color: #d63384;
+      border: none; padding: 12px; border-radius: 6px; font-weight: 700;
+      cursor: pointer; display: flex; justify-content: center; gap: 8px;
+    }
+  }
+}

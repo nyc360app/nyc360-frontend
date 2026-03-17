@@ -1,0 +1,229 @@
+<div>
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-group">
+      <h2 class="page-title">Community Management</h2>
+      <p class="page-subtitle">Monitor and moderate NYC360 communities and disband requests.</p>
+    </div>
+    <div class="action-group">
+      <a routerLink="../disband-requests" class="btn btn-warning">
+        <i class="bi bi-exclamation-triangle"></i> Disband Requests
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats" [style.border-bottom-color]="stat.color">
+      <div class="stat-icon" [style.background-color]="stat.color + '20'" [style.color]="stat.color">
+        <i class="bi" [ngClass]="stat.icon"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">{{ stat.title }}</span>
+        <h3 class="stat-value">{{ stat.value }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="filters-card">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" placeholder="Search by name or slug...">
+    </div>
+    <div class="filter-group">
+      <select class="form-select" [(ngModel)]="selectedType" (change)="onTypeChange()">
+        <option *ngFor="let type of communityTypes" [ngValue]="type.value">{{ type.label }}</option>
+      </select>
+      <div class="form-check form-switch ms-3">
+        <input class="form-check-input" type="checkbox" id="disbandFilter" [(ngModel)]="hasDisbandRequest"
+          (change)="onDisbandFilterChange()">
+        <label class="form-check-label" for="disbandFilter">Disband Requests Only</label>
+      </div>
+      <button class="btn btn-primary ms-3" (click)="onSearch()">
+        <i class="bi bi-filter"></i> Apply
+      </button>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="data-card">
+    <div class="table-responsive d-none d-md-block">
+      <table class="table custom-table">
+        <thead>
+          <tr>
+            <th>Community</th>
+            <th>Type</th>
+            <th>Members</th>
+            <th>Privacy</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let community of communities">
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="community-avatar">
+                  {{ community.name.charAt(0) }}
+                </div>
+                <div class="ms-3">
+                  <div class="fw-bold">{{ community.name }}</div>
+                  <small class="text-muted">@{{ community.slug }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="getTypeBadgeClass(community.type)">
+                {{ getCommunityTypeName(community.type) }}
+              </span>
+            </td>
+            <td>
+              <div class="members-info">
+                <span class="count">{{ community.memberCount }}</span>
+                <div class="sub-counts">
+                  <span title="Leaders"><i class="bi bi-person-badge"></i> {{ community.leaderCount }}</span>
+                  <span title="Moderators" class="ms-2"><i class="bi bi-shield-check"></i> {{ community.moderatorCount
+                    }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="community.isPrivate ? 'bg-dark' : 'bg-light text-dark border'">
+                {{ community.isPrivate ? 'Private' : 'Public' }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex flex-column gap-1">
+                <span class="badge" [ngClass]="community.isActive ? 'bg-success' : 'bg-danger'">
+                  {{ community.isActive ? 'Active' : 'Disabled' }}
+                </span>
+                <span *ngIf="community.hasPendingDisbandRequest" class="badge bg-warning text-dark">
+                  Disband Pending
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="text-muted small">{{ community.createdAt | date:'MMM d, y' }}</div>
+            </td>
+            <td class="text-end">
+              <div class="btn-group">
+                <a [routerLink]="['../moderation', community.id]" class="btn btn-sm btn-outline-primary"
+                  title="Moderate">
+                  <i class="bi bi-shield-lock"></i>
+                </a>
+                <button class="btn btn-sm btn-outline-info" title="View Public Profile">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="communities.length === 0 && !isLoading">
+            <td colspan="7" class="text-center py-5">
+              <div class="empty-state">
+                <i class="bi bi-people text-muted display-4"></i>
+                <p class="mt-3">No communities found matching your criteria.</p>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="isLoading">
+            <td colspan="7" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="d-md-none p-3">
+      <!-- Loading State Mobile -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Empty State Mobile -->
+      <div *ngIf="!isLoading && communities.length === 0" class="text-center py-5">
+        <div class="empty-state">
+          <i class="bi bi-people text-muted display-4"></i>
+          <p class="mt-3">No communities found matching your criteria.</p>
+        </div>
+      </div>
+
+      <div class="community-card-mobile p-3 mb-3" *ngFor="let community of communities">
+        <div class="d-flex align-items-center gap-3 mb-3 border-bottom pb-3">
+          <div class="community-avatar">
+            {{ community.name.charAt(0) }}
+          </div>
+          <div>
+            <div class="fw-bold">{{ community.name }}</div>
+            <small class="text-muted">@{{ community.slug }}</small>
+          </div>
+          <div class="ms-auto" *ngIf="community.hasPendingDisbandRequest">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-3">
+          <span class="badge" [ngClass]="getTypeBadgeClass(community.type)">
+            {{ getCommunityTypeName(community.type) }}
+          </span>
+          <span class="badge" [ngClass]="community.isPrivate ? 'bg-dark' : 'bg-light text-dark border'">
+            {{ community.isPrivate ? 'Private' : 'Public' }}
+          </span>
+          <span class="badge" [ngClass]="community.isActive ? 'bg-success' : 'bg-danger'">
+            {{ community.isActive ? 'Active' : 'Disabled' }}
+          </span>
+        </div>
+
+        <div class="row g-2 mb-3 bg-light p-2 rounded mx-0">
+          <div class="col-4 text-center border-end">
+            <div class="small fw-bold">{{community.memberCount}}</div>
+            <div class="tiny text-muted">Members</div>
+          </div>
+          <div class="col-4 text-center border-end">
+            <div class="small fw-bold">{{community.leaderCount}}</div>
+            <div class="tiny text-muted">Leaders</div>
+          </div>
+          <div class="col-4 text-center">
+            <div class="small fw-bold">{{community.moderatorCount}}</div>
+            <div class="tiny text-muted">Mods</div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <a [routerLink]="['../moderation', community.id]" class="btn btn-outline-primary flex-grow-1">
+            <i class="bi bi-shield-lock me-1"></i> Moderate
+          </a>
+          <button class="btn btn-outline-info flex-grow-1">
+            <i class="bi bi-eye me-1"></i> View
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section" *ngIf="totalPages > 1">
+      <div class="pagination-info">
+        Showing page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong> ({{ totalCount }} total)
+      </div>
+      <div class="pagination-controls">
+        <button class="btn btn-icon" [disabled]="currentPage === 1" (click)="loadData(currentPage - 1)">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-icon" *ngFor="let p of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === i + 1" (click)="loadData(i + 1)">
+          {{ i + 1 }}
+        </button>
+        <button class="btn btn-icon" [disabled]="currentPage === totalPages" (click)="loadData(currentPage + 1)">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

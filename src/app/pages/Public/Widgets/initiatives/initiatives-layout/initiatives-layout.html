@@ -1,0 +1,82 @@
+<div class="initiatives-layout-host" [style.--theme-color]="themeColor" [style.--theme-light]="themeLight">
+  <div class="initiatives-container">
+
+    <section class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>Building a {{ pageTitle }} NYC Together</h1>
+        <p>Explore ongoing and upcoming {{ pageTitle | lowercase }} initiatives, government programs, and community
+          actions dedicated to improving the well-being of all New Yorkers.</p>
+
+        <div class="hero-actions">
+          <button class="btn-primary">Browse Programs</button>
+          <button class="btn-secondary">View Map</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <div class="search-bar">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" placeholder="Search for programs, campaigns, or specific topics..." [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()">
+        <button class="btn-search" (click)="onSearch()">Search</button>
+      </div>
+    </section>
+
+    <section class="content-section">
+
+      <!-- Skeleton Loading State -->
+      <div *ngIf="loading" class="cards-list fade-in-up">
+        <div class="initiative-card" *ngFor="let i of [1,2,3,4]">
+          <div class="card-image" style="background: #f0f0f0;">
+            <div class="skeleton-rect w-100 h-100" style="border-radius: 0;"></div>
+          </div>
+          <div class="card-body">
+            <div class="card-meta mb-3">
+              <div class="skeleton-line" style="width: 80px; height: 12px;"></div>
+              <div class="skeleton-line" style="width: 100px; height: 20px; border-radius: 20px;"></div>
+            </div>
+            <div class="skeleton-line mb-3" style="width: 70%; height: 24px;"></div>
+            <div class="skeleton-line mb-2" style="width: 100%; height: 14px;"></div>
+            <div class="skeleton-line mb-4" style="width: 90%; height: 14px;"></div>
+            <div class="skeleton-line mt-auto" style="width: 80px; height: 14px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && initiatives.length === 0" class="empty-state">
+        <p>No initiatives found matching your criteria.</p>
+      </div>
+
+      <div class="cards-list" *ngIf="!loading">
+
+        <div class="initiative-card" *ngFor="let item of initiatives" [class.text-only]="!item.image">
+          <div class="card-image" *ngIf="item.image">
+            <img [src]="item.image" loading="lazy" alt="{{ item.title }}">
+          </div>
+
+          <div class="card-body">
+            <div class="accent-bar" *ngIf="!item.image" [style.background]="themeColor"></div>
+
+            <div class="card-meta">
+              <span class="date">{{ item.date | date:'EEE, h a' | uppercase }}</span>
+              <span class="organizer-badge" [style.color]="!item.image ? themeColor : ''">{{ item.organizer }}</span>
+            </div>
+
+            <h3 class="card-title">{{ item.title }}</h3>
+
+            <p class="card-desc">{{ item.description }}</p>
+
+            <a [routerLink]="['/public/posts/details', item.id]" class="learn-more" [style.color]="themeColor">
+              Learn More
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+</div>

@@ -1,0 +1,179 @@
+<div class="dashboard-loading" *ngIf="isLoading">
+    <div class="spinner-border text-gold" role="status"></div>
+</div>
+
+<div class="content-wrapper" *ngIf="!isLoading">
+    <!-- Top Stats -->
+    <div class="stats-row mb-4">
+        <div class="stat-card">
+            <span class="stat-label">TOTAL INQUIRIES</span>
+            <div class="stat-value">{{ stats?.totalInquiries?.value || 0 }}</div>
+            <div class="stat-trend positive" *ngIf="stats?.totalInquiries?.monthlyChangePercentage">
+                <i class="bi bi-arrow-up-right"></i> +{{ stats.totalInquiries.monthlyChangePercentage }}% This
+                month
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">NEW INQUIRIES TODAY</span>
+            <div class="stat-value gold">{{ stats?.newInquiriesToday?.value || 0 }}</div>
+            <div class="stat-footer text-muted small"
+                *ngIf="stats?.newInquiriesToday?.lastUpdatedMinutesAgo && stats.newInquiriesToday.lastUpdatedMinutesAgo < 1000000">
+                Last updated: {{ stats.newInquiriesToday.lastUpdatedMinutesAgo }} MIN ago
+            </div>
+            <div class="stat-footer text-muted small"
+                *ngIf="stats?.newInquiriesToday?.lastUpdatedMinutesAgo && stats.newInquiriesToday.lastUpdatedMinutesAgo >= 1000000">
+                Last updated: Just now
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">INQUIRIES TYPE BREAKDOWN</span>
+            <div class="breakdown-bars mt-3">
+                <div class="bar-header d-flex justify-content-between">
+                    <span class="small fw-bold">Rent</span>
+                    <span class="small fw-bold text-muted">{{ stats?.typeBreakdown?.rentPercentage || 0
+                        }}%</span>
+                </div>
+                <div class="progress-premium mb-3">
+                    <div class="progress-bar-premium rent" [style.width.%]="stats?.typeBreakdown?.rentPercentage || 0">
+                    </div>
+                </div>
+
+                <div class="bar-header d-flex justify-content-between">
+                    <span class="small fw-bold">Sale</span>
+                    <span class="small fw-bold text-muted">{{ stats?.typeBreakdown?.salePercentage || 0
+                        }}%</span>
+                </div>
+                <div class="progress-premium">
+                    <div class="progress-bar-premium sale" [style.width.%]="stats?.typeBreakdown?.salePercentage || 0">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle Row: Chart & Most Requested -->
+    <div class="visual-row mb-4">
+        <div class="chart-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="section-title-sm m-0">Inquiry Performance</h5>
+                    <p class="text-muted small m-0">Daily inquiry volume over time</p>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-item"><span class="dot gold"></span> Inquiries</span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <svg viewBox="0 0 1000 300" preserveAspectRatio="none" class="chart-svg">
+                    <!-- Grid Lines -->
+                    <line x1="0" y1="50" x2="1000" y2="50" stroke="rgba(0,0,0,0.03)" stroke-width="1" />
+                    <line x1="0" y1="125" x2="1000" y2="125" stroke="rgba(0,0,0,0.03)" stroke-width="1" />
+                    <line x1="0" y1="200" x2="1000" y2="200" stroke="rgba(0,0,0,0.03)" stroke-width="1" />
+                    <line x1="0" y1="275" x2="1000" y2="275" stroke="rgba(0,0,0,0.03)" stroke-width="1" />
+
+                    <!-- Area Under Chart -->
+                    <path *ngIf="chartPoints" [attr.d]="chartPoints + ' V 300 H 0 Z'" fill="url(#chartGradient)" />
+
+                    <!-- Main Line -->
+                    <path *ngIf="chartPoints" [attr.d]="chartPoints" fill="none" class="chart-line shadow-sm" />
+
+                    <!-- Gradient Definition -->
+                    <defs>
+                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#BC9D5F" stop-opacity="0.2" />
+                            <stop offset="100%" stop-color="#BC9D5F" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <div class="chart-labels" *ngIf="chartPoints">
+                    <div class="x-label" *ngFor="let label of chartLabels" [style.left.%]="label.x / 10">
+                        {{ label.label }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="requested-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="section-title-sm m-0">Most Requested</h5>
+                <span class="badge bg-gold-soft text-gold small px-2 py-1 rounded-pill">Top {{ topNeighborhoods.length
+                    }}</span>
+            </div>
+
+            <div class="neighborhood-list">
+                <div class="neighborhood-item" *ngFor="let item of topNeighborhoods">
+                    <div class="n-icon-box">
+                        <img *ngIf="item.imageUrl" [src]="imageService.resolveImageUrl(item.imageUrl, 'housing')"
+                            class="media-content" alt="Property" appImgFallback="housing">
+                        <i *ngIf="!item.imageUrl" class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div class="item-info">
+                        <span class="n-name">{{ item.name || 'Manhattan Area' }}</span>
+                        <div class="progress mt-1" style="height: 4px; width: 80px;">
+                            <div class="progress-bar bg-gold"
+                                [style.width.%]="(item.count / (stats?.totalInquiries?.value || 1)) * 100"></div>
+                        </div>
+                    </div>
+                    <div class="item-stats text-end">
+                        <span class="n-count fw-bold">{{ item.count }}</span>
+                        <span class="text-muted small d-block" style="font-size: 0.65rem;">REQ</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Recent Inquiries Cards -->
+    <div class="recent-card">
+        <div class="d-flex justify-content-between align-items-center mb-4 p-3">
+            <h3 class="section-title m-0">Recent Inquiries</h3>
+            <button class="btn-export" [routerLink]="['/public/housing/agent/dashboard/requests']">View All
+                Requests</button>
+        </div>
+
+        <div class="inquiries-card-grid">
+            <div class="inquiry-card-premium" *ngFor="let inquiry of recentInquiries">
+                <div class="card-top">
+                    <div class="u-avatar-wrapper">
+                        <img *ngIf="inquiry.user?.imageUrl" [src]="imageService.resolveAvatar(inquiry.user)"
+                            class="u-avatar" [alt]="inquiry.user?.name" appImgFallback="avatar">
+                        <div *ngIf="!inquiry.user?.imageUrl" class="no-avatar-placeholder">
+                            {{ getInitials(inquiry.user?.name || inquiry.user?.email || 'U') }}
+                        </div>
+                    </div>
+                    <div class="u-info">
+                        <span class="u-name">{{ inquiry.user?.name || 'Anonymous User' }}</span>
+                        <span class="u-email">{{ inquiry.user?.email || 'No email provided' }}</span>
+                    </div>
+                </div>
+
+                <div class="card-mid">
+                    <span class="info-tag" [ngClass]="inquiry.type === 0 ? 'tag-rent' : 'tag-sale'">
+                        <i class="bi" [ngClass]="inquiry.type === 0 ? 'bi-key' : 'bi-house-door'"></i>
+                        {{ getTypeLabel(inquiry.type) }}
+                    </span>
+                    <span class="info-tag">
+                        <i class="bi bi-geo-alt"></i> {{ inquiry.neighborhood || 'Manhattan' }}
+                    </span>
+                    <span class="info-tag">
+                        <i class="bi bi-building"></i> {{ inquiry.propertyType || 'Apartment' }}
+                    </span>
+                </div>
+
+                <div class="card-bottom">
+                    <span class="status-pill" [ngClass]="getStatusClass(inquiry.status)">
+                        {{ inquiry.status }}
+                    </span>
+                    <button class="btn-view-req" [routerLink]="['/public/housing/agent/dashboard/requests']">
+                        View Full Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

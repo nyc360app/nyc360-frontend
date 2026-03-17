@@ -1,0 +1,17 @@
+<div class="navigation-controls-wrapper" *ngIf="historyState$ | async as state">
+  <button
+    class="nav-button"
+    title="Go Back"
+    (click)="goBack()"
+    [disabled]="!state.canGoBack">
+    <i class="bi bi-arrow-left-circle-fill"></i>
+  </button>
+
+  <button
+    class="nav-button"
+    title="Go Forward"
+    (click)="goForward()"
+    [disabled]="!state.canGoForward">
+    <i class="bi bi-arrow-right-circle-fill"></i>
+  </button>
+</div>

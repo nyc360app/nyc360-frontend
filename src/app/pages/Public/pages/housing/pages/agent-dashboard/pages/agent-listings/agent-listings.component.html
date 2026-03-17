@@ -1,0 +1,127 @@
+<div class="listings-page-container">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">My Listings</h1>
+            <p class="page-subtitle">Manage your active and inactive housing properties.</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-create" routerLink="/public/housing/create">
+                <i class="bi bi-plus-lg"></i> New Listing
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner-premium"></div>
+        <p>Loading your properties...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state-premium" *ngIf="!isLoading && listings.length === 0">
+        <div class="empty-illustration">
+            <i class="bi bi-building"></i>
+        </div>
+        <h3>No Listings Found</h3>
+        <p>You haven't posted any housing listings yet. Start by creating your first one!</p>
+        <button class="btn-primary-gold mt-4" routerLink="/public/housing/create">Create My First Listing</button>
+    </div>
+
+    <!-- Listings Grid (Replaced Table with Cards) -->
+    <div class="listings-grid" *ngIf="!isLoading && listings.length > 0">
+        <div class="listing-card-premium" *ngFor="let item of listings" [class.no-media]="!item.imageUrl">
+            <!-- Media Section -->
+            <div class="card-media">
+                <ng-container *ngIf="item.imageUrl; else noMedia">
+                    <ng-container *ngIf="isVideo(item.imageUrl); else imgThumb">
+                        <video [src]="imageService.resolveImageUrl(item.imageUrl, 'housing')" class="media-content"
+                            muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>
+                        <div class="media-overlay">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </div>
+                    </ng-container>
+                    <ng-template #imgThumb>
+                        <img [src]="imageService.resolveImageUrl(item.imageUrl, 'housing')" class="media-content"
+                            alt="Property" appImgFallback="housing">
+                    </ng-template>
+                </ng-container>
+                <ng-template #noMedia>
+                    <div class="no-media-placeholder">
+                        <i class="bi bi-image-alt"></i>
+                        <span>No Image Provided</span>
+                    </div>
+                </ng-template>
+
+                <!-- Status Badge Overlay -->
+                <div class="status-badge-overlay" [class.published]="item.isPublished"
+                    [class.draft]="!item.isPublished">
+                    {{ item.isPublished ? 'Published' : 'Draft' }}
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="card-content">
+                <div class="content-header">
+                    <div class="type-loc">
+                        <span class="type">{{ item.houseType }}</span>
+                        <span class="dot"></span>
+                        <span class="loc"><i class="bi bi-geo-alt"></i> {{ item.neighborhood }}</span>
+                    </div>
+                    <h3 class="price">{{ formatPrice(item.price) }}</h3>
+                </div>
+
+                <div class="property-id-date">
+                    <span class="id">Listing #{{ item.id }}</span>
+                    <span class="date">{{ item.createdAt | date:'MMM d, y' }}</span>
+                </div>
+
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <i class="bi bi-door-open"></i>
+                        <span>{{ item.bedrooms }} Beds</span>
+                    </div>
+                    <div class="spec-item">
+                        <i class="bi bi-droplet"></i>
+                        <span>{{ item.bathrooms }} Baths</span>
+                    </div>
+                    <div class="spec-item inquiry-link" [routerLink]="['/public/housing/agent/dashboard/requests']">
+                        <i class="bi bi-chat-left-dots"></i>
+                        <span>{{ item.totalInquiries }} Inquiries</span>
+                    </div>
+                </div>
+
+                <div class="card-footer-actions">
+                    <button class="btn-action authorize" *ngIf="!item.isPublished"
+                        [routerLink]="['/public/housing/listing-authorization']" [queryParams]="{listingId: item.id}">
+                        <i class="bi bi-shield-check"></i> Authorize
+                    </button>
+                    <button class="btn-action edit" [routerLink]="['/public/housing/edit', item.id]">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </button>
+                    <button class="btn-action view" [routerLink]="['/public/housing/details', item.id]">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination (remains outside grid) -->
+    <div class="pagination-footer" *ngIf="totalPages > 1 && !isLoading && listings.length > 0">
+        <span class="total-info">Showing {{ listings.length }} of {{ totalCount }} properties</span>
+        <div class="page-controls">
+            <button class="page-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="page-numbers">
+                <span *ngFor="let p of [].constructor(totalPages); let i = index" class="page-num"
+                    [class.active]="currentPage === i + 1" (click)="onPageChange(i + 1)">
+                    {{ i + 1 }}
+                </span>
+            </div>
+            <button class="page-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>

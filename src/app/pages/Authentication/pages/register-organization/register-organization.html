@@ -1,0 +1,261 @@
+<div class="registration-container">
+    <div class="form-container">
+        <button class="btn-back" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i> Back to Selection
+        </button>
+
+        <div class="form-header">
+            <h2 class="main-question">Organization Registration</h2>
+            <p class="sub-text">Join the network of nonprofits and civic groups shaping NYC.</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+            <!-- Core Identity -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-building me-2"></i>Account Identity</h4>
+
+                <div class="input-group-premium">
+                    <input type="text" class="form-control" formControlName="Name" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('Name')">
+                    <label class="floating-label">Organization Name *</label>
+                    <i class="bi bi-building input-icon"></i>
+                    <div *ngIf="isFieldInvalid('Name')" class="text-danger">Organization name is required.</div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="Username" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Username')">
+                        <label class="floating-label">Username *</label>
+                        <i class="bi bi-at input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Username')" class="text-danger">Username (min 4 chars) is required.
+                        </div>
+                    </div>
+                    <div class="input-group-premium">
+                        <input type="email" class="form-control" formControlName="Email" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Email')">
+                        <label class="floating-label">Official Email *</label>
+                        <i class="bi bi-envelope input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Email')" class="text-danger">A valid email is required.</div>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <input type="password" class="form-control" formControlName="Password" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('Password')">
+                    <label class="floating-label">Secure Password *</label>
+                    <i class="bi bi-lock input-icon"></i>
+                    <div *ngIf="isFieldInvalid('Password')" class="text-danger">Password must be 6+ chars with numbers.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Classification -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-tags-fill me-2"></i>Classification</h4>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="OrganizationType"
+                            [class.is-invalid]="isFieldInvalid('OrganizationType')">
+                            <option [ngValue]="null">Select Type *</option>
+                            <option *ngFor="let t of orgTypes" [ngValue]="t.value">{{ t.label }}</option>
+                        </select>
+                        <label class="floating-label">Organization Type *</label>
+                        <i class="bi bi-diagram-3 input-icon"></i>
+                        <div *ngIf="isFieldInvalid('OrganizationType')" class="text-danger">Selection is required.</div>
+                    </div>
+
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="FundType"
+                            [class.is-invalid]="isFieldInvalid('FundType')">
+                            <option [ngValue]="null">Select Funding *</option>
+                            <option *ngFor="let f of fundTypes" [ngValue]="f.value">{{ f.label }}</option>
+                        </select>
+                        <label class="floating-label">Funding Structure *</label>
+                        <i class="bi bi-cash-stack input-icon"></i>
+                        <div *ngIf="isFieldInvalid('FundType')" class="text-danger">Funding structure is required.</div>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <select class="form-control" formControlName="ServiceArea">
+                        <option *ngFor="let area of serviceAreas" [ngValue]="area.value">{{ area.label }}</option>
+                    </select>
+                    <label class="floating-label">Primary Service Area</label>
+                    <i class="bi bi-geo input-icon"></i>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="Website" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Website')">
+                        <label class="floating-label">Website URL</label>
+                        <i class="bi bi-globe input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Website')" class="text-danger">Please enter a valid URL (if
+                            provided).</div>
+                    </div>
+                    <div class="input-group-premium">
+                        <input type="email" class="form-control" formControlName="PublicEmail" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('PublicEmail')">
+                        <label class="floating-label">Public Contact Email</label>
+                        <i class="bi bi-envelope-at input-icon"></i>
+                        <div *ngIf="isFieldInvalid('PublicEmail')" class="text-danger">A valid email address is required
+                            (e.g. info@org.com).</div>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <textarea class="form-control" formControlName="Description" placeholder=" "></textarea>
+                    <label class="floating-label">Mission Statement / Description</label>
+                    <i class="bi bi-file-text input-icon" style="top: 30px; transform: none;"></i>
+                </div>
+            </div>
+
+            <!-- Services Offered -->
+            <div class="form-section">
+                <label class="section-label">Services Provided <span class="req">*</span></label>
+                <p class="text-muted small mb-3">Select the types of services your organization offers to the community.
+                </p>
+                <div class="chips-grid">
+                    <div class="interest-chip" *ngFor="let service of servicesOptions"
+                        [class.active]="isServiceSelected(service.value)" (click)="toggleService(service.value)"
+                        style="--chip-color: #0A3D91">
+                        <span>{{ service.label }}</span>
+                    </div>
+                </div>
+                <!-- Detailed Error for Services -->
+                <div *ngIf="form.touched && selectedServiceIds.length === 0" class="text-danger mt-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one service category
+                    above.
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-section" formGroupName="Address">
+                <h4 class="section-title"><i class="bi bi-geo-alt-fill me-2"></i>Headquarters Location</h4>
+
+                <div class="row-group">
+                    <div class="input-group-premium" style="flex: 2;">
+                        <input type="text" class="form-control" #locationInput
+                            (input)="searchLocations(locationInput.value)" placeholder=" ">
+                        <label class="floating-label">Search NYC Neighborhood *</label>
+                        <i class="bi bi-search input-icon"></i>
+
+                        <div class="search-results" *ngIf="locations.length > 0">
+                            <div class="search-item" *ngFor="let loc of locations"
+                                (click)="selectLocation(loc, locationInput)">
+                                {{ loc.neighborhood }} ({{ loc.borough }}) <span *ngIf="loc.zipCode">- {{ loc.zipCode
+                                    }}</span>
+                            </div>
+                        </div>
+                        <div *ngIf="isAddressFieldInvalid('LocationId')" class="text-danger">Neighborhood is required.
+                        </div>
+                    </div>
+                    <div class="input-group-premium" style="flex: 1;">
+                        <input type="text" class="form-control" formControlName="ZipCode" placeholder=" ">
+                        <label class="floating-label">Zip Code</label>
+                        <i class="bi bi-postcard input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium" style="flex: 3;">
+                        <input type="text" class="form-control" formControlName="Street" placeholder=" "
+                            [class.is-invalid]="isAddressFieldInvalid('Street')">
+                        <label class="floating-label">Street Address *</label>
+                        <i class="bi bi-geo input-icon"></i>
+                    </div>
+                    <div class="input-group-premium" style="flex: 1;">
+                        <input type="text" class="form-control" formControlName="BuildingNumber" placeholder=" "
+                            [class.is-invalid]="isAddressFieldInvalid('BuildingNumber')">
+                        <label class="floating-label">Unit/No. *</label>
+                        <i class="bi bi-building input-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interests -->
+            <div class="form-section">
+                <label class="section-label">Civic Interests & Focus Areas <span class="req">*</span></label>
+                <div class="chips-grid">
+                    <div class="interest-chip" *ngFor="let interest of interestsList"
+                        [class.active]="isSelected(interest.id)" (click)="toggleInterest(interest.id)"
+                        [style.--chip-color]="interest.color">
+                        <span>{{ interest.name }}</span>
+                    </div>
+                </div>
+                <!-- Detailed Error for Interests -->
+                <div *ngIf="form.touched && selectedInterestIds.length === 0" class="text-danger mt-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one civic interest
+                    above.
+                </div>
+            </div>
+
+            <!-- Compliance & Social -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-shield-check me-2"></i>Compliance & Social</h4>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Tax Exempt Status</span>
+                        <span class="pref-desc">Organization is recognized as tax-exempt (e.g., 501(c)(3)).</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="IsTaxExempt">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">NYS Registered</span>
+                        <span class="pref-desc">Registered with the New York State Charities Bureau.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="IsNysRegistered">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <label class="section-label mb-3">Professional Social Media</label>
+                    <div formArrayName="SocialLinks">
+                        <div *ngFor="let link of socialLinks.controls; let i=index" [formGroupName]="i"
+                            class="social-link-row mb-3 d-flex gap-2 align-items-center">
+                            <div class="input-group-premium p-0 m-0" style="flex: 1;">
+                                <select class="form-control" formControlName="Platform" style="padding-left: 15px;">
+                                    <option [ngValue]="null">Platform</option>
+                                    <option *ngFor="let p of socialPlatforms" [ngValue]="p.value">{{ p.label }}</option>
+                                </select>
+                            </div>
+                            <div class="input-group-premium p-0 m-0" style="flex: 2;">
+                                <input type="text" class="form-control" formControlName="Url" placeholder=" ">
+                                <label class="floating-label">URL</label>
+                                <i class="bi bi-link input-icon"></i>
+                            </div>
+                            <button type="button" class="btn-remove" (click)="removeSocialLink(i)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add-social" (click)="addSocialLink()">
+                        <i class="bi bi-plus-lg"></i> Add Official Link
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="isLoading">
+                <span *ngIf="!isLoading">Register Organization <i class="bi bi-check-circle-fill ms-2"></i></span>
+                <span *ngIf="isLoading"><i class="spinner-border spinner-border-sm"></i> Initializing Civic
+                    Profile...</span>
+            </button>
+
+        </form>
+    </div>
+
+    <app-auth-success-modal [visible]="showModal" [title]="modalTitle" [message]="modalMessage" buttonText="Go to Login"
+        (closed)="onModalClose()">
+    </app-auth-success-modal>
+</div>

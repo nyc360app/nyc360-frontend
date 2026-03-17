@@ -1,0 +1,292 @@
+<div class="home-container">
+
+  <div class="content-wrapper">
+    <!-- 1. Top Section: Featured & Weather -->
+
+    <!-- Account Pending Alert -->
+    <!-- Account Pending Alert -->
+    <!-- Premium Account Verification Status -->
+    <!-- Account Pending Alert (Compact & Professional) -->
+    <div class="pending-alert animate__animated animate__fadeInDown" *ngIf="isPendingUser">
+      <div class="alert-content">
+        <div class="status-icon-wrapper">
+          <div class="icon-circle">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <div class="pulse-ring"></div>
+        </div>
+
+        <div class="alert-details">
+          <div class="alert-header">
+            <h4>Account Under Review</h4>
+            <span class="verification-tag">
+              <i class="bi bi-patch-check-fill"></i> Processing
+            </span>
+          </div>
+          <p>Your profile is currently being verified by the NYC360 Team. Access is limited during this process.</p>
+        </div>
+
+        <div class="alert-actions">
+          <div class="wait-info">
+            <i class="bi bi-clock-history"></i>
+            <span>Est. Look: 24hrs</span>
+          </div>
+          <button class="btn-support-compact" (click)="openTicketModal()">
+            <i class="bi bi-headset"></i> Support
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Ticket Modal -->
+    <div class="modal-overlay" *ngIf="showTicketModal">
+      <div class="modal-card animate__animated animate__zoomIn">
+        <div class="modal-header">
+          <h3>Contact Support</h3>
+          <button class="btn-close-modal" (click)="closeTicketModal()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <label>Subject</label>
+          <input type="text" [(ngModel)]="ticketSubject" placeholder="Subject">
+
+          <label>Message</label>
+          <textarea [(ngModel)]="ticketMessage" placeholder="Explain your issue..." rows="5"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeTicketModal()">Cancel</button>
+          <button class="btn btn-primary" (click)="submitTicket()">Send Request</button>
+        </div>
+      </div>
+    </div>
+
+    <header class="section-title-main">
+      <h1>NYC360 Featured Posts</h1>
+    </header>
+
+    <div class="top-layout-grid">
+      <div class="featured-cards-row">
+        <div class="feat-card-small" *ngFor="let post of featuredPosts" (click)="goToPost(post)">
+          <div class="card-img-container">
+            <img [src]="resolvePostImage(post)" [alt]="post.title" appImgFallback="post">
+            <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(post.category)">
+              <span>{{ getCategoryName(post.category) }}</span>
+            </span>
+            <div class="card-overlay">
+              <h3>{{ post.title | slice:0:40 }}{{ post.title.length > 40 ? '...' : '' }}</h3>
+            </div>
+            <button class="save-btn" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+              <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar-top">
+        <div class="widget weather-card" *ngIf="weatherData" (click)="toggleUnit()">
+          <div class="weather-header">
+            <span class="location"><i class="bi bi-geo-alt-fill"></i> New York, NYC</span>
+            <span class="date">{{ currentDate | date:'MMM d' }}</span>
+          </div>
+          <div class="weather-body">
+            <div class="temp-group">
+              <span class="temp">{{ displayTemp }}°{{ isFahrenheit ? 'F' : 'C' }}</span>
+              <span class="condition">{{ weatherData.desc | titlecase }}</span>
+            </div>
+            <img [src]="weatherData.icon" alt="weather icon" class="weather-icon">
+          </div>
+          <div class="weather-footer">
+            <div class="alert-mini" *ngFor="let alert of alerts | slice:0:1">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>{{ alert.title }}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 2. Hero & Sidebar Widgets -->
+    <div class="hero-layout-grid">
+      <section class="hero-banner" *ngIf="heroBanner" (click)="goToPost(heroBanner)">
+        <div class="hero-img-wrapper">
+          <img [src]="resolvePostImage(heroBanner)" alt="hero" appImgFallback="post">
+          <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(heroBanner.category)">
+            <img [src]="getCategoryIcon(heroBanner.category)" alt="icon">
+            <span>{{ getCategoryName(heroBanner.category) }}</span>
+          </span>
+          <div class="hero-content">
+            <h2>{{ heroBanner.title }}</h2>
+            <p>{{ heroBanner.content | slice:0:150 }}...</p>
+          </div>
+          <button class="save-btn" [class.saved]="heroBanner.isSaved" (click)="onSavePost(heroBanner, $event)">
+            <i class="bi" [ngClass]="heroBanner.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+          </button>
+        </div>
+      </section>
+
+      <aside class="sidebar-widgets">
+        <div class="widget trending-widget">
+          <h3>Trending Now</h3>
+          <div class="tags-list">
+            <a *ngFor="let tag of trendingTags | slice:0:6" [routerLink]="['/public/posts/tags', tag]"
+              class="trending-tag">
+              {{ tag }}
+            </a>
+          </div>
+        </div>
+
+        <div class="widget communities-widget">
+          <h3>Communities For You</h3>
+          <div class="comm-stack">
+            <div class="comm-item" *ngFor="let comm of suggestedCommunities | slice:0:2">
+              <div class="comm-avatar">{{ comm.name.charAt(0) | uppercase }}</div>
+              <div class="comm-info">
+                <strong>{{ comm.name }}</strong>
+                <span>{{ comm.memberCount || 0 }} members</span>
+              </div>
+              <button class="join-btn-sm" [class.joined]="comm.isJoined" (click)="onJoinCommunity(comm)">
+                <i class="bi" [ngClass]="comm.isJoined ? 'bi-check-lg' : 'bi-plus-lg'"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 3. Dynamic Category Sections ( Lifestyle, Events, etc. ) -->
+    <section class="category-block-full" *ngFor="let group of interestGroups"
+      [style.--cat-color]="getCategoryColor(group.category)">
+      <header class="block-header">
+        <div class="header-left">
+          <div class="vertical-bar" [ngClass]="'bar-'+group.category"></div>
+          <h2>{{ getCategoryName(group.category) }}</h2>
+        </div>
+        <div class="slider-controls" *ngIf="group.posts.length > 3">
+          <button class="ctrl-btn prev" (click)="scrollGroup(group.category, 'left')">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+          <button class="ctrl-btn next" (click)="scrollGroup(group.category, 'right')">
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="slider-wrapper">
+        <div class="slider-container" [id]="'slider-'+group.category">
+          <div class="std-card-v2" *ngFor="let post of group.posts" (click)="goToPost(post)">
+            <div class="card-media">
+              <img [src]="resolvePostImage(post)" alt="post" appImgFallback="post">
+              <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(post.category)">
+                <span>{{ getCategoryName(post.category) }}</span>
+              </span>
+              <div class="media-overlay">
+                <h4>{{ post.title | slice:0:60 }}{{ post.title.length > 60 ? '...' : '' }}</h4>
+              </div>
+              <button class="save-btn" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+                <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Special Horizontal Banner (Mock Feature based on Image) -->
+    <section class="promo-banner-horizontal" *ngIf="highlightedPosts.length > 0"
+      (click)="goToPost(highlightedPosts[0])">
+      <div class="promo-img">
+        <img [src]="resolvePostImage(highlightedPosts[0])" alt="promo" appImgFallback="post">
+        <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(highlightedPosts[0].category)">
+          <span>{{ getCategoryName(highlightedPosts[0].category) }}</span>
+        </span>
+      </div>
+      <div class="promo-content">
+        <div class="promo-date">
+          <i class="bi bi-calendar"></i>
+          <span>JUNE 4 - JUNE 8</span>
+        </div>
+        <h2>{{ highlightedPosts[0].title }}</h2>
+        <p>{{ highlightedPosts[0].content | slice:0:200 }}...</p>
+        <div class="promo-actions">
+          <button class="btn-join">Join</button>
+          <button class="btn-outline">More Details</button>
+          <button class="save-btn-circle" [class.saved]="highlightedPosts[0].isSaved"
+            (click)="onSavePost(highlightedPosts[0], $event)">
+            <i class="bi" [ngClass]="highlightedPosts[0].isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Large Feed Style Cards -->
+    <section class="feed-section">
+      <div class="large-feed-card" *ngFor="let post of highlightedPosts | slice:1:4" (click)="goToPost(post)">
+        <div class="feed-media-container">
+          <img [src]="resolvePostImage(post)" alt="feed" appImgFallback="post">
+          <span class="feed-badge category-badge-top-left" [style.--badge-color]="getCategoryColor(post.category)">
+            <img [src]="getCategoryIcon(post.category)" alt="icon">
+            <span>{{ getCategoryName(post.category) }}</span>
+          </span>
+          <button class="save-btn-large" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+            <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+          </button>
+        </div>
+        <div class="feed-content">
+          <h2 class="feed-title">{{ post.title }}</h2>
+          <p class="feed-desc">{{ post.content | slice:0:220 }}...</p>
+          <div class="feed-footer">
+            <div class="author-info">
+              <img [src]="getAuthorImage(post.author)" alt="author" appImgFallback="avatar">
+              <div class="author-details">
+                <strong>{{ getAuthorName(post.author) }}</strong>
+                <span>Posted 20m ago</span>
+              </div>
+            </div>
+            <a class="read-more-link">Read More <i class="bi bi-arrow-right-short"></i></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Text Only Posts (Moved to Bottom as Requested) -->
+    <section class="text-only-section-v2" *ngIf="textOnlyPosts.length > 0">
+      <header class="block-header">
+        <div class="vertical-bar"></div>
+        <h2>Text-Only Insights</h2>
+      </header>
+      <div class="text-insights-grid">
+        <div class="insight-card" *ngFor="let post of textOnlyPosts" (click)="goToPost(post)">
+          <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(post.category)">
+            <img [src]="getCategoryIcon(post.category)" alt="icon">
+            <span>{{ getCategoryName(post.category) }}</span>
+          </span>
+          <div class="insight-meta">
+            <span class="date">{{ post.createdAt | date:'shortDate' }}</span>
+          </div>
+          <h3 class="insight-title">{{ post.title }}</h3>
+          <p class="insight-excerpt">{{ post.content | slice:0:150 }}...</p>
+          <div class="insight-footer">
+            <div class="author">
+              <img [src]="getAuthorImage(post.author)" alt="auth" appImgFallback="avatar">
+              <span>{{ getAuthorName(post.author) }}</span>
+            </div>
+            <button class="save-btn-mini" (click)="onSavePost(post, $event)">
+              <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <div class="empty-state-v2" *ngIf="!isLoading && featuredPosts.length === 0 && !heroBanner">
+      <img src="assets/images/default-post.jpg" alt="empty" style="opacity: 0.1; width: 100px;">
+      <h3>No Updates Today</h3>
+      <p>Please check back later for more NYC news.</p>
+    </div>
+
+    <app-status-modal [isOpen]="statusModalOpen" [type]="statusModalType" [title]="statusModalTitle"
+      [message]="statusModalMessage" (close)="closeModal()">
+    </app-status-modal>
+
+  </div>
+</div>

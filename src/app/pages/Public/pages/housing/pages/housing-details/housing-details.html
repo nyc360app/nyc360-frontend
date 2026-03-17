@@ -1,0 +1,534 @@
+<div class="details-page" *ngIf="!isLoading && property">
+    <!-- Gallery Grid -->
+    <!-- Gallery Grid -->
+    <div class="gallery-section">
+        <div class="main-image" (click)="openLightbox(property.attachments.indexOf(activeMedia))"
+            (mousemove)="onMouseMove($event)" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+
+            <!-- Amazon Zoom Lens -->
+            <div class="zoom-lens" *ngIf="showZoom" [ngStyle]="lensStyle"></div>
+            <div class="zoom-result" *ngIf="showZoom" [ngStyle]="zoomStyle"></div>
+
+            <!-- Video Player -->
+            <video *ngIf="activeMedia?.type === 'video'" [src]="activeMedia.url" controls autoplay muted loop
+                class="media-content" (click)="$event.stopPropagation()"></video>
+
+            <!-- Image Display -->
+            <img *ngIf="activeMedia?.type === 'image' && activeMedia.url" [src]="activeMedia.url"
+                alt="Property Main Media" class="media-content">
+
+            <!-- No Media Placeholder -->
+            <div *ngIf="!activeMedia?.url"
+                class="no-media-placeholder d-flex flex-column align-items-center justify-content-center h-100 bg-light text-muted">
+                <i class="bi bi-image fs-1 mb-2"></i>
+                <span>No Media Available</span>
+            </div>
+
+            <div class="image-counter" *ngIf="property.attachments?.length > 1">
+                <i class="bi bi-collection"></i> {{ property.attachments.length }} Media
+            </div>
+        </div>
+
+        <div class="side-images" *ngIf="property.attachments?.length > 1">
+            <!-- Show first 2 additional items (index 1 and 2) -->
+            <div class="sub-img" *ngFor="let item of (property.attachments | slice:1:3)"
+                (click)="setActiveMedia(item); $event.stopPropagation()">
+                <div class="media-preview-wrapper h-100 w-100 position-relative">
+                    <img *ngIf="$any(item).type === 'image' && $any(item).url" [src]="$any(item).url"
+                        class="h-100 w-100 object-fit-cover">
+                    <div *ngIf="$any(item).type === 'video'"
+                        class="video-thumbnail h-100 w-100 d-flex align-items-center justify-content-center bg-dark text-white">
+                        <video [src]="$any(item).url"
+                            class="h-100 w-100 object-fit-cover position-absolute top-0 start-0"
+                            style="opacity: 0.6; pointer-events: none;"></video>
+                        <i class="bi bi-play-circle-fill fs-2 position-relative z-index-1"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- If more than 3 total items -->
+            <div class="view-more-btn" *ngIf="property.attachments?.length > 3" (click)="togglePhotos()">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span>View All {{ property.attachments.length }} Media</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-container">
+        <!-- Left Column (Main Info) -->
+        <div class="main-info">
+            <!-- Header -->
+            <div class="header-info">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="status-badge mb-2">
+                            {{ property.isRenting ? 'For Rent' : 'For Sale' }}
+                        </div>
+                        <h1 class="prop-title">{{ property.title || 'Untitled Property' }}</h1>
+                    </div>
+                    <div class="text-end" *ngIf="property.priceChange">
+                        <!-- Placeholder for price drops if any data provided later -->
+                    </div>
+                </div>
+
+                <p class="prop-address">
+                    <i class="bi bi-geo-alt-fill me-1"></i>
+                    <span *ngIf="property.address">
+                        <span *ngIf="property.address.buildingNumber">{{ property.address.buildingNumber }} </span>
+                        <span *ngIf="property.address.street">{{ property.address.street }}, </span>
+                        <span *ngIf="property.address.location?.neighborhood">{{ property.address.location.neighborhood
+                            }}, </span>
+                        <span *ngIf="property.address.location?.borough">{{ property.address.location.borough }}</span>
+                        <span *ngIf="property.address.zipCode"> - {{ property.address.zipCode }}</span>
+                    </span>
+                    <span *ngIf="!property.address">Address Not Disclosed</span>
+                </p>
+
+                <!-- Key Specs Grid -->
+                <div class="specs-grid">
+                    <div class="spec-item" *ngIf="property.numberOfRooms > 0">
+                        <span class="label">Bedrooms</span>
+                        <strong class="value"><i class="bi bi-door-open me-2"></i>{{ property.numberOfRooms }}</strong>
+                    </div>
+                    <div class="spec-item" *ngIf="property.numberOfRooms === 0">
+                        <span class="label">Layout</span>
+                        <strong class="value"><i class="bi bi-door-open me-2"></i>Studio / Open</strong>
+                    </div>
+                    <div class="spec-item" *ngIf="property.numberOfBathrooms > 0">
+                        <span class="label">Bathrooms</span>
+                        <strong class="value"><i class="bi bi-droplet me-2"></i>{{ property.numberOfBathrooms
+                            }}</strong>
+                    </div>
+                    <div class="spec-item" *ngIf="property.size > 0">
+                        <span class="label">Size</span>
+                        <strong class="value"><i class="bi bi-rulers me-2"></i>{{ property.size }} Sq Ft</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span class="label">Type</span>
+                        <strong class="value"><i class="bi bi-building me-2"></i>{{ getLabel(property.buildingType,
+                            buildingTypeOptions) }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="info-block">
+                <h3>About This Home</h3>
+                <p class="desc-text">{{ property.description || 'No description provided.' }}</p>
+
+                <div class="highlights-row mt-4">
+                    <div class="highlight-pill" *ngIf="property.isFurnished">
+                        <i class="bi bi-lamp-fill"></i> Furnished
+                    </div>
+                    <div class="highlight-pill" *ngIf="property.isPetsFriendly">
+                        <i class="bi bi-emoji-smile-fill"></i> Pets Friendly
+                    </div>
+                    <div class="highlight-pill" *ngIf="property.isShortTermStayAllowed">
+                        <i class="bi bi-clock-history"></i> Short-Term Allowed
+                    </div>
+                    <div class="highlight-pill" *ngIf="property.isAcceptsHousingVouchers">
+                        <i class="bi bi-ticket-perforated-fill"></i> Vouchers Accepted
+                    </div>
+                    <div class="highlight-pill" *ngIf="property.familyAndKidsFriendly">
+                        <i class="bi bi-people-fill"></i> Family Friendly
+                    </div>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <!-- Property Details Grid -->
+            <div class="info-block">
+                <h3>Property Facts & Features</h3>
+                <div class="details-grid-list">
+
+                    <div class="detail-group">
+                        <h5><i class="bi bi-house-gear me-2"></i>General / Structure</h5>
+                        <ul>
+                            <li><span>Property Type:</span> {{ property.propertyType === 1 ? 'Apartment' :
+                                (property.propertyType === 2 ? 'House' : 'Other') }}</li>
+                            <li><span>Building Type:</span> {{ getLabel(property.buildingType, buildingTypeOptions) }}
+                            </li>
+                            <li><span>Year Built:</span> {{ property.yearBuilt > 0 ? property.yearBuilt : 'Not
+                                Specified' }}</li>
+                            <li><span>Renovated:</span> {{ property.renovatedIn > 0 ? property.renovatedIn : 'Not
+                                Specified' }}</li>
+                            <li><span>Legal Units:</span> {{ property.legalUnitCount || 'Not Specified' }}</li>
+                            <li><span>Dimensions:</span> {{ property.size > 0 ? property.size + ' Sq Ft' : 'Not
+                                Specified' }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-group">
+                        <h5><i class="bi bi-thermometer-half me-2"></i>Systems & Utilities</h5>
+                        <ul>
+                            <li><span>Heating:</span> {{ getLabel(property.heatingSystem, heatingSystems) }}</li>
+                            <li><span>Cooling:</span> {{ getLabel(property.coolingSystem, coolingSystems) }}</li>
+                            <li><span>Temp Control:</span> {{ getLabel(property.temperatureControl, tempControls) }}
+                            </li>
+                            <li><span>Laundry:</span> {{ getLabel(property.laundryType, laundryTypes) }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-group">
+                        <h5><i class="bi bi-people me-2"></i>Living Space</h5>
+                        <ul>
+                            <li><span>Household:</span> {{ getLabel(property.householdType, householdTypes) }}</li>
+                            <li><span>Max Occupants:</span> {{ property.maxOccupants > 0 ? property.maxOccupants : 'Not
+                                Specified' }}</li>
+                            <li><span>Floor Level:</span> {{ property.floorLevel || 'Not Specified' }}</li>
+                            <li><span>Unit #:</span> {{ property.unitNumber || 'Not Specified' }}</li>
+                            <li><span>Furnished:</span> {{ property.furnished ? 'Yes' : 'No' }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-group">
+                        <h5><i class="bi bi-key me-2"></i>Rental Specifics</h5>
+                        <ul>
+                            <li><span>Status:</span> {{ property.isRenting ? 'For Rent' : 'For Sale' }}</li>
+                            <li *ngIf="property.isRenting"><span>Lease Type:</span> {{
+                                getLabel(property.rentingLeaseType, leaseTypes) }}</li>
+                            <li *ngIf="property.isRenting"><span>Privacy:</span> {{ property.rentPrivacyType === 0 ?
+                                'Private Room' : (property.rentPrivacyType === 1 ? 'Shared Room' : 'Entire Place') }}
+                            </li>
+                            <li *ngIf="property.isRenting"><span>Bathroom:</span> {{ property.rentBathroomType === 0 ?
+                                'Private' : 'Shared' }}</li>
+                            <li *ngIf="property.isRenting"><span>Kitchen:</span> {{ property.rentKitchenType === 0 ?
+                                'Private' : 'Shared' }}</li>
+                            <li><span>Short Term:</span> {{ property.shortTermStayAllowed ? 'Allowed' : 'No' }}</li>
+                            <li><span>Smoking:</span> {{ property.smokingAllowed ? 'Allowed' : 'No' }}</li>
+                            <li><span>Pets:</span> {{ property.petsFriendly ? 'Friendly' : 'No' }}</li>
+                            <li><span>Accessibility:</span> {{ property.accessibilityFriendly ? 'Yes' : 'No' }}</li>
+                            <li><span>Short Stay Eligible:</span> {{ property.shortStayEligible ? 'Yes' : 'No' }}</li>
+                            <li><span>Direct Apply:</span> {{ property.addDirectApplyLink ? 'Available' : 'No' }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <!-- Social & Community Info (New Section) -->
+            <div class="info-block" *ngIf="property.rentingRoommateGroupChat || property.coListers?.length > 0">
+                <h3>Community & Contacts</h3>
+                <div class="alert alert-info border-0 bg-light-blue" *ngIf="property.rentingRoommateGroupChat">
+                    <h6 class="fw-bold text-primary mb-1"><i class="bi bi-chat-quote-fill me-2"></i>Roommate Group Chat
+                    </h6>
+                    <a [href]="property.rentingRoommateGroupChat" target="_blank" class="text-break">{{
+                        property.rentingRoommateGroupChat }}</a>
+                </div>
+
+                <!-- Co-Listers List if any -->
+                <div class="co-listers mt-3" *ngIf="property.coListers?.length > 0">
+                    <h6 class="fw-bold text-muted text-uppercase small mb-2">Co-Listing Agents</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="co-lister-chip d-flex align-items-center bg-white border rounded pe-3 py-1 ps-1"
+                            *ngFor="let cl of property.coListers">
+                            <div class="avatar-sm rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                style="width:24px;height:24px;">
+                                <span style="font-size: 0.7rem;">{{ cl.firstName?.charAt(0) || 'A' }}</span>
+                            </div>
+                            <span class="small fw-bold">{{ cl.firstName }} {{ cl.lastName }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="divider" *ngIf="property.rentingRoommateGroupChat || property.coListers?.length > 0">
+
+            <hr class="divider">
+
+            <!-- Amenities & Utilities -->
+            <div class="info-block">
+                <h3>Utilities & Programs</h3>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Utilities Included</h6>
+                        <div class="tags-cloud" *ngIf="property.utilitiesIncluded?.length > 0; else noUtils">
+                            <span class="tag" *ngFor="let u of property.utilitiesIncluded"><i
+                                    class="bi bi-check2 me-1"></i> {{ u }}</span>
+                        </div>
+                        <ng-template #noUtils>
+                            <p class="text-muted fst-italic">None specified</p>
+                        </ng-template>
+                    </div>
+
+                    <div class="col-md-6" *ngIf="property.isRenting">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Programs Accepted</h6>
+                        <div class="tags-cloud" *ngIf="property.acceptedHousingPrograms?.length > 0; else noProgs">
+                            <span class="tag program"
+                                *ngFor="let p of getProgramLabels(property.acceptedHousingPrograms, housingPrograms)">{{
+                                p }}</span>
+                        </div>
+                        <ng-template #noProgs>
+                            <p class="text-muted fst-italic">No specific programs listed</p>
+                        </ng-template>
+                    </div>
+
+                    <div class="col-md-6" *ngIf="!property.isRenting">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Buyer Assistance</h6>
+                        <div class="tags-cloud" *ngIf="property.acceptedBuyerPrograms?.length > 0; else noBuyers">
+                            <span class="tag program"
+                                *ngFor="let p of getProgramLabels(property.acceptedBuyerPrograms, buyerPrograms)">{{ p
+                                }}</span>
+                        </div>
+                        <ng-template #noBuyers>
+                            <p class="text-muted fst-italic">No buyer programs listed</p>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <!-- Documents Section -->
+            <div class="info-block" *ngIf="property.documents?.length > 0">
+                <h3>Documents & Files</h3>
+                <div class="documents-list">
+                    <a *ngFor="let doc of property.documents" [href]="doc.url" target="_blank"
+                        class="document-card d-flex align-items-center p-3 border rounded mb-2 text-decoration-none text-dark">
+                        <i class="bi bi-file-earmark-text fs-3 text-gold me-3"></i>
+                        <div class="doc-info">
+                            <h6 class="mb-0 text-truncate" style="max-width: 250px;">{{ doc.originalUrl || 'Document' }}
+                            </h6>
+                            <small class="text-muted">Click to view</small>
+                        </div>
+                        <i class="bi bi-download ms-auto text-muted"></i>
+                    </a>
+                </div>
+            </div>
+
+            <hr class="divider" *ngIf="property.documents?.length > 0">
+
+            <!-- Rules & Policies (Show only if relevant) -->
+            <div class="info-block"
+                *ngIf="property.isRenting && (property.rentingRulesAndPolicies || property.rentingAboutCurrentResident)">
+                <h3>House Rules & Info</h3>
+                <div class="alert alert-light border" *ngIf="property.rentingAboutCurrentResident">
+                    <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Current Residents</h6>
+                    <p class="mb-0">{{ property.rentingAboutCurrentResident }}</p>
+                </div>
+                <div class="alert alert-light border" *ngIf="property.rentingRulesAndPolicies">
+                    <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Policies</h6>
+                    <p class="mb-0">{{ property.rentingRulesAndPolicies }}</p>
+                </div>
+            </div>
+
+            <!-- Location Map Area -->
+            <div class="info-block" *ngIf="property.address?.location">
+
+                <div class="map-placeholder-box">
+                    <!-- If google link exists -->
+
+                    <!-- Fallback Info -->
+                    <div class="loc-details p-4" *ngIf="!property.googleMapLink">
+                        <h4>{{ property.address.location.neighborhood }}</h4>
+                        <p class="text-muted">{{ property.address.location.borough }} • {{
+                            property.address.location.zipCode }}</p>
+                        <div class="nearby-transit mt-3" *ngIf="property.nearbySubwayLines?.length">
+                            <strong class="d-block mb-2 text-muted small">NEARBY TRANSIT</strong>
+                            <span class="badge bg-dark me-1" *ngFor="let l of property.nearbySubwayLines">{{ l }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Sidebar (unchanged) -->
+        <div class="sidebar">
+            <div class="sidebar-wrapper">
+                <!-- Owner Actions (Visible only to Author) -->
+                <div class="sidebar-card owner-actions-card mb-4" *ngIf="canEdit"
+                    style="border-color: #B59B62; background: #fffcf5;">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle me-3"
+                            style="width: 40px; height: 40px; background: rgba(181, 155, 98, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #B59B62;">
+                            <i class="bi bi-pencil-square fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: #1a1a1a;">Manage Listing</h5>
+                            <small class="text-muted">You are the owner</small>
+                        </div>
+                    </div>
+                    <button class="btn-action gold w-100"
+                        [routerLink]="property.isRenting ? ['/public/housing/edit/renting', property.id] : ['/public/housing/edit/sale', property.id]">
+                        Edit Property Details
+                    </button>
+                </div>
+
+                <!-- Price & Actions -->
+                <div class="sidebar-card price-card">
+                    <h2 class="price-display">
+                        {{ formatPrice(property.startingPrice || property.monthlyCostRange) }}
+                    </h2>
+
+                    <div class="financials-list mb-3">
+                        <div class="fin-row" *ngIf="property.isRenting && property.securityDeposit">
+                            <span>Security Deposit</span>
+                            <strong>{{ formatPrice(property.securityDeposit) }}</strong>
+                        </div>
+                        <div class="fin-row" *ngIf="property.isRenting && property.brokerFee">
+                            <span>Broker Fee</span>
+                            <strong>{{ formatPrice(property.brokerFee) }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="dates-info mb-3" *ngIf="property.moveInDate">
+                        <small class="text-muted d-block text-uppercase"
+                            style="font-size: 0.7rem; letter-spacing: 1px;">Move-in Date</small>
+                        <strong class="fs-5">{{ property.moveInDate | date:'mediumDate' }}</strong>
+                        <div class="mt-2" *ngIf="property.moveOutDate"
+                            style="border-top: 1px solid #eee; padding-top: 5px;">
+                            <small class="text-muted">Move-out: {{ property.moveOutDate | date:'mediumDate' }}</small>
+                        </div>
+                    </div>
+
+                    <button *ngIf="!canEdit && !requestInfo" class="btn-action gold" (click)="openAgentRequest()">
+                        Request Tour / Apply
+                    </button>
+                    <button *ngIf="!canEdit && requestInfo" class="btn-action gold" (click)="openRequestInfo()">
+                        View Request
+                    </button>
+
+                </div>
+
+                <!-- Availability Section -->
+                <div class="sidebar-card availability-card mb-4" *ngIf="availabilities && availabilities.length > 0">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Availability</h5>
+                    <div class="availability-list">
+                        <div *ngFor="let avail of availabilities" class="availability-item mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge bg-primary text-white"
+                                    *ngIf="avail.availabilityType === 1">Contact</span>
+                                <span class="badge bg-info text-white" *ngIf="avail.availabilityType === 2">Virtual
+                                    Tour</span>
+                                <span class="badge bg-success text-white"
+                                    *ngIf="avail.availabilityType === 3">In-Person</span>
+                            </div>
+
+                            <div class="date-group ps-2 border-start border-3 border-warning">
+                                <div *ngFor="let d of avail.dates" class="mb-1">
+                                    <span class="fw-bold text-dark">{{ d | date:'EEE, MMM d' }}</span>
+                                </div>
+                                <div class="text-muted small mt-1" *ngIf="avail.timeFrom">
+                                    <i class="bi bi-clock me-1"></i> {{ avail.timeFrom }} - {{ avail.timeTo }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent / Authorization Info -->
+                <div class="sidebar-card agent-card">
+                    <!-- Authorization Header if Exists -->
+
+
+                    <div class="agent-row">
+                        <div class="agent-avatar">
+                            <img *ngIf="property.author?.imageUrl"
+                                [src]="imageService.resolveImageUrl(property.author?.imageUrl, 'avatar')"
+                                appImgFallback="avatar" class="img-fluid rounded-circle">
+                            <div *ngIf="!property.author?.imageUrl"
+                                class="avatar-placeholder rounded-circle bg-light d-flex align-items-center justify-content-center text-muted"
+                                style="width: 100%; height: 100%;">
+                                <i class="bi bi-person-circle fs-1"></i>
+                            </div>
+                        </div>
+                        <div class="agent-details">
+                            <span class="label">Listed by</span>
+                            <h4 [routerLink]="['/public/profile', property.author?.username]" style="cursor: pointer;">
+                                {{ property.author?.fullName || property.author?.username }}
+                            </h4>
+                            <span class="sub-label">
+                                <i class="bi bi-patch-check-fill me-1"></i>
+                                {{ property.author?.type === 1 ? 'Organization' : 'Verified User' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Homes -->
+    <div class="similar-section" *ngIf="similarProperties.length > 0">
+        <h3>Similar Homes Nearby</h3>
+        <div class="similar-grid">
+            <div class="similar-card" *ngFor="let item of similarProperties"
+                [routerLink]="['/public/housing/details', item.id]">
+                <div class="sim-img" *ngIf="item.mediaUrl">
+                    <video *ngIf="item.mediaType === 'video'" [src]="item.mediaUrl" muted loop autoplay playsinline
+                        onmouseover="this.play()" onmouseout="this.pause()"
+                        class="w-100 h-100 object-fit-cover"></video>
+                    <img *ngIf="item.mediaType !== 'video'" [src]="item.mediaUrl" appImgFallback="housing">
+                    <div *ngIf="item.mediaType === 'video'"
+                        class="position-absolute top-50 start-50 translate-middle text-white"
+                        style="pointer-events:none;"><i class="bi bi-play-circle-fill fs-4 shadow-lg"></i>
+                    </div>
+                </div>
+                <div class="sim-info">
+                    <h4>{{ item.title }}</h4>
+                    <div class="sim-stats" *ngIf="item.numberOfRooms > 0 || item.numberOfBathrooms > 0">
+                        <span *ngIf="item.numberOfRooms"><i class="bi bi-door-open"></i> {{ item.numberOfRooms }}
+                            Bed</span>
+                        <span *ngIf="item.numberOfBathrooms"><i class="bi bi-droplet"></i> {{ item.numberOfBathrooms}}
+                            Bath</span>
+                    </div>
+                    <p class="sim-price">{{ formatPrice(item.startingPrice) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photos Overlay -->
+<!-- Photos Overlay (Lightbox) -->
+<div class="photos-overlay lightbox-overlay" *ngIf="lightboxActive" (click)="closeLightbox()">
+    <div class="overlay-backdrop"></div>
+
+    <div class="lightbox-container" (click)="$event.stopPropagation()">
+        <button class="close-btn" (click)="closeLightbox()"><i class="bi bi-x-lg"></i></button>
+
+        <button class="nav-btn prev" (click)="prevImage($event)"><i class="bi bi-chevron-left"></i></button>
+
+        <div class="lightbox-main-view">
+            <ng-container *ngIf="getActiveLightboxMedia() as media">
+                <img *ngIf="media.type === 'image'" [src]="media.url" class="lightbox-img">
+                <video *ngIf="media.type === 'video'" [src]="media.url" controls autoplay
+                    class="lightbox-video"></video>
+            </ng-container>
+        </div>
+
+        <button class="nav-btn next" (click)="nextImage($event)"><i class="bi bi-chevron-right"></i></button>
+
+        <div class="lightbox-thumbnails">
+            <div *ngFor="let item of property.attachments; let i = index" class="thumb"
+                [class.active]="i === lightboxIndex" (click)="openLightbox(i)">
+                <img *ngIf="item.type === 'image'" [src]="item.url">
+                <div *ngIf="item.type === 'video'" class="vid-thumb">
+                    <i class="bi bi-play-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner-border text-gold" role="status"></div>
+</div>
+
+<!-- Agent Request Modal -->
+<div class="agent-request-modal-overlay" *ngIf="showAgentRequestModal" (click)="closeAgentRequest()">
+    <div class="modal-content-wrapper" (click)="$event.stopPropagation()">
+        <app-agent-request [postId]="property.id" [contentTitle]="property.title" [contentImage]="activeMedia?.url"
+            [authorization]="property.authorization || property.author" [availabilities]="availabilities"
+            (close)="closeAgentRequest()" (requestSubmitted)="handleRequestSubmitted()"></app-agent-request>
+    </div>
+</div>
+
+<!-- Request Info View Modal -->
+<app-housing-request-status *ngIf="showRequestInfoModal" [requestInfo]="requestInfo" (close)="closeRequestInfo()"
+    (statusUpdated)="handleStatusUpdated($event)">
+</app-housing-request-status>d

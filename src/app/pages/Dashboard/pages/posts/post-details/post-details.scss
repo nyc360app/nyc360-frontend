@@ -1,0 +1,98 @@
+@use "sass:color";
+
+$bg-body: #f0f2f5;
+$white: #ffffff;
+$text-primary: #050505;
+$text-secondary: #65676b;
+$blue: #1877f2;
+$hover: #f2f2f2;
+$divider: #ced0d4;
+$red-danger: #dc3545;
+$gold: #DAA520;
+
+.page-container {
+  padding: 20px; background-color: $bg-body; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.state-container { text-align: center; padding: 40px; color: $text-secondary; }
+
+.post-details-wrapper { width: 100%; max-width: 750px; margin-bottom: 40px; }
+
+.post-card {
+  background: $white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); overflow: visible; animation: fadeIn 0.4s ease;
+
+  .card-top {
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px; position: relative;
+    .icon-btn { background: none; border: none; padding: 8px; border-radius: 50%; cursor: pointer; color: $text-secondary; font-size: 1.2rem; &:hover { background: $hover; } }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+    .meta { flex: 1; .username { font-size: 0.95rem; font-weight: 600; margin: 0; color: $text-primary; } .timestamp { font-size: 0.8rem; color: $text-secondary; .cat { color: $blue; font-weight: 600; margin-left: 5px; } } }
+    
+    // Dropdown
+    .post-menu-container { position: relative; }
+    .menu-dropdown {
+      position: absolute; top: 100%; right: 0; background: $white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; width: 180px; padding: 8px; border: 1px solid #eee;
+      .menu-item {
+        width: 100%; background: none; border: none; padding: 8px 12px; text-align: left; font-weight: 600; color: $text-secondary; border-radius: 6px; cursor: pointer; display: flex; gap: 10px; align-items: center;
+        &:hover { background: $hover; }
+        &.text-danger { color: $red-danger; &:hover { background: #ffebe8; } }
+      }
+    }
+  }
+
+  .card-content { padding: 4px 16px 16px; .post-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; } .post-text { font-size: 1rem; white-space: pre-wrap; line-height: 1.5; } }
+  .card-media { width: 100%; background: #000; display: flex; justify-content: center; img { width: 100%; max-height: 600px; object-fit: contain; } }
+  .card-stats { padding: 10px 16px; display: flex; justify-content: space-between; font-size: 0.9rem; color: $text-secondary; border-bottom: 1px solid $divider; }
+  .card-actions { display: flex; padding: 4px; border-bottom: 1px solid $divider; .action-btn { flex: 1; background: none; border: none; padding: 8px; border-radius: 4px; font-weight: 600; color: $text-secondary; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; &:hover { background: $hover; } &.active { color: $blue; i { color: $blue; } } } }
+
+  .comments-area {
+    padding: 12px 16px 20px;
+    
+    // Clean Input (No Avatar)
+    .comment-input-wrapper { margin-bottom: 20px; width: 100%; }
+    
+    .input-box {
+      width: 100%; position: relative;
+      input {
+        width: 100%; background: $bg-body; border: none; padding: 12px 40px 12px 16px; border-radius: 20px; outline: none; font-size: 0.95rem;
+        &:focus { background: color.scale($bg-body, $lightness: -3%); }
+      }
+      button {
+        position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; color: $blue; cursor: pointer; font-size: 1.1rem;
+        opacity: 0.4; pointer-events: none; transition: 0.2s;
+        &.active { opacity: 1; pointer-events: all; }
+      }
+      &.small input { padding: 8px 35px 8px 12px; font-size: 0.85rem; height: 36px; }
+    }
+
+    .comments-stream { display: flex; flex-direction: column; gap: 10px; }
+    .comment-row {
+      display: flex; gap: 8px;
+      .comment-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+      .comment-avatar.small { width: 24px; height: 24px; }
+      .bubble-container {
+        max-width: 88%;
+        .comment-bubble { background: $bg-body; padding: 8px 12px; border-radius: 18px; display: inline-block; .author { display: block; font-weight: 700; font-size: 0.8rem; color: $text-primary; margin-bottom: 2px; } p { margin: 0; font-size: 0.9rem; } }
+        .comment-actions-text { font-size: 0.75rem; color: $text-secondary; margin: 2px 0 0 12px; display: flex; gap: 15px; span { font-weight: 700; cursor: pointer; &:hover { text-decoration: underline; } &.time { font-weight: 400; cursor: default; } } }
+      }
+    }
+    .nested-replies { margin-left: 40px; margin-top: 5px; display: flex; flex-direction: column; gap: 5px; }
+    
+    // Clean Reply Input Wrapper
+    .reply-input-wrapper { margin-left: 40px; margin-top: 8px; width: calc(100% - 40px); }
+  }
+}
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; animation: fadeIn 0.2s;
+  .modal-content {
+    background: $white; width: 90%; max-width: 500px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden;
+    .modal-header { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; h3 { margin: 0; font-size: 1.2rem; } .btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; } }
+    .modal-body { padding: 20px; .instruction { margin-bottom: 15px; font-weight: 600; color: $text-primary; } .form-group { margin-bottom: 15px; select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; &:focus { border-color: $blue; outline: none; } } } }
+    .modal-footer { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; .btn-cancel { background: none; border: none; color: $text-secondary; font-weight: 600; padding: 8px 16px; cursor: pointer; &:hover { background: $hover; border-radius: 4px; } } .btn-submit { background: $blue; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; &:disabled { opacity: 0.6; cursor: default; } } }
+  }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

@@ -1,0 +1,13 @@
+.public-content-wrapper {
+    /* Offset for fixed public navbar only */
+    position: relative;
+    padding-top: 118px;
+    min-height: calc(100vh - 118px);
+}
+
+@media (max-width: 991px) {
+    .public-content-wrapper {
+        padding-top: 104px;
+        min-height: calc(100vh - 104px);
+    }
+}

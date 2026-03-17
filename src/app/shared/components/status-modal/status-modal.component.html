@@ -1,0 +1,16 @@
+<div class="status-modal-overlay" *ngIf="isOpen" (click)="onClose()">
+    <div class="status-modal-card" [ngClass]="type" (click)="$event.stopPropagation()">
+        <div class="icon-wrapper">
+            <i class="bi" [ngClass]="type === 'success' ? 'bi-check-lg' : 'bi-exclamation-triangle-fill'"></i>
+        </div>
+        <div class="content">
+            <h3 class="modal-title">{{ title }}</h3>
+            <p class="modal-message">{{ message }}</p>
+        </div>
+        <div class="actions">
+            <button class="btn-action" (click)="onClose()">
+                {{ type === 'success' ? 'Great!' : 'Close' }}
+            </button>
+        </div>
+    </div>
+</div>

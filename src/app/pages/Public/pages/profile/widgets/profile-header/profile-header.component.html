@@ -1,0 +1,87 @@
+<header class="profile-header-premium" *ngIf="user">
+    <!-- Banner Section -->
+    <div class="banner-box">
+        <div class="banner-img" [style.backgroundImage]="'url(' + resolveCover(user.coverImageUrl) + ')'"></div>
+        <div class="banner-overlay"></div>
+
+        <button class="edit-cover-btn" *ngIf="isOwner" (click)="triggerCoverUpload()" title="Update Cover">
+            <i class="bi bi-camera"></i>
+        </button>
+        <input type="file" id="cover-input" hidden (change)="onCoverSelected($event)" accept="image/*">
+    </div>
+
+    <!-- Content Section -->
+    <div class="header-main-area">
+        <div class="profile-intro-row">
+            <!-- Avatar -->
+            <div class="avatar-container">
+                <div class="avatar-frame">
+                    <img [src]="resolveImage(user.imageUrl)" alt="Profile" (click)="triggerAvatarUpload()">
+                    <button class="edit-avatar-badge" *ngIf="isOwner" (click)="triggerAvatarUpload()">
+                        <i class="bi bi-camera-fill"></i>
+                    </button>
+                </div>
+                <input type="file" id="avatar-input" hidden (change)="onAvatarSelected($event)" accept="image/*">
+            </div>
+
+            <!-- Info Column -->
+            <div class="info-content-col">
+                <div class="name-badge-line">
+                    <h1 class="profile-name">
+                        {{ displayName }}
+                        <i class="bi bi-patch-check-fill verified-icon" *ngIf="isVerified"></i>
+                    </h1>
+
+                    <!-- Primary Tag -->
+                    <span class="primary-tag" *ngIf="publicBadgeTags.length > 0">
+                        <i class="bi bi-tag-fill"></i>
+                        {{ publicBadgeTags[0].name }}
+                    </span>
+                </div>
+
+                <p class="headline-text">{{ user.headline || 'Impactful Member @ NYC 360' }}</p>
+
+                <div class="location-line" *ngIf="locationDisplay">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>{{ locationDisplay }}</span>
+                </div>
+
+                <!-- Secondary Tags -->
+                <div class="tags-cluster" *ngIf="publicBadgeTags.length > 1">
+                    <span class="secondary-tag" *ngFor="let tag of publicBadgeTags | slice:1:6">
+                        <i class="bi bi-tag"></i>
+                        {{ tag.name }}
+                    </span>
+                    <span class="more-count" *ngIf="publicBadgeTags.length > 6">
+                        +{{ publicBadgeTags.length - 6 }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Area -->
+        <nav class="header-tabs">
+            <div class="tabs-inner">
+                <button class="tab-item" [class.active]="activeTab === 'posts'" (click)="switchTab('posts')">
+                    Posts
+                    <span class="tab-indicator"></span>
+                </button>
+                <button class="tab-item" [class.active]="activeTab === 'about'" (click)="switchTab('about')">
+                    About
+                    <span class="tab-indicator"></span>
+                </button>
+                <button class="tab-item tab-with-badge" [class.active]="activeTab === 'applications'"
+                    (click)="switchTab('applications')" *ngIf="isOwner">
+                    Applications
+                    <span class="badge-count" *ngIf="applicationsCount > 0">{{ applicationsCount }}</span>
+                    <span class="tab-indicator"></span>
+                </button>
+                <button class="tab-item" [class.active]="activeTab === 'saved'" (click)="switchTab('saved')"
+                    *ngIf="isOwner">
+                    Saved
+                    <span class="tab-indicator"></span>
+                </button>
+            </div>
+        </nav>
+    </div>
+</header>

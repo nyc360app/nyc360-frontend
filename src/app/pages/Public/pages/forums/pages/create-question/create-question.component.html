@@ -1,0 +1,144 @@
+<div class="create-question-container">
+    <div class="header">
+        <h1>Ask a Question</h1>
+        <p>Get help from the {{ forum?.title || 'community' }}. Be clear and specific for the best answers.</p>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Main Form -->
+        <div class="form-card">
+            <form (ngSubmit)="onSubmit()" #questionForm="ngForm">
+
+                <div class="form-group" [class.has-error]="titleInput.invalid && titleInput.touched">
+                    <label for="title">
+                        Question Title
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" id="title" name="title" #titleInput="ngModel" [(ngModel)]="title" required
+                        minlength="10" placeholder="e.g., How do I apply for affordable housing in Brooklyn?"
+                        maxlength="150" [disabled]="isSubmitting" (input)="onTitleChange()">
+                    <div class="field-footer">
+                        <div class="validation-message" *ngIf="titleInput.invalid && titleInput.touched">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span *ngIf="titleInput.errors?.['required']">Title is required</span>
+                            <span *ngIf="titleInput.errors?.['minlength']">Title must be at least 10 characters</span>
+                        </div>
+                        <div class="char-count" [class.warning]="title.length > 130"
+                            [class.danger]="title.length >= 150">
+                            {{ title.length }}/150
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" [class.has-error]="contentInput.invalid && contentInput.touched">
+                    <label for="content">
+                        Question Details
+                        <span class="required">*</span>
+                    </label>
+                    <textarea id="content" name="content" #contentInput="ngModel" [(ngModel)]="content" required
+                        minlength="20"
+                        placeholder="Provide context, what you've tried, and what specific help you need..." rows="10"
+                        [disabled]="isSubmitting"></textarea>
+                    <div class="field-footer">
+                        <div class="validation-message" *ngIf="contentInput.invalid && contentInput.touched">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span *ngIf="contentInput.errors?.['required']">Details are required</span>
+                            <span *ngIf="contentInput.errors?.['minlength']">Please provide at least 20 characters of
+                                detail</span>
+                        </div>
+                        <div class="char-count">{{ content.length }} characters</div>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="preview-section" *ngIf="title.length > 0 || content.length > 0">
+                    <div class="preview-header">
+                        <i class="bi bi-eye"></i>
+                        <span>Preview</span>
+                    </div>
+                    <div class="preview-content">
+                        <h3 class="preview-title" *ngIf="title">{{ title }}</h3>
+                        <p class="preview-description" *ngIf="content">{{ content }}</p>
+                        <div class="preview-empty" *ngIf="!title && !content">
+                            Start typing to see a preview of your question
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" [routerLink]="['/public/forums', slug]"
+                        [disabled]="isSubmitting">
+                        <i class="bi bi-x-lg"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-submit" [disabled]="!questionForm.form.valid || isSubmitting">
+                        <i class="bi bi-send-fill" *ngIf="!isSubmitting"></i>
+                        <i class="bi bi-hourglass-split spinner" *ngIf="isSubmitting"></i>
+                        {{ isSubmitting ? 'Posting...' : 'Post Question' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tips Sidebar -->
+        <div class="tips-card">
+            <div class="tips-header">
+                <i class="bi bi-lightbulb-fill"></i>
+                <h3>Writing Tips</h3>
+            </div>
+            <div class="tips-content">
+                <div class="tip-item" [class.completed]="title.length >= 10">
+                    <div class="tip-icon">
+                        <i class="bi bi-check-circle-fill" *ngIf="title.length >= 10"></i>
+                        <i class="bi bi-circle" *ngIf="title.length < 10"></i>
+                    </div>
+                    <div class="tip-text">
+                        <strong>Clear title</strong>
+                        <p>Summarize your question in one sentence</p>
+                    </div>
+                </div>
+
+                <div class="tip-item" [class.completed]="content.length >= 20">
+                    <div class="tip-icon">
+                        <i class="bi bi-check-circle-fill" *ngIf="content.length >= 20"></i>
+                        <i class="bi bi-circle" *ngIf="content.length < 20"></i>
+                    </div>
+                    <div class="tip-text">
+                        <strong>Add details</strong>
+                        <p>Explain your situation and what you need help with</p>
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="bi bi-circle"></i>
+                    </div>
+                    <div class="tip-text">
+                        <strong>Be specific</strong>
+                        <p>Include relevant details like location, dates, or requirements</p>
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="bi bi-circle"></i>
+                    </div>
+                    <div class="tip-text">
+                        <strong>Stay respectful</strong>
+                        <p>Keep your question professional and courteous</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="community-stats" *ngIf="forum">
+                <div class="stat-badge">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Active Community</span>
+                </div>
+                <p class="stat-description">
+                    Join {{ forum.questionsCount }} other discussions in {{ forum.title }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

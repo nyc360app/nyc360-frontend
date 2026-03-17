@@ -1,0 +1,68 @@
+<div class="saved-posts-page" [style.--accent-color]="fallbackColor">
+    <header class="saved-header">
+        <div class="container text-center">
+            <div class="category-icon" *ngIf="categoryTheme?.icon">
+                <img [src]="categoryTheme.icon" [alt]="categoryTheme.label">
+            </div>
+            <h1 class="display-4 fw-bold mb-2">My Inquiries</h1>
+            <p class="lead">Your saved interactions in the <strong>{{ categoryTheme?.label }}</strong> ecosystem.</p>
+
+
+        </div>
+    </header>
+
+    <main class="container py-5">
+        <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border" role="status" [style.color]="fallbackColor">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div *ngIf="!isLoading && posts.length === 0" class="text-center py-5 no-results">
+            <i class="bi bi-bookmark-x display-1 mb-4"></i>
+            <h2>No saved inquiries found</h2>
+            <p class="text-muted">You haven't saved any posts in this category yet.</p>
+            <a [routerLink]="categoryTheme?.route || '/public/home'" class="btn btn-primary mt-3 px-4 py-2 rounded-pill"
+                [style.background-color]="fallbackColor" [style.border-color]="fallbackColor">
+                Explore {{ categoryTheme?.label }}
+            </a>
+        </div>
+
+        <div *ngIf="!isLoading && posts.length > 0" class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let post of posts">
+                <div class="inquiry-card" [routerLink]="['/public/posts/details', post.id]">
+                    <div class="card-image" *ngIf="post.attachments?.length">
+                        <img [src]="imageService.resolveImageUrl(post.attachments?.[0]?.url)" [alt]="post.title">
+                    </div>
+                    <div class="card-image no-img" *ngIf="!post.attachments?.length"
+                        [style.background-color]="fallbackColor + '15'">
+                        <i class="bi" [class]="categoryTheme?.biIcon || 'bi-journal-text'"
+                            [style.color]="fallbackColor"></i>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-meta">
+                            <span class="date">{{ post.createdAt | date:'MMM d, y' }}</span>
+                            <span class="type-badge" [style.background-color]="fallbackColor + '20'"
+                                [style.color]="fallbackColor">
+                                {{ categoryTheme?.label }}
+                            </span>
+                        </div>
+                        <h3 class="card-title">{{ post.title }}</h3>
+                        <p class="card-excerpt">{{ post.content | slice:0:100 }}...</p>
+
+                        <div class="card-action-bar">
+                            <span class="btn-details" [style.background-color]="fallbackColor + '10'"
+                                [style.color]="fallbackColor">
+                                View Details <i class="bi bi-arrow-right ms-1"></i>
+                            </span>
+                            <span class="ms-auto saved-tag" [style.color]="fallbackColor">
+                                <i class="bi bi-bookmark-fill"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

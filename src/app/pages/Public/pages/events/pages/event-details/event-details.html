@@ -1,0 +1,210 @@
+<div class="page-container" *ngIf="event">
+
+    <!-- Hero Header -->
+    <header class="hero-header">
+        <div class="overlay"></div>
+        <img [src]="event.attachments[0] || 'assets/images/placeholder-event.jpg'" class="hero-bg" alt="Event Banner">
+
+        <div class="container hero-content">
+            <button class="back-btn" routerLink="/public/events/list">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <h1 class="event-title animate__animated animate__fadeInUp">{{ event.title }}</h1>
+        </div>
+    </header>
+
+    <div class="container main-content">
+        <div class="row gx-lg-5">
+            <!-- Left Column -->
+            <div class="col-lg-8 left-column">
+
+                <!-- Tag -->
+                <div class="mb-4">
+                    <span class="category-pill">{{ getCategoryName(event.category) }}</span>
+                </div>
+
+                <!-- Info Row -->
+                <div class="info-row d-flex flex-wrap gap-4 mb-5">
+                    <div class="info-block d-flex gap-3 align-items-center">
+                        <div class="info-icon-box">
+                            <i class="bi bi-calendar4-week"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">{{ event.startDateTime | date:'EEE, MMM d' }}</div>
+                            <div class="text-muted small">{{ event.startDateTime | date:'h:mm a' }} - {{
+                                event.endDateTime | date:'h:mm a' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="vr mx-2 d-none d-md-block opacity-25"></div>
+
+                    <div class="info-block d-flex gap-3 align-items-center">
+                        <div class="info-icon-box">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">{{ event.venueName || 'To Be Announced' }}</div>
+                            <div class="text-muted small">{{ event.address?.location?.borough || 'New York, NY' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendees -->
+                <div class="attendees-section mb-5 d-flex align-items-center gap-3">
+                    <div class="avatars">
+                        <!-- Mock avatars for styling as API doesn't have invitees list yet -->
+                        <img src="https://ui-avatars.com/api/?name=A" class="avatar">
+                        <img src="https://ui-avatars.com/api/?name=B" class="avatar">
+                        <img src="https://ui-avatars.com/api/?name=C" class="avatar">
+                    </div>
+                    <div>
+                        <span class="fw-bold text-dark">+{{ event.totalTicketsSold || '200' }}</span> <span
+                            class="text-muted">Going</span>
+                    </div>
+                    <a href="javascript:void(0)" class="ms-auto text-decoration-none view-all-link">View All
+                        Invitees</a>
+                </div>
+
+                <!-- About -->
+                <div class="about-section mb-5">
+                    <h3 class="section-heading">About Event</h3>
+                    <div class="description-text text-muted" [innerHTML]="event.description"></div>
+
+                    <!-- Bullet points mock since description is raw text usually -->
+                    <ul class="features-list mt-3 text-muted small" *ngIf="false">
+                        <li>Live performance by {{ getOrganizer()?.fullName }}</li>
+                        <li>Complimentary welcome drink</li>
+                        <li>Panoramic views</li>
+                    </ul>
+                </div>
+
+                <!-- Location Map -->
+                <div class="location-section mb-5">
+                    <div class="d-flex justify-content-between align-items-end mb-3">
+                        <h3 class="section-heading mb-0">Location</h3>
+                        <a href="javascript:void(0)" class="get-location-link">Get Location</a>
+                    </div>
+                    <!-- Placeholder Map Image matching design -->
+                    <div class="map-container rounded-4 overflow-hidden">
+                        <img src="https://i.imgur.com/8J5f8lD.png" class="w-100 object-fit-cover" style="height: 180px;"
+                            alt="Map Preview">
+                        <div class="map-pin">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organizer -->
+                <div class="organizer-section mb-5">
+                    <h3 class="section-heading mb-4">Organized by</h3>
+                    <div class="organizer-card p-4 rounded-4" *ngIf="getOrganizer() as merchant">
+                        <div class="d-flex align-items-center gap-3">
+                            <img [src]="merchant.imageUrl || 'assets/images/user-placeholder.png'"
+                                class="org-avatar rounded-circle">
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold m-0 mb-1">{{ merchant.fullName }}</h5>
+                                <div class="org-stats d-flex gap-3 small text-muted">
+                                    <span><strong>12.4k</strong> Followers</span>
+                                    <span><strong>32</strong> Events</span>
+                                </div>
+                            </div>
+                            <div class="actions d-flex gap-2">
+                                <button class="btn btn-follow">Follow</button>
+                                <button class="btn btn-contact">Contact</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column / Sidebar -->
+            <div class="col-lg-4 right-column">
+                <div class="sticky-card-wrapper">
+                    <div class="booking-card bg-white shadow-sm rounded-4 p-4 text-center border">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="text-start">
+                                <small class="text-muted d-block mb-1">Starting from</small>
+                                <h2 class="price-tag fw-bold mb-0">${{ getMinPrice() | number:'1.2-2' }} <small
+                                        class="text-muted fw-normal fs-6">/person</small></h2>
+                            </div>
+                            <div class="rating-badge">
+                                <i class="bi bi-star-fill text-warning"></i> 4.8 <span
+                                    class="text-muted small">(122)</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-grid gap-3">
+                            <button class="btn btn-buy-ticket py-3">
+                                <i class="bi bi-ticket-perforated-fill me-2"></i> Buy Ticket
+                            </button>
+                            <button class="btn btn-invite-friend py-3">
+                                <i class="bi bi-arrow-return-right me-2"></i> Invite Friend
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar Events -->
+        <div class="similar-events-section py-5 border-top mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="section-heading m-0">More Events Like This</h3>
+                <a href="javascript:void(0)" class="text-decoration-none view-all-link">View All</a>
+            </div>
+
+            <div class="row g-4">
+                <!-- Mock Cards -->
+                <div class="col-md-4">
+                    <div class="card event-card-sm border-0 h-100">
+                        <div class="img-wrapper rounded-4 overflow-hidden position-relative mb-2">
+                            <img src="https://images.unsplash.com/photo-1533174072545-e8d4aa97edf9?auto=format&fit=crop&w=600&q=80"
+                                class="w-100">
+                            <span class="badge position-absolute top-0 start-0 m-3 bg-white text-dark">Music</span>
+                        </div>
+                        <h6 class="fw-bold mb-1">Harlem Late Night Jazz</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">$37.00</span>
+                            <button class="btn btn-sm btn-light rounded-pill px-3">Get Ticket</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Repeat for visuals -->
+                <div class="col-md-4">
+                    <div class="card event-card-sm border-0 h-100">
+                        <div class="img-wrapper rounded-4 overflow-hidden position-relative mb-2">
+                            <img src="https://images.unsplash.com/photo-1514525253440-b393452e8d26?auto=format&fit=crop&w=600&q=80"
+                                class="w-100">
+                            <span class="badge position-absolute top-0 start-0 m-3 bg-white text-dark">Music</span>
+                        </div>
+                        <h6 class="fw-bold mb-1">Symphony in the Park</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-success fw-bold">Free</span>
+                            <button class="btn btn-sm btn-light rounded-pill px-3">Get Ticket</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card event-card-sm border-0 h-100">
+                        <div class="img-wrapper rounded-4 overflow-hidden position-relative mb-2">
+                            <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80"
+                                class="w-100">
+                            <span class="badge position-absolute top-0 start-0 m-3 bg-white text-dark">Dance</span>
+                        </div>
+                        <h6 class="fw-bold mb-1">Rooftop Salsa Night</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">$25.00</span>
+                            <button class="btn btn-sm btn-light rounded-pill px-3">Get Ticket</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+</div>

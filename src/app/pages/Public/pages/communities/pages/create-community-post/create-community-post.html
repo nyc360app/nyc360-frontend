@@ -1,0 +1,77 @@
+<div class="create-page-container">
+  <div class="editor-card">
+
+    <div class="card-header">
+      <h2>Create Post</h2>
+      <button class="close-btn" (click)="cancel()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="card-body">
+      <div class="user-row">
+        <div class="avatar-placeholder"><i class="bi bi-person-fill"></i></div>
+        <div class="info">
+          <strong>New Post</strong>
+          <span class="badge-public">Public Community Post</span>
+        </div>
+      </div>
+
+      <input type="text" class="title-input" placeholder="Post Title (Optional)" [(ngModel)]="title">
+
+      <textarea class="main-input" rows="5" placeholder="What's happening?" [(ngModel)]="content">
+      </textarea>
+
+      <div class="previews-grid" *ngIf="previews.length > 0">
+        <div class="preview-item" *ngFor="let item of previews; let i = index">
+          <img *ngIf="item.type === 'image'" [src]="item.url">
+          <video *ngIf="item.type === 'video'" [src]="item.url" controls class="w-100 h-100 object-fit-cover"></video>
+          <button class="remove-btn" (click)="removeAttachment(i)"><i class="bi bi-x"></i></button>
+        </div>
+      </div>
+
+      <div class="tags-section">
+        <div class="selected-tags mb-2" *ngIf="tags.length > 0">
+          <span class="tag-chip" *ngFor="let tag of tags">
+            {{ tag.name }}
+            <button (click)="removeTag(tag)">&times;</button>
+          </span>
+        </div>
+
+        <div class="search-wrapper" style="position: relative;">
+          <div class="input-box">
+            <input type="text" [formControl]="tagSearchControl" placeholder="add tags (e.g. news, events)..."
+              (blur)="onTagBlur()" (focus)="showTagResults = true">
+
+            <div class="spinner-sm" *ngIf="isSearchingTags" style="position: absolute; right: 10px; top: 10px;"></div>
+          </div>
+
+          <div class="search-results" *ngIf="showTagResults && tagResults.length > 0">
+            <div class="result-item" *ngFor="let result of tagResults" (mousedown)="onTagSelect(result)">
+              <div class="r-icon"><i class="bi bi-hash"></i></div>
+              <div class="r-info">
+                <strong>{{ result.name }}</strong>
+                <span class="small" *ngIf="result.type">{{ result.type }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="tools-left">
+          <label class="tool-item" title="Add Photo or Video">
+            <i class="bi bi-collection-play text-success"></i>
+            <input type="file" multiple hidden accept="image/*,video/*" (change)="onFileSelected($event)">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button class="btn-post" (click)="submitPost()"
+        [disabled]="isPosting || (!content && !title && attachments.length === 0)">
+        <span *ngIf="isPosting" class="spinner-border spinner-border-sm"></span> Post
+      </button>
+    </div>
+
+  </div>
+</div>

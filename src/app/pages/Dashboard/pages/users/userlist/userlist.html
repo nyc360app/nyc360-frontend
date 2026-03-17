@@ -1,0 +1,280 @@
+<div class="users-page animate__animated animate__fadeIn">
+
+  <!-- Page Header -->
+  <div class="header-section mb-4 d-flex justify-content-between align-items-end">
+    <div>
+      <h1 class="gold-title mb-1">USERS MANAGEMENT</h1>
+      <p class="text-muted small mb-0">Manage platform members, permissions and account statuses</p>
+    </div>
+
+    <div class="header-actions glass-panel p-2 d-flex gap-2">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"
+          placeholder="Search users by name or email...">
+      </div>
+      <button class="btn-luxury-gold py-1 px-3" (click)="onSearch()">
+        <i class="bi bi-filter"></i> Search
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="glass-panel p-3 d-flex align-items-center gap-3">
+        <div class="mini-icon gold"><i class="bi bi-people"></i></div>
+        <div>
+          <div class="small text-muted fw-bold">TOTAL USERS</div>
+          <div class="h5 mb-0 fw-bold">{{ totalCount }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subtle Loading Indicator -->
+  <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+    <div class="progress" style="height: 3px; border-radius: 0;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%;"></div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-container">
+    <div class="glass-panel overflow-hidden">
+      <!-- Desktop Table View -->
+      <div class="d-none d-md-block">
+        <table class="luxury-table mb-0">
+          <thead>
+            <tr>
+              <th>USER IDENTITY</th>
+              <th>BIOGRAPHY</th>
+              <th>META DATA</th>
+              <th>SECURITY</th>
+              <th class="text-end">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users; let i = index">
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="luxury-avatar-wrapper">
+                    <img *ngIf="user.avatarUrl" [src]="environment.apiBaseUrl2 + '/avatars/' + user.avatarUrl"
+                      alt="Avatar">
+                    <div *ngIf="!user.avatarUrl" class="avatar-initials">
+                      {{ getInitials(user.firstName + ' ' + user.lastName) }}
+                    </div>
+                    <div class="status-indicator" [class.verified]="user.emailConfirmed"></div>
+                  </div>
+                  <div>
+                    <div class="fw-bold">{{ user.firstName }} {{ user.lastName }}</div>
+                    <div class="small text-muted font-monospace">{{ user.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="bio-text" [title]="user.bio || 'No biography'">
+                  {{ user.bio || '---' }}
+                </div>
+              </td>
+              <td>
+                <span class="role-badge-luxury" [attr.data-role]="user.role">
+                  {{ user.role || 'MEMBER' }}
+                </span>
+              </td>
+              <td>
+                <div *ngIf="user.lockoutEnd" class="lock-status text-danger small fw-bold">
+                  <i class="bi bi-shield-lock-fill me-1"></i> BANNED
+                </div>
+                <div *ngIf="!user.lockoutEnd" class="lock-status text-success small fw-bold">
+                  <i class="bi bi-shield-check me-1"></i> ACTIVE
+                </div>
+              </td>
+              <td class="text-end">
+                <div class="d-flex justify-content-end gap-2">
+                  <button class="btn-circle-luxury edit" (click)="openEditProfile(user)" title="Edit Profile">
+                    <i class="bi bi-sliders"></i>
+                  </button>
+                  <button class="btn-circle-luxury role" (click)="openRoleManager(user)" title="Change Role">
+                    <i class="bi bi-shield-shaded"></i>
+                  </button>
+                  <button class="btn-circle-luxury delete" (click)="onDelete(user)" title="Delete Account">
+                    <i class="bi bi-person-x"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="d-md-none p-3">
+        <div class="user-card-mobile p-3 mb-3" *ngFor="let user of users">
+          <div class="d-flex align-items-center gap-3 mb-3 border-bottom pb-3">
+            <div class="luxury-avatar-wrapper">
+              <img *ngIf="user.avatarUrl" [src]="environment.apiBaseUrl2 + '/avatars/' + user.avatarUrl" alt="Avatar">
+              <div *ngIf="!user.avatarUrl" class="avatar-initials">
+                {{ getInitials(user.firstName + ' ' + user.lastName) }}
+              </div>
+              <div class="status-indicator" [class.verified]="user.emailConfirmed"></div>
+            </div>
+            <div>
+              <div class="fw-bold">{{ user.firstName }} {{ user.lastName }}</div>
+              <div class="small text-muted font-monospace">{{ user.email }}</div>
+            </div>
+          </div>
+
+          <div class="row mb-3 g-2 align-items-center">
+            <div class="col-6">
+              <span class="role-badge-luxury" [attr.data-role]="user.role">
+                {{ user.role || 'MEMBER' }}
+              </span>
+            </div>
+            <div class="col-6 text-end">
+              <div *ngIf="user.lockoutEnd" class="lock-status text-danger small fw-bold">
+                <i class="bi bi-shield-lock-fill me-1"></i> BANNED
+              </div>
+              <div *ngIf="!user.lockoutEnd" class="lock-status text-success small fw-bold">
+                <i class="bi bi-shield-check me-1"></i> ACTIVE
+              </div>
+            </div>
+          </div>
+
+          <div class="bio-text mb-3 w-100" *ngIf="user.bio">
+            {{ user.bio }}
+          </div>
+
+          <div class="d-flex gap-2 border-top pt-3">
+            <button class="btn btn-outline-primary btn-sm flex-grow-1" (click)="openEditProfile(user)">
+              <i class="bi bi-sliders me-1"></i> Edit
+            </button>
+            <button class="btn btn-outline-warning btn-sm flex-grow-1" (click)="openRoleManager(user)">
+              <i class="bi bi-shield-shaded me-1"></i> Role
+            </button>
+            <button class="btn btn-outline-danger btn-sm flex-grow-1" (click)="onDelete(user)">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Empty State -->
+      <div *ngIf="users.length === 0" class="py-5 text-center">
+        <i class="bi bi-person-dash h1 text-muted"></i>
+        <p class="text-muted mt-2">No users found matching your search</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-luxury mt-4 d-flex justify-content-between align-items-center px-2">
+      <div class="small text-muted">
+        Showing page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn-luxury-outline py-1 px-3" (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn-luxury-outline py-1 px-3" (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div class="luxury-modal-backdrop" *ngIf="showProfileModal" (click)="closeModals()">
+    <div class="luxury-modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-luxury-header">
+        <h3 class="gold-title h4 mb-0">EDIT ACCOUNT</h3>
+        <button class="close-luxury" (click)="closeModals()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="modal-luxury-body">
+          <div class="row g-3">
+            <div class="col-md-6 text-center mb-3">
+              <div class="avatar-upload-luxury mx-auto">
+                <img *ngIf="!selectedFile && selectedUser?.avatarUrl"
+                  [src]="environment.apiBaseUrl2 + '/avatars/' + selectedUser?.avatarUrl">
+                <div *ngIf="!selectedUser?.avatarUrl && !selectedFile" class="upload-placeholder">
+                  <i class="bi bi-cloud-arrow-up h2"></i>
+                </div>
+                <input type="file" (change)="onFileSelected($event)" accept="image/*" id="avatarInput">
+                <label for="avatarInput" class="upload-label"><i class="bi bi-camera"></i></label>
+              </div>
+              <div class="small text-muted mt-2">Upload profile photo</div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label class="label-luxury">First Name</label>
+                <input formControlName="firstName" class="luxury-input" placeholder="Enter first name">
+              </div>
+              <div class="form-group mb-3">
+                <label class="label-luxury">Last Name</label>
+                <input formControlName="lastName" class="luxury-input" placeholder="Enter last name">
+              </div>
+            </div>
+          </div>
+          <div class="form-group mb-3">
+            <label class="label-luxury">Email Address</label>
+            <input formControlName="email" class="luxury-input" type="email">
+          </div>
+          <div class="form-group">
+            <label class="label-luxury">Biography / About</label>
+            <textarea formControlName="bio" class="luxury-input" rows="3"
+              placeholder="Write something about the user..."></textarea>
+          </div>
+        </div>
+        <div class="modal-luxury-footer">
+          <button type="button" class="btn-luxury-outline py-2" (click)="closeModals()">Cancel</button>
+          <button type="submit" class="btn-luxury-gold py-2" [disabled]="isSaving || profileForm.invalid">
+            <span *ngIf="!isSaving">Apply Changes</span>
+            <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Role Change Modal -->
+  <div class="luxury-modal-backdrop" *ngIf="showRoleModal" (click)="closeModals()">
+    <div class="luxury-modal-content role-manager-luxury" (click)="$event.stopPropagation()">
+      <div class="modal-luxury-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-circle bg-gold"><i class="bi bi-shield-lock"></i></div>
+          <div>
+            <h3 class="gold-title h4 mb-0">ACCESS CONTROL</h3>
+            <p class="text-muted small mb-0">Update role for {{ selectedUser?.firstName }}</p>
+          </div>
+        </div>
+        <button class="close-luxury" (click)="closeModals()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-luxury-body">
+        <div class="role-grid-luxury">
+          <label *ngFor="let role of availableRoles" class="role-option-luxury"
+            [class.active]="selectedRoleName === role.name">
+            <input type="radio" name="roleSelection" [value]="role.name" [(ngModel)]="selectedRoleName">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-3">
+                <div class="indicator"></div>
+                <div class="role-name-display">{{ role.name }}</div>
+              </div>
+              <i class="bi bi-check-circle-fill check-icon" *ngIf="selectedRoleName === role.name"></i>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="modal-luxury-footer">
+        <button class="btn-luxury-outline py-2" (click)="closeModals()">Discard</button>
+        <button class="btn-luxury-gold py-2" (click)="saveRoles()" [disabled]="isSaving">
+          <span *ngIf="!isSaving">Update Access</span>
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

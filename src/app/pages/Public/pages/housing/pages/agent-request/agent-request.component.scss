@@ -1,0 +1,638 @@
+@use 'sass:color';
+
+$primary: #B59B62; // Housing Gold
+$primary-light: color.adjust($primary, $lightness: 35%);
+$primary-dark: color.adjust($primary, $lightness: -10%);
+$text-dark: #1a1a1a;
+$text-light: #5f6368;
+$bg-faint: #F8F9FA;
+$border-color: #E2E8F0;
+$error-red: #DC2626;
+$error-bg: #FEF2F2;
+
+// Animation Keyframes
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.modal-body {
+    padding: 3.5rem;
+    font-family: 'Outfit', 'Inter', sans-serif; // Using a more modern font stack if available
+    color: $text-dark;
+    background: #ffffff;
+    animation: scaleIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.modal-header-premium {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba($primary, 0.1);
+    animation: fadeInUp 0.4s ease-out;
+
+    h2 {
+        font-size: 2rem;
+        font-weight: 800; // Extra bold
+        margin: 0;
+        letter-spacing: -0.5px;
+        color: $text-dark;
+        background: linear-gradient(45deg, $text-dark, $primary-dark);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .close-x {
+        background: rgba($primary, 0.05);
+        border: none;
+        font-size: 1.25rem;
+        color: $primary;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+            background: $primary;
+            color: white;
+            transform: rotate(90deg);
+        }
+    }
+}
+
+.agent-welcome-card {
+    background: linear-gradient(135deg, #1C1C1E 0%, #2C2C2E 100%);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 3.5rem;
+    color: white;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba($primary, 0.3);
+    animation: fadeInUp 0.5s ease-out 0.1s backwards;
+
+    // Golden Glow Effect
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(45deg, transparent 40%, rgba($primary, 0.1) 50%, transparent 60%);
+        background-size: 200% 100%;
+        animation: shimmer 6s infinite linear;
+        pointer-events: none;
+    }
+
+    .card-importance-tag {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba($primary, 0.15);
+        border: 1px solid $primary;
+        color: $primary;
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(4px);
+
+        i {
+            font-size: 1rem;
+        }
+    }
+
+    .agent-profile-mini {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 1;
+
+        .agent-avatar-ring {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, $primary, darken($primary, 10%));
+            border-radius: 20px; // Squircle
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 8px 20px rgba($primary, 0.3);
+            transform: rotate(-5deg);
+        }
+
+        .agent-identity {
+            h4 {
+                margin: 0;
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: white;
+                letter-spacing: -0.02em;
+            }
+
+            .id-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-top: 6px;
+
+                .verified-badge {
+                    background: rgba(16, 185, 129, 0.15);
+                    color: #10B981;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+            }
+        }
+    }
+
+    .welcome-message {
+        position: relative;
+        z-index: 1;
+
+        p {
+            font-size: 1.05rem;
+            color: #d1d5db;
+            line-height: 1.7;
+            font-weight: 300;
+            max-width: 90%;
+
+            strong {
+                color: $primary;
+                font-weight: 600;
+            }
+        }
+    }
+
+    // Improve Availability Grid
+    .availability-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 25px;
+
+        .avail-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+
+            &:hover {
+                background: rgba($primary, 0.1);
+                border-color: rgba($primary, 0.3);
+                transform: translateY(-2px);
+            }
+
+            .a-label {
+                color: rgba(255, 255, 255, 0.5);
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                margin-bottom: 8px;
+                display: block;
+            }
+
+            .a-value {
+                color: white;
+                font-weight: 600;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                i {
+                    color: $primary;
+                }
+            }
+        }
+    }
+}
+
+.form-section-premium {
+    margin-bottom: 3.5rem;
+    animation: fadeInUp 0.6s ease-out 0.2s backwards;
+
+    .section-badge {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 2rem;
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: $bg-faint;
+            color: $primary;
+            border: 1px solid rgba($primary, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba($primary, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: $text-dark;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        &:hover .step-number {
+            background: $primary;
+            color: white;
+            box-shadow: 0 8px 20px rgba($primary, 0.2);
+        }
+    }
+}
+
+.form-group-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+
+    label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: $text-light;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    // Modern Input Styles
+    input,
+    textarea,
+    select {
+        padding: 16px 20px;
+        border: 2px solid transparent; // Transparent border initially
+        background: #F8F9FA; // Light grey bg
+        border-radius: 14px;
+        font-size: 1rem;
+        color: $text-dark;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+
+        &::placeholder {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        &:hover {
+            background: #F1F5F9;
+        }
+
+        &:focus {
+            outline: none;
+            background: white;
+            border-color: $primary;
+            box-shadow: 0 8px 30px rgba($primary, 0.1);
+            transform: translateY(-1px);
+        }
+
+        &.invalid {
+            border-color: rgba($error-red, 0.3);
+            background: $error-bg;
+            color: $error-red;
+
+            &:focus {
+                border-color: $error-red;
+                box-shadow: 0 8px 30px rgba($error-red, 0.1);
+            }
+        }
+    }
+}
+
+// PREMIUM TOGGLE GROUP (Replaces old bordered buttons)
+.toggle-group-premium {
+    display: flex;
+    background: #F1F5F9;
+    padding: 6px;
+    border-radius: 16px;
+    gap: 6px;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+
+    button {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 14px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #64748b;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba($primary, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+            z-index: -1;
+        }
+
+        &:hover {
+            color: $primary;
+
+            &::before {
+                width: 120%;
+                height: 120%;
+            }
+        }
+
+        &.active {
+            background: white;
+            color: $primary;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-weight: 800; // Bolder when active
+            transform: scale(1.02);
+        }
+    }
+}
+
+// Improved Date/Time Row
+.form-row-premium {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+
+    &.date-time-row {
+        background: white;
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid $border-color;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+
+        &:hover {
+            border-color: $primary;
+            box-shadow: 0 15px 40px -10px rgba($primary, 0.1);
+        }
+    }
+}
+
+// Custom Select
+.custom-select-premium {
+    padding: 16px 20px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    background: #F8F9FA;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+        background: #F1F5F9;
+    }
+
+    .selected-value {
+        font-weight: 600;
+        color: $text-dark;
+    }
+
+    .dropdown-menu-premium {
+        position: absolute;
+        width: 100%;
+        top: calc(100% + 8px);
+        left: 0;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        padding: 8px;
+        z-index: 50;
+        animation: scaleIn 0.2s ease-out;
+
+        .dropdown-item-premium {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: $text-dark;
+            transition: all 0.2s;
+            cursor: pointer;
+
+            &:hover {
+                background: rgba($primary, 0.08);
+                color: $primary;
+            }
+        }
+    }
+}
+
+// Validation Banner with Animation
+.validation-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FEF2F2;
+    border-left: 4px solid #DC2626;
+    color: #991B1B;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+    animation: fadeInUp 0.3s ease-out;
+
+    i {
+        font-size: 1.2rem;
+    }
+}
+
+// Icon Wrapper for Inputs
+.date-input-wrapper {
+    position: relative;
+
+    input {
+        padding-left: 54px !important;
+    }
+
+    i {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $primary;
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover i {
+        transform: translateY(-50%) scale(1.1);
+    }
+}
+
+.form-footer-premium {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid $border-color;
+    animation: fadeInUp 0.6s ease-out 0.4s backwards;
+
+    .btn-send-premium {
+        background: linear-gradient(135deg, $primary 0%, darken($primary, 10%) 100%);
+        color: white;
+        border: none;
+        padding: 18px 48px;
+        border-radius: 100px; // Pill shape
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba($primary, 0.4);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+
+        // Inner highlight
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        &:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba($primary, 0.5);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        &:disabled {
+            background: #E2E8F0;
+            color: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        i {
+            margin-left: 8px;
+            transition: transform 0.3s;
+        }
+
+        &:hover:not(:disabled) i {
+            transform: translateX(4px) rotate(-15deg);
+        }
+    }
+}
+
+// Selection Grid
+.strict-selection-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 5px;
+
+    .slot-btn {
+        background: white;
+        border: 1px solid $border-color;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        color: $text-light;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            border-color: $primary;
+            color: $primary;
+            background: rgba($primary, 0.05);
+            transform: translateY(-2px);
+        }
+
+        &.active {
+            background: $primary;
+            color: white;
+            border-color: $primary;
+            box-shadow: 0 8px 20px rgba($primary, 0.3);
+            transform: translateY(-2px);
+        }
+    }
+}

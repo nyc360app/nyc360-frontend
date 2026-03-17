@@ -1,0 +1,61 @@
+<div class="auth-layout">
+  <a routerLink="/" class="landing-btn">
+    <i class="bi bi-house-door"></i> Back to Home
+  </a>
+
+  <div class="brand-panel">
+    <div class="brand-content">
+      <div class="logo-box">NYC<span class="highlight">360</span></div>
+      <h1 class="brand-title">Verification.</h1>
+      <p class="brand-subtitle">Securing your digital identity in the city.</p>
+    </div>
+    <div class="glow-circle"></div>
+  </div>
+
+  <div class="form-panel">
+    <div class="content-wrapper text-center" @fadeInUp>
+
+      <div *ngIf="isLoading" class="status-box">
+        <div class="spinner-border text-primary mb-4" role="status"></div>
+        <h2>Verifying...</h2>
+        <p class="text-muted">Please wait while we confirm your email.</p>
+      </div>
+
+      <div *ngIf="!isLoading && isConfirmed" class="status-box">
+        <div class="icon-circle success mb-4" style="font-size: 3rem; color: #2ecc71;">
+          <i class="bi bi-shield-check"></i>
+        </div>
+
+        <h2>Account Verified!</h2>
+        <p class="text-muted mb-4">Thank you for confirming your email. Your account is now active and secure.</p>
+
+        <a routerLink="/auth/login" class="btn-submit w-100 d-block text-decoration-none">
+          Continue to Login
+        </a>
+        <p class="small-note mt-3 text-muted">Redirecting in 3 seconds...</p>
+      </div>
+
+      <div *ngIf="!isLoading && !isConfirmed" class="status-box">
+        <div class="icon-circle error mb-4" style="font-size: 3rem; color: #e74c3c;">
+          <i class="bi bi-slash-circle"></i>
+        </div>
+
+        <h2>Verification Failed</h2>
+        <p class="text-muted small mb-4">
+          The link might be expired or invalid. Please try logging in to request a new verification email.
+        </p>
+
+        <a routerLink="/auth/login" class="btn-submit w-100 d-block text-decoration-none" style="background: #e74c3c;">
+          Go to Login
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <app-auth-success-modal [visible]="showModal" [title]="modalTitle" [message]="modalMessage"
+    buttonText="Continue to Login" (closed)="onModalClose()">
+  </app-auth-success-modal>
+
+</div>

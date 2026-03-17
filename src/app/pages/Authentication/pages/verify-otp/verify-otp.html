@@ -1,0 +1,63 @@
+<div class="auth-layout">
+  <a routerLink="/" class="landing-btn">
+    <i class="bi bi-house-door"></i> Back to Home
+  </a>
+
+  <div class="brand-panel">
+    <div class="brand-content">
+      <div class="logo-box">NYC<span class="highlight">360</span></div>
+      <h1 class="brand-title">Security Check.</h1>
+      <p class="brand-subtitle">Protecting your account with Two-Factor Authentication.</p>
+    </div>
+    <div class="glow-circle"></div>
+  </div>
+
+  <div class="form-panel">
+    <div class="content-wrapper" @fadeInUp>
+
+      <div class="header-section">
+        <h2>Verify Identity</h2>
+        <p>Enter the 6-digit code sent to <strong>{{ email }}</strong>.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+          <label>Verification Code</label>
+          <div class="input-wrapper">
+            <i class="bi bi-key-fill"></i>
+            <input type="text" formControlName="code" placeholder="123456" maxlength="6" class="otp-input"
+              [class.is-invalid]="isFieldInvalid('code')"
+              style="letter-spacing: 5px; font-weight: 700; font-size: 1.2rem;">
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('code')">
+            Enter a valid 6-digit number.
+          </div>
+          <small class="text-muted mt-2 d-block">Check your inbox and spam folder.</small>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Verify & Login</span>
+          <span *ngIf="isLoading"><i class="spinner-border spinner-border-sm me-2"></i> Verifying...</span>
+        </button>
+
+        <div class="footer-link">
+          Didn't receive the code? <a href="javascript:void(0)">Resend Code</a>
+        </div>
+
+        <div class="text-center mt-3">
+          <a routerLink="/auth/login" class="text-muted text-decoration-none small">Back to Login</a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+
+  <!-- Success Modal -->
+  <app-auth-success-modal [visible]="showModal" [title]="modalTitle" [message]="modalMessage"
+    buttonText="Continue to Home" (closed)="onModalClose()">
+  </app-auth-success-modal>
+
+</div>

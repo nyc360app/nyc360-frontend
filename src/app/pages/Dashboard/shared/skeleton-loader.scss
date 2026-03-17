@@ -1,0 +1,64 @@
+// Skeleton Loader Styles for Dashboard
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-card {
+    @extend .skeleton;
+    height: 120px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-row {
+    @extend .skeleton;
+    height: 50px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-text {
+    @extend .skeleton;
+    height: 20px;
+    margin-bottom: 0.5rem;
+
+    &.short {
+        width: 40%;
+    }
+
+    &.medium {
+        width: 60%;
+    }
+
+    &.long {
+        width: 80%;
+    }
+
+    &.full {
+        width: 100%;
+    }
+}
+
+.skeleton-avatar {
+    @extend .skeleton;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.skeleton-image {
+    @extend .skeleton;
+    width: 100%;
+    height: 200px;
+}

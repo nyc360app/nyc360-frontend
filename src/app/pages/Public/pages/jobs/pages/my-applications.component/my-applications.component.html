@@ -1,0 +1,56 @@
+<div class="my-apps-page">
+  <header class="apps-header">
+    <div class="container">
+      <h1 class="font-header">My Job Applications</h1>
+      <p class="font-body">Track and manage your professional journey in NYC.</p>
+    </div>
+  </header>
+
+  <div class="container main-content">
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-success"></div>
+      <p class="mt-2">Fetching your applications...</p>
+    </div>
+
+    <div *ngIf="!isLoading && applications.length === 0" class="empty-state shadow-sm">
+      <i class="bi bi-briefcase-history display-1"></i>
+      <h2>No Applications Yet</h2>
+      <p>You haven't applied to any professions yet. Start exploring now!</p>
+      <button class="btn-primary" routerLink="/public/profession/jobs">Explore Jobs</button>
+    </div>
+
+    <div class="apps-grid" *ngIf="!isLoading && applications.length > 0">
+      <div class="app-card shadow-sm" *ngFor="let app of applications">
+        <div class="app-card-body">
+          <div class="job-info">
+            <span class="company-name">{{ app.offer.companyName }}</span>
+            <h3 class="job-title font-header">{{ app.offer.title }}</h3>
+            <div class="job-meta">
+              <span><i class="bi bi-calendar3"></i> Applied on {{ app.appliedAt | date:'MMM d, y' }}</span>
+              <span class="sep"></span>
+              <span><i class="bi bi-cash-stack"></i> ${{ app.offer.salaryMin/1000 }}K - ${{ app.offer.salaryMax/1000 }}K</span>
+            </div>
+          </div>
+          
+          <div class="app-actions">
+            <div class="status-badge" [ngClass]="getStatusClass(app.status)">
+              {{ getStatusLabel(app.status) }}
+            </div>
+            
+            <div class="btns-row">
+              <button class="btn-view" [routerLink]="['/public/job-profile', app.offer.id]">View Offer</button>
+              <button 
+                class="btn-withdraw" 
+                *ngIf="app.status === 0" 
+                [disabled]="isWithdrawing === app.applicationId"
+                (click)="onWithdraw(app.applicationId)">
+                <span *ngIf="isWithdrawing === app.applicationId" class="spinner-border spinner-border-sm"></span>
+                Withdraw
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

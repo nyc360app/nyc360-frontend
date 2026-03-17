@@ -1,0 +1,231 @@
+<div class="luxury-dashboard animate__animated animate__fadeIn">
+    <div class="container-fluid py-4 px-md-5">
+
+        <!-- Header -->
+        <div class="header-section d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div class="title-area">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn-icon back-btn" routerLink="..">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <div>
+                        <h1 class="gold-title merriweather-font mb-0">TAG VERIFICATIONS</h1>
+                        <p class="text-muted small mb-0">Identity & Professional verification queue</p>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-mini glass-panel px-4 py-2 d-flex align-items-center gap-4">
+                <div class="stat-item">
+                    <span class="label text-muted small uppercase">Pending</span>
+                    <h4 class="value mb-0 gold-text">{{ totalCount }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel glass-panel mb-4 p-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="search-box">
+                        <i class="bi bi-search text-gold"></i>
+                        <input type="text" [(ngModel)]="searchTerm"
+                            placeholder="Search by username, full name or tag...">
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button class="btn-luxury-outline" (click)="loadRequests()">
+                        <i class="bi bi-arrow-clockwise me-2"></i> REFRESH
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests List -->
+        <!-- Subtle Loading Indicator -->
+        <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+            <div class="progress" style="height: 3px; border-radius: 0; background: transparent;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-gold"
+                    style="width: 100%; background-color: #c5a059;">
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="hasInitialized && filteredRequests.length === 0 && !isLoading"
+            class="empty-state glass-panel text-center py-5 animate__animated animate__fadeIn">
+            <div class="icon-box mb-4">
+                <div class="empty-icon-wrapper">
+                    <i class="bi bi-shield-lock text-gold" style="font-size: 3rem;"></i>
+                </div>
+            </div>
+            <h3 class="text-dark merriweather-font">Clear Skies</h3>
+            <p class="text-muted">No pending verification requests match your criteria.</p>
+            <button class="btn-luxury-gold mt-3 px-4" (click)="loadRequests()">Check for New Requests</button>
+        </div>
+
+        <div class="table-responsive glass-panel animate__animated animate__fadeIn" *ngIf="filteredRequests.length > 0">
+            <table class="luxury-table">
+                <thead>
+                    <tr>
+                        <th>Requester</th>
+                        <th>Requested Tag</th>
+                        <th>Reason</th>
+                        <th>Evidence</th>
+                        <th>Submitted At</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let req of filteredRequests">
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-wrapper">
+                                    <img [src]="getRequesterImage(req.requester.imageUrl)" class="avatar-img"
+                                        style="width: 40px; height: 40px; border-radius: 10px;" alt="User"
+                                        onerror="this.src='/assets/images/default-avatar.png'">
+                                </div>
+                                <div class="user-details">
+                                    <div class="fw-bold text-dark">{{ req.requester.fullName || req.requester.username
+                                        }}</div>
+                                    <div class="text-gold small">@{{ req.requester.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="tag-value fw-bold">
+                                <i class="bi bi-patch-check-fill text-primary small me-1"></i>
+                                {{ req.tag.name }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="reason-text-truncated" [title]="req.reason">
+                                "{{ req.reason }}"
+                            </div>
+                        </td>
+                        <td>
+                            <div class="docs-list d-flex gap-2">
+                                <div *ngFor="let doc of req.documents | slice:0:2">
+                                    <a [href]="getDocUrl(doc.fileUrl)" target="_blank" class="doc-pill">
+                                        <i class="bi"
+                                            [ngClass]="doc.type === 9 ? 'bi-file-earmark-pdf' : 'bi-image'"></i>
+                                        <span>{{ doc.type === 9 ? 'PDF' : 'IMG' }}</span>
+                                    </a>
+                                </div>
+                                <span class="text-muted small" *ngIf="req.documents.length > 2">+{{req.documents.length
+                                    - 2}} more</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-muted small">{{ req.submittedAt | date:'MMM d, y, h:mm a' }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn-luxury-outline-danger" (click)="openResolveModal(req)">
+                                    <i class="bi bi-x-circle me-1"></i> REJECT
+                                </button>
+                                <button class="btn-luxury-gold" (click)="openResolveModal(req)">
+                                    <i class="bi bi-check-circle me-1"></i> APPROVE
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-footer-luxury mt-5 d-flex justify-content-center" *ngIf="totalPages > 1">
+            <div class="pagination-controls d-flex align-items-center gap-4 bg-white p-2 px-3 rounded-pill shadow-sm">
+                <button class="btn-circle luxury" [disabled]="currentPage === 1"
+                    (click)="loadRequests(currentPage - 1)">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div class="page-numbers">
+                    <span class="current">{{currentPage}}</span>
+                    <span class="sep">/</span>
+                    <span class="total">{{totalPages}}</span>
+                </div>
+                <button class="btn-circle luxury" [disabled]="currentPage === totalPages"
+                    (click)="loadRequests(currentPage + 1)">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Resolve Modal -->
+    <div class="resolve-overlay animate__animated animate__fadeIn" *ngIf="selectedRequest"
+        (click)="closeResolveModal()">
+        <div class="resolve-modal shadow-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header-luxury border-bottom p-4 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icon"><i class="bi bi-shield-shaded"></i></div>
+                    <h3 class="mb-0 gold-text merriweather-font">Verification Final Decision</h3>
+                </div>
+                <button class="btn-close-custom bg-transparent border-0" (click)="closeResolveModal()"><i
+                        class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="target-info-card mb-4 bg-light p-3 rounded-3">
+                    <div class="row align-items-center">
+                        <div class="col-5 text-end">
+                            <strong class="d-block text-dark">{{ selectedRequest.requester.username }}</strong>
+                            <small class="text-muted">User Requester</small>
+                        </div>
+                        <div class="col-2 text-center">
+                            <i class="bi bi-arrow-right-circle-fill text-gold fs-3"></i>
+                        </div>
+                        <div class="col-5 text-start">
+                            <strong class="d-block text-primary">{{ selectedRequest.tag.name }}</strong>
+                            <small class="text-muted">Targeted Tag</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full Reason in Modal -->
+                <div class="mb-4">
+                    <label class="label-muted small uppercase fw-bold mb-2 d-block">Statement of Interest</label>
+                    <div class="p-3 bg-light rounded italic-text text-muted border-start border-gold border-4">
+                        "{{ selectedRequest.reason }}"
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="mb-2 fw-bold text-dark d-flex justify-content-between">
+                        <span>Internal Audit Comment</span>
+                        <span class="text-muted small fw-normal">(Optional)</span>
+                    </label>
+                    <textarea class="form-control luxury-textarea w-100" rows="4" [(ngModel)]="adminComment"
+                        placeholder="Provide details about your decision findings..."
+                        style="border-radius: 12px; border: 1px solid rgba(197, 160, 89, 0.2);"></textarea>
+                </div>
+
+                <div class="audit-warning p-3 rounded d-flex gap-3 align-items-center"
+                    style="background: #fff9eb; border: 1px solid #ffeeba;">
+                    <div class="warning-icon text-warning"><i class="bi bi-info-circle-fill"></i></div>
+                    <p class="mb-0 x-small text-muted">A notification and an email will be dispatched to the user upon
+                        submission of this decision.</p>
+                </div>
+            </div>
+
+            <div class="modal-footer-luxury p-4 border-top d-flex gap-3">
+                <button class="btn btn-link text-muted text-decoration-none fw-bold" (click)="closeResolveModal()"
+                    [disabled]="isProcessingAction">ABORT</button>
+                <div class="ms-auto d-flex gap-3">
+                    <button class="btn btn-danger px-4 rounded-3" [disabled]="isProcessingAction"
+                        (click)="handleResolve(false)" style="border-radius: 10px;">
+                        <span *ngIf="!isProcessingAction">DENY VERIFICATION</span>
+                        <span *ngIf="isProcessingAction" class="spinner-border spinner-border-sm"></span>
+                    </button>
+                    <button class="btn btn-luxury-gold px-4 rounded-3" [disabled]="isProcessingAction"
+                        (click)="handleResolve(true)"
+                        style="background: #c5a059; color: white; border: none; border-radius: 10px; font-weight: 700;">
+                        <span *ngIf="!isProcessingAction">GRANT ACCESS</span>
+                        <span *ngIf="isProcessingAction" class="spinner-border spinner-border-sm"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

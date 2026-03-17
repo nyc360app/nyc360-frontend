@@ -1,0 +1,310 @@
+<div class="job-profile-page">
+
+  <div class="job-profile-container" *ngIf="job">
+
+    <section class="profile-header">
+      <div class="cover-photo"></div>
+      <div class="container header-card-wrapper">
+        <div class="floating-card shadow-lg">
+          <div class="card-left">
+            <div class="logo-wrapper">
+              <img [src]="getAvatarUrl(job.author.imageUrl)" alt="Company Logo">
+            </div>
+            <div class="job-main-info">
+              <span class="badge-category">{{ getType(job.employmentType) | uppercase }}</span>
+              <h1>{{ job.title }}</h1>
+              <p class="company-name text-muted mb-2">by <strong>{{ job.author.fullName }}</strong></p>
+              <div class="meta-row">
+                <span *ngIf="job.address?.location">
+                  <i class="bi bi-geo-alt-fill"></i>
+                  {{ job.address?.location?.neighborhood || 'N/A' }},
+                  {{ job.address?.location?.borough || 'N/A' }}
+                </span>
+                <span *ngIf="!job.address?.location"><i class="bi bi-geo-alt-fill"></i> Location Not Found</span>
+                <span class="sep"></span>
+                <span><i class="bi bi-briefcase-fill"></i> {{ getType(job.employmentType) }}</span>
+                <span class="sep"></span>
+                <span><i class="bi bi-clock"></i> Posted {{ job.createdAt | date:'shortDate' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right">
+            <button *ngIf="!isAuthor && !job.isApplied" class="btn-primary-action" (click)="showApplyModal = true">
+              <i class="bi bi-send"></i> Apply
+            </button>
+
+            <button *ngIf="!isAuthor && job.isApplied" class="btn-primary-action applied" disabled>
+              <i class="bi bi-check-circle-fill"></i> Applied
+            </button>
+
+
+
+            <div class="secondary-actions">
+              <button class="btn-outline-action" (click)="openShareModal()">
+                <i class="bi bi-share"></i> Share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="container main-content-grid">
+
+      <main class="details-column">
+
+        <nav class="tabs-nav">
+          <button [class.active]="activeTab === 'overview'" (click)="onTabChange('overview')">Overview</button>
+          <button [class.active]="activeTab === 'responsibilities'"
+            (click)="onTabChange('responsibilities')">Responsibilities</button>
+          <button [class.active]="activeTab === 'requirements'"
+            (click)="onTabChange('requirements')">Requirements</button>
+
+          <button *ngIf="isAuthor" [class.active]="activeTab === 'applicants'" (click)="onTabChange('applicants')"
+            style="color: #e67e22; border-color: #e67e22; position: relative;">
+            <i class="bi bi-people-fill"></i> Applicants
+            <span class="applicants-badge" *ngIf="job.applicationsCount > 0">{{ job.applicationsCount }}</span>
+          </button>
+        </nav>
+
+        <div class="tab-content-area">
+
+          <section class="content-section" *ngIf="activeTab === 'overview'">
+            <h2 class="font-header">Job Overview</h2>
+            <div class="card-content">
+              <p class="text-body">{{ job.description || 'Description Not Found' }}</p>
+              <h3 class="font-header mt-4">Benefits</h3>
+              <p class="text-body" [class.text-muted]="!job.benefits">{{ job.benefits || 'Benefits Not Found' }}</p>
+            </div>
+          </section>
+
+          <section class="content-section" *ngIf="activeTab === 'responsibilities'">
+            <h2 class="font-header">Key Responsibilities</h2>
+            <div class="card-content">
+              <ul class="styled-list" *ngIf="job.responsibilities">
+                <li *ngFor="let res of job.responsibilities.split('\n')">
+                  <i class="bi bi-check2-circle"></i> {{ res }}
+                </li>
+              </ul>
+              <p *ngIf="!job.responsibilities" class="text-muted">Detailed responsibilities will be provided during
+                interview.</p>
+            </div>
+          </section>
+
+          <section class="content-section" *ngIf="activeTab === 'requirements'">
+            <h2 class="font-header">Requirements & Skills</h2>
+            <div class="requirements-grid">
+              <div class="req-box essential">
+                <h4 class="font-header"><i class="bi bi-star-fill"></i> Essential</h4>
+                <p [class.text-muted]="!job.requirements">{{ job.requirements || 'Requirements Not Found' }}</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="content-section" *ngIf="activeTab === 'applicants' && isAuthor">
+            <h2 class="font-header" style="border-color: #e67e22;">Applicants ({{job.applicationsCount}})</h2>
+
+            <div *ngIf="isLoadingApplicants" class="text-center py-4">
+              <div class="spinner-border text-warning"></div>
+            </div>
+
+            <div class="applicants-grid" *ngIf="!isLoadingApplicants">
+              <div class="applicant-card" *ngFor="let app of applicants">
+                <div class="app-header">
+                  <img [src]="getAvatarUrl(app.applicantAvatarUrl)" class="app-img" alt="Candidate">
+                  <div class="app-info">
+                    <h5>{{ app.applicantFullName }} <small class="text-muted">(<a
+                          [routerLink]="['/public/profile', app.applicantUsername]" class="text-decoration-none">@{{
+                          app.applicantUsername }}</a>)</small></h5>
+                    <p class="text-muted small mb-1" *ngIf="app.applicantBio">{{ app.applicantBio }}</p>
+                    <small class="text-muted">{{ app.appliedAt | date:'mediumDate' }}</small>
+                  </div>
+                </div>
+
+                <div class="cover-preview mt-3">
+                  <strong>Cover Letter:</strong>
+                  <p class="text-muted fst-italic">"{{ app.coverLetter || 'No cover letter provided.' }}"</p>
+                </div>
+
+                <!-- More Details Section -->
+                <div class="applicant-details mt-3 pt-3 border-top" *ngIf="isApplicantExpanded(app.applicationId)">
+                  <h6 class="fw-bold mb-2 text-primary">Experience</h6>
+                  <div *ngIf="app.applicantExperiences.length; else noExp">
+                    <div class="mb-2" *ngFor="let exp of app.applicantExperiences">
+                      <div class="fw-bold">{{ exp.title }} at {{ exp.company }}</div>
+                      <div class="small text-muted">
+                        {{ exp.startDate | date:'MMM yyyy' }} -
+                        <span *ngIf="exp.isCurrent">Present</span>
+                        <span *ngIf="!exp.isCurrent">{{ exp.endDate | date:'MMM yyyy' }}</span>
+                      </div>
+                      <p class="small mb-0" *ngIf="exp.description">{{ exp.description }}</p>
+                    </div>
+                  </div>
+                  <ng-template #noExp>
+                    <p class="small text-muted">No experience listed.</p>
+                  </ng-template>
+
+                  <h6 class="fw-bold mt-3 mb-2 text-primary">Education</h6>
+                  <div *ngIf="app.applicantEducations.length; else noEdu">
+                    <div class="mb-2" *ngFor="let edu of app.applicantEducations">
+                      <div class="fw-bold">{{ edu.school }}</div>
+                      <div class="small">{{ edu.degree }} <span *ngIf="edu.fieldOfStudy">- {{ edu.fieldOfStudy }}</span>
+                      </div>
+                      <div class="small text-muted">
+                        {{ edu.startDate | date:'yyyy' }} - {{ edu.endDate ? (edu.endDate | date:'yyyy') : 'Present' }}
+                      </div>
+                    </div>
+                  </div>
+                  <ng-template #noEdu>
+                    <p class="small text-muted">No education listed.</p>
+                  </ng-template>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <button class="btn btn-sm btn-link text-decoration-none p-0"
+                    (click)="toggleApplicant(app.applicationId)">
+                    {{ isApplicantExpanded(app.applicationId) ? 'Hide Details' : 'View Full Profile' }}
+                  </button>
+
+                  <div class="resume-link-box" *ngIf="app.resumeUrl">
+                    <a [href]="getResumeUrl(app.resumeUrl)" target="_blank" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-file-earmark-pdf"></i> Resume
+                    </a>
+                  </div>
+                </div>
+
+                <div class="status-action-row mt-3 pt-2 border-top">
+                  <label class="small-label align-self-center mb-0 me-2">Status:</label>
+                  <select [ngModel]="app.status" (ngModelChange)="onStatusChange(app, $event)"
+                    class="status-select flex-grow-1"
+                    [ngClass]="{'status-hired': app.status == 4, 'status-rejected': app.status == 3}">
+                    <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <div *ngIf="applicants.length === 0" class="text-center w-100 p-3 text-muted">
+                No applicants yet.
+              </div>
+            </div>
+          </section>
+
+          <section class="content-section no-border" *ngIf="activeTab !== 'applicants'">
+            <h2 class="font-header">Work Model & Location</h2>
+            <div class="work-model-card">
+              <div class="model-info">
+                <h3 class="font-header">{{ getArrangement(job.workArrangement) }} Schedule</h3>
+                <p>This role follows the standard {{ getArrangement(job.workArrangement) }} work program.</p>
+              </div>
+
+              <div class="model-map-placeholder">
+                <div class="location-pin" *ngIf="job.address?.location">{{ job.address?.location?.neighborhood }}</div>
+                <div class="location-pin" *ngIf="!job.address?.location">NYC</div>
+              </div>
+
+              <div class="address-details mt-3">
+                <div *ngIf="job.address">
+                  <p class="text-muted small">
+                    <i class="bi bi-pin-map-fill"></i>
+                    <span *ngIf="job.address.street">{{ job.address.street }} {{ job.address.buildingNumber }}, </span>
+                    <span *ngIf="job.address.location">{{ job.address.location.neighborhood }}, {{
+                      job.address.location.borough }}</span>
+                    <span *ngIf="job.address.zipCode">, {{ job.address.zipCode }}</span>
+                  </p>
+                </div>
+                <p class="text-muted small" *ngIf="!job.address">
+                  <i class="bi bi-geo-alt"></i> Exact address not provided.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <aside class="sidebar-column">
+        <div class="widget glance-widget shadow-sm">
+          <h3 class="font-header"><i class="bi bi-info-circle-fill"></i> At a Glance</h3>
+          <ul class="glance-list">
+            <li><span>Salary Range</span> <strong>${{ job.salaryMin/1000 }}K - ${{ job.salaryMax/1000 }}K / yr</strong>
+            </li>
+            <li><span>Job ID</span> <strong>#{{ job.id }}</strong></li>
+            <li><span>Date Posted</span> <strong>{{ job.createdAt | date:'MMM d, y' }}</strong></li>
+            <li><span>Experience</span> <strong>{{ getLevel(job.employmentLevel) }}</strong></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showApplyModal">
+    <div class="apply-modal-card animate__animated animate__fadeInUp">
+      <div class="modal-header">
+        <h2 class="font-header">Job Application</h2>
+        <button class="btn-close-modal" (click)="showApplyModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">You are applying for: <strong>{{ job?.title }}</strong></p>
+        <label class="fw-bold mb-2">Cover Letter / Introduction</label>
+        <textarea [(ngModel)]="coverLetterText" class="form-control" rows="5"
+          placeholder="Tell us why you are the best fit..."></textarea>
+
+        <label class="fw-bold mt-3 mb-2">Resume / CV</label>
+        <input type="file" (change)="onFileSelected($event)" class="form-control" accept=".pdf,.doc,.docx" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showApplyModal = false">Cancel</button>
+        <button class="btn-confirm" [disabled]="isSubmittingApply || !coverLetterText.trim()"
+          (click)="onConfirmApply()">
+          <span *ngIf="isSubmittingApply" class="spinner-border spinner-border-sm me-2"></span>
+          Confirm & Send
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showShareModal">
+    <div class="apply-modal-card animate__animated animate__fadeInUp">
+      <div class="modal-header">
+        <h2 class="font-header">Share Opportunity</h2>
+        <button class="btn-close-modal" (click)="showShareModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">Share this job offer with your network.</p>
+
+        <div class="share-link-box mb-4"
+          style="background: #f8f9fa; padding: 10px; border-radius: 8px; display: flex; gap: 10px;">
+          <input type="text" [value]="shareLink" readonly class="form-control form-control-sm"
+            style="background: transparent; border: none;">
+          <button class="btn btn-sm btn-outline-secondary" (click)="copyLink()">Copy</button>
+        </div>
+
+        <p class="text-muted small">Clicking "Share Now" will publish this to your feed/network.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showShareModal = false">Close</button>
+        <button class="btn-confirm" [disabled]="isSharing" (click)="confirmShare()">
+          <span *ngIf="isSharing" class="spinner-border spinner-border-sm me-2"></span>
+          Share Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" *ngIf="showSuccessModal">
+    <div class="apply-modal-card animate__animated animate__fadeInUp text-center" style="max-width: 400px;">
+      <div class="modal-body py-4">
+        <div style="font-size: 4rem; color: #00695C; margin-bottom: 20px;">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2 class="font-header mb-2">Application Sent!</h2>
+        <p class="text-muted">Your application has been successfully sent to the employer. Good luck!</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button class="btn-confirm" (click)="showSuccessModal = false">Done</button>
+      </div>
+    </div>
+  </div>
+
+</div>

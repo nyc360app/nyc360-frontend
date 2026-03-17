@@ -1,0 +1,430 @@
+<div class="settings-page">
+    <div class="settings-layout">
+
+        <!-- Sidebar -->
+        <aside class="settings-sidebar">
+            <h2 class="sidebar-title"><i class="bi bi-gear-fill"></i> Settings</h2>
+            <nav class="settings-nav">
+                <a (click)="activeTab = 'profile'" [class.active]="activeTab === 'profile'">
+                    <i class="bi bi-person-circle"></i> Edit Profile
+                </a>
+                <a (click)="activeTab = 'security'" [class.active]="activeTab === 'security'">
+                    <i class="bi bi-shield-lock"></i> Security
+                </a>
+
+                <a (click)="activeTab = 'verification'" [class.active]="activeTab === 'verification'">
+                    <i class="bi bi-patch-check-fill"></i> Verifications
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="settings-content" [ngSwitch]="activeTab">
+
+            <!-- EDIT PROFILE TAB -->
+            <section *ngSwitchCase="'profile'" class="settings-section animate-fade-in">
+                <!-- Header -->
+                <header class="section-header">
+                    <h1>Edit Profile</h1>
+                    <p>Manage your public profile information</p>
+                </header>
+
+                <div *ngIf="isLoading" class="loading-state">
+                    <div class="spinner"></div> Loading...
+                </div>
+
+                <div *ngIf="!isLoading && user" class="profile-forms">
+
+                    <!-- Basic Info -->
+                    <div class="card-setting">
+                        <h3><i class="bi bi-info-circle"></i> Basic Information</h3>
+                        <form [formGroup]="basicForm" (ngSubmit)="saveBasicInfo()" class="form-grid">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>First Name</label>
+                                    <input formControlName="firstName" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name</label>
+                                    <input formControlName="lastName" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Headline</label>
+                                <input formControlName="headline" class="form-control"
+                                    placeholder="Software Engineer at...">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Bio</label>
+                                <textarea formControlName="bio" class="form-control" rows="4"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" [disabled]="isSaving">Update Info</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Images -->
+                    <div class="card-setting">
+                        <h3><i class="bi bi-images"></i> Profile Images</h3>
+                        <div class="images-grid">
+                            <div class="image-upload-box">
+                                <label>Profile Picture</label>
+                                <input type="file" (change)="onAvatarSelected($event)" accept="image/*">
+                            </div>
+                            <div class="image-upload-box">
+                                <label>Cover Image</label>
+                                <input type="file" (change)="onCoverSelected($event)" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="card-setting">
+                        <div class="card-actions-header">
+                            <h3><i class="bi bi-briefcase"></i> Experience</h3>
+                            <button class="btn-sm" (click)="openAddPos()">+ Add Position</button>
+                        </div>
+                        <div class="list-entries">
+                            <div class="list-entry" *ngFor="let pos of user.positions">
+                                <div class="entry-info">
+                                    <strong>{{ pos.title }}</strong>
+                                    <span>{{ pos.company }}</span>
+                                    <small>{{ pos.startDate | date:'MMM yyyy' }} - {{ pos.isCurrent ? 'Present' :
+                                        (pos.endDate | date:'MMM yyyy') }}</small>
+                                </div>
+                                <div class="entry-actions">
+                                    <button (click)="openEditPos(pos)"><i class="bi bi-pencil"></i></button>
+                                    <button (click)="deletePos(pos.id)" class="text-danger"><i
+                                            class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div *ngIf="user.positions && user.positions.length === 0" class="empty-msg">No positions
+                                added.</div>
+                        </div>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="card-setting">
+                        <div class="card-actions-header">
+                            <h3><i class="bi bi-mortarboard"></i> Education</h3>
+                            <button class="btn-sm" (click)="openAddEdu()">+ Add Education</button>
+                        </div>
+                        <div class="list-entries">
+                            <div class="list-entry" *ngFor="let edu of user.education">
+                                <div class="entry-info">
+                                    <strong>{{ edu.school }}</strong>
+                                    <span>{{ edu.degree }}, {{ edu.fieldOfStudy }}</span>
+                                    <small>{{ edu.startDate | date:'yyyy' }} - {{ edu.endDate ? (edu.endDate |
+                                        date:'yyyy') : 'Present' }}</small>
+                                </div>
+                                <div class="entry-actions">
+                                    <button (click)="openEditEdu(edu)"><i class="bi bi-pencil"></i></button>
+                                    <button (click)="deleteEdu(edu.id)" class="text-danger"><i
+                                            class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div *ngIf="user.education && user.education.length === 0" class="empty-msg">No education
+                                added.</div>
+                        </div>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="card-setting">
+                        <div class="card-actions-header">
+                            <h3><i class="bi bi-link-45deg"></i> Social Links</h3>
+                            <button class="btn-sm" (click)="openAddSocial()">+ Add Link</button>
+                        </div>
+                        <div class="list-entries">
+                            <div class="list-entry" *ngFor="let link of user.socialLinks">
+                                <div class="entry-info social-row">
+                                    <i class="bi" [ngClass]="getPlatformIcon(link.platform)"></i>
+                                    <a [href]="link.url" target="_blank">{{ getPlatformName(link.platform) }}</a>
+                                </div>
+                                <div class="entry-actions">
+                                    <button (click)="openEditSocial(link)"><i class="bi bi-pencil"></i></button>
+                                    <button (click)="deleteSocial((link.id || link.linkId)!)" class="text-danger"><i
+                                            class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECURITY TAB -->
+            <section *ngSwitchCase="'security'" class="settings-section animate-fade-in">
+                <header class="section-header">
+                    <h1>Security Settings</h1>
+                    <p>Manage your password and security preferences</p>
+                </header>
+
+                <div class="card-setting">
+                    <h3>Login & Recovery</h3>
+                    <div class="settings-list">
+                        <!-- Change Password Item -->
+                        <div class="setting-item">
+                            <div class="item-icon"><i class="bi bi-key-fill"></i></div>
+                            <div class="item-content">
+                                <h4>Change Password</h4>
+                                <p>Update your password regularly to keep your account secure.</p>
+                            </div>
+                            <button class="btn-outline" (click)="openChangePassword()">Update</button>
+                        </div>
+
+                        <!-- 2FA Item (Placeholder) -->
+                        <div class="setting-item">
+                            <div class="item-icon"><i class="bi bi-shield-check"></i></div>
+                            <div class="item-content">
+                                <h4>Two-Factor Authentication</h4>
+                                <p>Add an extra layer of security to your account.</p>
+                            </div>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="2fa">
+                                <label for="2fa"></label>
+                            </div>
+                        </div>
+
+                        <!-- Login Activity (Placeholder) -->
+                        <!-- <div class="setting-item">
+                            <div class="item-icon"><i class="bi bi-clock-history"></i></div>
+                            <div class="item-content">
+                                <h4>Login Activity</h4>
+                                <p>View where you're logged in.</p>
+                            </div>
+                            <button class="btn-link">View</button>
+                        </div> -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAGS TAB -->
+            <section *ngSwitchCase="'tags'" class="settings-section animate-fade-in">
+                <header class="section-header">
+                    <h1>User Tags</h1>
+                    <p>Manage tags associated with your profile</p>
+                </header>
+                <div class="card-setting">
+                    <h3>Your Tags</h3>
+                    <p>Tag management coming soon.</p>
+                    <button class="btn-primary" (click)="saveTags()">Save Tags</button>
+                </div>
+            </section>
+
+            <!-- VERIFICATION TAB -->
+            <section *ngSwitchCase="'verification'" class="settings-section animate-fade-in">
+                <header class="section-header">
+                    <h1>Verifications</h1>
+                    <p>Submit documents to verify your identity or tags</p>
+                </header>
+
+                <div class="card-setting">
+                    <div class="verification-toggle">
+                        <button [class.active]="verificationType === 'identity'"
+                            (click)="setVerificationType('identity')">
+                            Verify Identity
+                        </button>
+                        <button [class.active]="verificationType === 'tag'" (click)="setVerificationType('tag')">
+                            Verify Tag
+                        </button>
+                    </div>
+
+                    <h3 class="mt-4"><i class="bi"
+                            [ngClass]="verificationType === 'identity' ? 'bi-person-badge' : 'bi-hash'"></i>
+                        {{ verificationType === 'identity' ? 'Identity Verification' : 'Tag Verification' }}
+                    </h3>
+                    <p class="text-muted mb-4 small">
+                        {{ verificationType === 'identity'
+                        ? 'Get a blue checkmark on your profile by verifying your identity.'
+                        : 'Verify ownership of a specific tag/topic on the platform.' }}
+                    </p>
+
+                    <form [formGroup]="verificationForm" (ngSubmit)="submitVerification()"
+                        class="form-grid layout-vertical">
+
+                        <!-- Tag Search Field (Conditionally Shown) -->
+                        <div class="form-group full-width position-relative" *ngIf="verificationType === 'tag'">
+                            <label>Tag</label>
+                            <input [formControl]="tagSearchControl" class="form-control"
+                                placeholder="Search for a tag...">
+
+                            <div class="selected-tag-chip" *ngIf="selectedTag">
+                                <span class="tag-name"><i class="bi bi-hash"></i> {{ selectedTag.name }}</span>
+                                <button type="button" class="btn-clear" (click)="clearTagSelection()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Dropdown Results -->
+                            <div class="dropdown-results" *ngIf="showTagDropdown">
+                                <div class="dropdown-item" *ngFor="let result of tagSearchResults"
+                                    (click)="selectTag(result)">
+                                    <span class="tag-name">{{ result.name }}</span>
+                                    <small class="tag-type text-muted">{{ result.type === 1 ? 'Media' : 'Organization'
+                                        }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Verification Reason</label>
+                            <textarea formControlName="reason" class="form-control" rows="3"
+                                placeholder="Explain why you are requesting verification..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Document Type</label>
+                            <select formControlName="documentType" class="form-control custom-select">
+                                <option *ngFor="let type of documentTypes" [value]="type.id">{{ type.name }}</option>
+                            </select>
+                        </div>
+
+                        <!-- Enhanced File Input -->
+                        <div class="form-group full-width">
+                            <label>Upload Document</label>
+                            <div class="file-upload-area" (click)="fileInput.click()"
+                                [class.has-file]="!!selectedVerificationFile">
+                                <input #fileInput type="file" (change)="onVerificationFileSelected($event)"
+                                    accept=".jpg,.png,.pdf,.jpeg" hidden>
+                                <i class="bi bi-cloud-arrow-up-fill upload-icon"></i>
+                                <div class="upload-text" *ngIf="!selectedVerificationFile">
+                                    <span>Click to upload verification document</span>
+                                    <small>Max size: 5MB</small>
+                                </div>
+                                <div class="file-info" *ngIf="selectedVerificationFile">
+                                    <i class="bi bi-file-earmark-check text-success"></i>
+                                    <span>{{ selectedVerificationFile.name }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions mt-4 gap-2">
+                            <button type="button" class="btn-outline"
+                                (click)="verificationForm.reset({tagId:0, documentType:1}); selectedVerificationFile=null">Reset</button>
+                            <button type="submit" class="btn-primary" [disabled]="isSaving">
+                                <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+                                {{ isSaving ? 'Submitting...' : 'Submit Verification' }}
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODALS for List Items -->
+    <!-- Position Modal -->
+    <div class="modal-backdrop" *ngIf="modalState.position">
+        <div class="modal-content animate-pop-in">
+            <div class="modal-header">
+                <h3>{{ isEditMode ? 'Edit' : 'Add' }} Experience</h3><button (click)="closeModals()">&times;</button>
+            </div>
+            <form [formGroup]="posForm" (ngSubmit)="savePos()">
+                <div class="form-group"><label>Title</label><input formControlName="title" class="form-control"></div>
+                <div class="form-group"><label>Company</label><input formControlName="company" class="form-control">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Start Date</label><input type="date" formControlName="startDate"
+                            class="form-control"></div>
+                    <div class="form-group"><label>End Date</label><input type="date" formControlName="endDate"
+                            class="form-control"></div>
+                </div>
+                <div class="form-group check"><label><input type="checkbox" formControlName="isCurrent"> Currently
+                        Working Here</label></div>
+                <div class="modal-footer"><button type="submit" class="btn-primary">{{ isSaving ? 'Saving...' : 'Save'
+                        }}</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Education Modal -->
+    <div class="modal-backdrop" *ngIf="modalState.education">
+        <div class="modal-content animate-pop-in">
+            <div class="modal-header">
+                <h3>{{ isEditMode ? 'Edit' : 'Add' }} Education</h3><button (click)="closeModals()">&times;</button>
+            </div>
+            <form [formGroup]="eduForm" (ngSubmit)="saveEdu()">
+                <div class="form-group"><label>School</label><input formControlName="school" class="form-control"></div>
+                <div class="form-group"><label>Degree</label><input formControlName="degree" class="form-control"></div>
+                <div class="form-group"><label>Field of Study</label><input formControlName="fieldOfStudy"
+                        class="form-control"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Start Date</label><input type="date" formControlName="startDate"
+                            class="form-control"></div>
+                    <div class="form-group"><label>End Date</label><input type="date" formControlName="endDate"
+                            class="form-control"></div>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn-primary">{{ isSaving ? 'Saving...' : 'Save'
+                        }}</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Social Modal -->
+    <div class="modal-backdrop" *ngIf="modalState.social">
+        <div class="modal-content animate-pop-in">
+            <div class="modal-header">
+                <h3>{{ isEditMode ? 'Edit' : 'Add' }} Social Link</h3><button (click)="closeModals()">&times;</button>
+            </div>
+            <form [formGroup]="socialForm" (ngSubmit)="saveSocial()">
+                <div class="form-group"><label>Platform</label>
+                    <select formControlName="platform" class="form-control">
+                        <option *ngFor="let p of socialPlatforms" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>URL</label><input formControlName="url" class="form-control"
+                        placeholder="https://..."></div>
+                <div class="modal-footer"><button type="submit" class="btn-primary" [disabled]="isSaving">
+                        {{ isSaving ? (isEditMode ? 'Updating...' : 'Adding...') : (isEditMode ? 'Update' : 'Add Link')
+                        }}
+                    </button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-backdrop" *ngIf="modalState.password">
+        <div class="modal-content animate-pop-in">
+            <div class="modal-header">
+                <h3>Change Password</h3><button (click)="closeModals()">&times;</button>
+            </div>
+            <form [formGroup]="passwordForm" (ngSubmit)="savePassword()">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" formControlName="currentPassword" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" formControlName="newPassword" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" formControlName="confirmPassword" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">{{ isSaving ? 'Updating...' : 'Update Password'
+                        }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HIGH-IMPACT SUCCESS OVERLAY -->
+    <div class="success-overlay-container" *ngIf="showSuccessOverlay">
+        <div class="success-card">
+            <div class="success-icon-wrapper">
+                <div class="checkmark-circle">
+                    <div class="checkmark draw"></div>
+                </div>
+            </div>
+            <div class="success-content">
+                <h2>Done!</h2>
+                <p>{{ successMessage }}</p>
+            </div>
+        </div>
+    </div>
+
+</div>

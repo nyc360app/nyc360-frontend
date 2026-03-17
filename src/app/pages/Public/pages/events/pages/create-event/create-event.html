@@ -1,0 +1,310 @@
+<div class="create-event-container">
+
+    <!-- Left Sidebar Stepper -->
+    <aside class="sidebar-wrapper">
+        <a routerLink="/public/events/list" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to events
+        </a>
+
+        <!-- Miniature Live Preview (Eventbrite Style) -->
+        <div class="preview-mini-card animate__animated animate__fadeIn">
+            <div class="mini-img">
+                <img [src]="bannerPreviewUrl || 'assets/images/placeholder-event.jpg'" alt="Preview">
+            </div>
+            <div class="mini-title">{{ basicInfoForm.get('Title')?.value || 'Event Title' }}</div>
+            <div class="mini-meta">
+                <i class="bi bi-calendar-event me-1"></i>
+                {{ (basicInfoForm.get('StartDateTime')?.value | date:'MMM d, y') || 'Date TBA' }}
+            </div>
+            <div class="mt-2">
+                <span class="badge" [class.bg-secondary]="currentStep < 3" [class.bg-success]="currentStep === 3">
+                    {{ currentStep === 3 ? 'Published' : 'Draft' }}
+                </span>
+            </div>
+        </div>
+
+        <nav class="stepper-nav">
+            <li class="step-item" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+                <div class="step-circle">1</div>
+                <div class="step-text">Build event page</div>
+            </li>
+            <li class="step-item" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+                <div class="step-circle">2</div>
+                <div class="step-text">Add tickets</div>
+            </li>
+            <li class="step-item" [class.active]="currentStep === 3">
+                <div class="step-circle">3</div>
+                <div class="step-text">Publish</div>
+            </li>
+        </nav>
+    </aside>
+
+    <!-- Main Canvas -->
+    <main class="main-canvas">
+
+        <!-- STEP 1: BASIC INFO & MEDIA -->
+        <div *ngIf="currentStep === 1" class="animate__animated animate__fadeInUp">
+
+            <!-- Section: Media -->
+            <div class="section-box">
+                <div class="box-header">
+                    <h2>Upload Photos</h2>
+                    <button class="btn-add-section">+</button>
+                </div>
+                <p class="info-text">Add a high-quality banner to make your event stand out. Attendees expect to see
+                    what your event is about.</p>
+
+                <div class="media-dropzone" (click)="fileInput.click()">
+                    <input type="file" #fileInput class="d-none" multiple (change)="onFileSelect($event)"
+                        accept="image/*">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <h4>Upload photos and video</h4>
+                    <p class="text-muted small">Drag or click to choose files</p>
+                </div>
+
+                <!-- Chips for selected files -->
+                <div class="d-flex flex-wrap gap-2 mt-3" *ngIf="selectedFiles.length > 0">
+                    <div *ngFor="let f of selectedFiles; let i = index" class="badge bg-purple p-2 rounded-pill">
+                        {{ f.name | slice:0:15 }}... <i class="bi bi-x-circle ms-1 cursor-pointer"
+                            (click)="removeFile(i)"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Overview -->
+            <div [formGroup]="basicInfoForm" class="section-box">
+                <div class="box-header">
+                    <h2>Event Overview</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" class="form-control" formControlName="Title"
+                        placeholder="Give your event a short, distinct name.">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Category *</label>
+                            <select class="form-select" formControlName="Category">
+                                <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Event Type *</label>
+                            <select class="form-select" formControlName="Type">
+                                <option *ngFor="let t of eventTypes" [value]="t.id">{{t.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Your Role *</label>
+                            <select class="form-select" formControlName="UserRole">
+                                <option *ngFor="let r of userRoles" [value]="r.id">{{r.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea class="form-control" formControlName="Description" rows="6"
+                        placeholder="Provide more details about your event..."></textarea>
+                </div>
+            </div>
+
+            <!-- Section: Date and Time -->
+            <div [formGroup]="basicInfoForm" class="section-box">
+                <div class="box-header">
+                    <h2>Date and time</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Event Starts *</label>
+                            <input type="datetime-local" class="form-control" formControlName="StartDateTime">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Event Ends *</label>
+                            <input type="datetime-local" class="form-control" formControlName="EndDateTime">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Location -->
+            <div [formGroup]="basicInfoForm" class="section-box">
+                <div class="box-header">
+                    <h2>Location</h2>
+                </div>
+                <div formGroupName="Address">
+                    <div class="form-group">
+                        <label>Street Address</label>
+                        <input type="text" class="form-control" formControlName="Street" placeholder="e.g. 123 NYC Ave">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Building/Suite</label>
+                                <input type="text" class="form-control" formControlName="BuildingNumber"
+                                    placeholder="Apt 4B">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Zip Code</label>
+                                <input type="text" class="form-control" formControlName="ZipCode" placeholder="10001">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Footer -->
+            <div class="form-footer">
+                <button (click)="submitStep1()" class="btn-next" [disabled]="isSubmitting">
+                    <span *ngIf="!isSubmitting">Save and continue</span>
+                    <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: TICKETS -->
+        <div *ngIf="currentStep === 2" class="animate__animated animate__fadeInUp">
+
+            <div class="section-box">
+                <div class="box-header">
+                    <h2>Ticket Tiers</h2>
+                    <button class="btn btn-navy-sm rounded-pill" (click)="addTier()">
+                        <i class="bi bi-plus"></i> Add Tier
+                    </button>
+                </div>
+                <p class="info-text">Create different ticket types for your attendees (e.g. VIP, Early Bird, General
+                    Admission).</p>
+
+                <form [formGroup]="ticketsForm">
+                    <div formArrayName="Tiers">
+                        <div *ngFor="let tier of tiers.controls; let i = index" [formGroupName]="i" class="tier-card">
+                            <i class="bi bi-trash remove-tier" (click)="removeTier(i)"></i>
+
+                            <div class="form-group">
+                                <label>Tier Name *</label>
+                                <input type="text" class="form-control" formControlName="Name"
+                                    placeholder="e.g. General Admission">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Price ($) *</label>
+                                        <input type="number" class="form-control" formControlName="Price">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Quantity *</label>
+                                        <input type="number" class="form-control" formControlName="QuantityAvailable">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Max Per Order</label>
+                                        <input type="number" class="form-control" formControlName="MaxPerOrder">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="form-control" formControlName="Description"
+                                    placeholder="What's included in this ticket?">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div *ngIf="tiers.length === 0" class="text-center py-4 border rounded-4 bg-light">
+                    <p class="text-muted m-0">No ticket tiers added yet.</p>
+                </div>
+            </div>
+
+            <!-- Action Footer -->
+            <div class="form-footer">
+                <button (click)="currentStep = 1" class="btn btn-outline-secondary rounded-pill px-4">Previous</button>
+                <button (click)="submitStep2()" class="btn-next" [disabled]="isSubmitting">
+                    <span *ngIf="!isSubmitting">Publish Event</span>
+                    <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: REVIEW & PUBLISH -->
+        <div *ngIf="currentStep === 3" class="animate__animated animate__fadeInUp">
+
+            <!-- STATE A: PRE-PUBLISH (REVIEW) -->
+            <div *ngIf="!isPublished">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold text-dark display-6">You're almost there!</h2>
+                    <p class="text-muted">Review your event details before going live.</p>
+                </div>
+
+                <div class="section-box text-center">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <img [src]="bannerPreviewUrl || 'assets/images/placeholder-event.jpg'"
+                                class="img-fluid rounded-4 mb-4 shadow-sm"
+                                style="max-height: 300px; object-fit: cover; width: 100%;">
+
+                            <h3 class="fw-bold mb-2">{{ basicInfoForm.get('Title')?.value }}</h3>
+                            <p class="text-purple fw-bold mb-3">
+                                <i class="bi bi-calendar3 me-1"></i> {{ basicInfoForm.get('StartDateTime')?.value |
+                                date:'EEEE, MMMM d, y • h:mm a' }}
+                            </p>
+
+                            <div class="d-flex justify-content-center gap-4 mb-4 text-start">
+                                <div class="bg-light p-3 rounded-3 flex-grow-1">
+                                    <small class="text-muted d-block">Venue</small>
+                                    <strong>{{ basicInfoForm.get('Address.Street')?.value || 'Online' }}</strong>
+                                </div>
+                                <div class="bg-light p-3 rounded-3 flex-grow-1">
+                                    <small class="text-muted d-block">Tickets</small>
+                                    <strong>{{ tiers.length }} Types Created</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-footer justify-content-center">
+                    <button (click)="currentStep = 2" class="btn btn-outline-secondary rounded-pill px-4 me-3">Back to
+                        Tickets</button>
+                    <button (click)="publish()" class="btn-next px-5 py-3 fs-5" [disabled]="isSubmitting">
+                        <span *ngIf="!isSubmitting">PUBLISH NOW 🚀</span>
+                        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE B: SUCCESS (POST-PUBLISH) -->
+            <div *ngIf="isPublished" class="success-container animate__animated animate__bounceIn">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                <h1 class="mt-3">Congratulations!</h1>
+                <p class="lead text-muted">Your event is now <strong>LIVE</strong> on NYC360.</p>
+
+                <div class="mt-5 d-flex justify-content-center gap-3">
+                    <button (click)="finish()" class="btn btn-outline-secondary rounded-pill px-4">Create
+                        Another</button>
+                    <button [routerLink]="['/public/events/details', createdEventId]" class="btn-next px-5">View Event
+                        Page</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>

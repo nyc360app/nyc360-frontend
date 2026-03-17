@@ -1,0 +1,122 @@
+<div class="job-search-page">
+
+  <section class="hero-section" style="background-image: url('covers.jpg');">
+    <div class="hero-content">
+      <h1>NYC Careers & Opportunities</h1>
+      <p>Discover real-time roles, city initiatives and professional insights tailored for New Yorkers.</p>
+    </div>
+  </section>
+
+  <div class="container search-container">
+
+    <div class="main-search-bar">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" [(ngModel)]="filters.Search" (keyup.enter)="onSearchSubmit()"
+        placeholder="Search by job offer (name, model, location...)">
+      <button class="btn-search" (click)="onSearchSubmit()">Search</button>
+    </div>
+
+    <div class="filters-row">
+
+      <div class="location-wrapper">
+        <input class="filter-pill" type="text" [(ngModel)]="locationQuery" (input)="onLocInput()" placeholder="Location"
+          style="width: 160px;">
+
+        <div class="dropdown-list" *ngIf="locations.length > 0">
+          <div class="item" *ngFor="let loc of locations" (click)="selectLoc(loc)">
+            {{loc.neighborhood}}, {{loc.borough}}
+          </div>
+        </div>
+      </div>
+
+      <select class="filter-pill custom-select" [(ngModel)]="filters.Type" (change)="fetchJobs()">
+        <option [ngValue]="null">Type</option>
+        <option [ngValue]="0">Full-Time</option>
+        <option [ngValue]="1">Part-Time</option>
+        <option [ngValue]="2">Contract</option>
+      </select>
+
+      <select class="filter-pill custom-select" [(ngModel)]="filters.Arrangement" (change)="fetchJobs()">
+        <option [ngValue]="null">Work Model</option>
+        <option [ngValue]="0">On-Site</option>
+        <option [ngValue]="1">Remote</option>
+        <option [ngValue]="2">Hybrid</option>
+      </select>
+
+      <select class="filter-pill custom-select" [(ngModel)]="filters.Level" (change)="fetchJobs()">
+        <option [ngValue]="null">Urgency</option>
+        <option [ngValue]="1">Junior</option>
+        <option [ngValue]="2">Mid-Level</option>
+        <option [ngValue]="4">Senior</option>
+      </select>
+
+      <button class="filter-pill btn-open-now">Open Now</button>
+    </div>
+  </div>
+
+  <div class="container main-content">
+
+    <div class="section-header">
+      <h3>Current Job Openings</h3>
+      <p>Browse through the latest opportunities across all categories.</p>
+    </div>
+
+    <div class="job-grid">
+
+      <div *ngIf="isLoading" class="w-100 text-center py-5" style="grid-column: 1/-1;">
+        <div class="spinner-border text-success" role="status"></div>
+      </div>
+
+      <div class="job-card" *ngFor="let job of jobs">
+        <div class="card-img-top">
+          <img [src]="resolveJobImage(job.authorAvatarUrl)" alt="Job Image" onerror="this.src='/covers.jpg'">
+        </div>
+
+        <div class="card-body">
+          <h4 class="job-title">{{ job.title }}</h4>
+          <div class="location-text">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>{{ job.companyName }} ({{ job.location || 'NYC' }})</span>
+          </div>
+
+          <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px; line-height: 1.4;">
+            {{ job.description ? (job.description | slice:0:100) + '...' : 'View details to learn more about this
+            opportunity.' }}
+          </p>
+
+          <div class="tags-container">
+            <span class="tag">{{ getArrangement(job.workArrangement) }}</span>
+            <span class="tag">{{ getLevel(job.employmentLevel) }}</span>
+            <span class="tag">{{ getType(job.employmentType) }}</span>
+          </div>
+
+          <button class="btn-details" [routerLink]="['/public/job-profile', job.id]">
+            View Details
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center w-100 py-5" *ngIf="!isLoading && jobs.length === 0" style="grid-column: 1/-1;">
+        <i class="bi bi-search display-4 text-muted opacity-50"></i>
+        <p class="mt-3 text-muted">No results found.</p>
+      </div>
+
+    </div>
+
+    <div class="pagination-wrapper" *ngIf="pagination.totalPages > 1">
+      <button class="page-btn" (click)="changePage(filters.Page - 1)" [disabled]="filters.Page === 1">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      <button class="page-btn" *ngFor="let p of [].constructor(pagination.totalPages); let i = index"
+        [class.active]="filters.Page === i+1" (click)="changePage(i+1)">
+        {{ i + 1 }}
+      </button>
+
+      <button class="page-btn" (click)="changePage(filters.Page + 1)"
+        [disabled]="filters.Page === pagination.totalPages">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>

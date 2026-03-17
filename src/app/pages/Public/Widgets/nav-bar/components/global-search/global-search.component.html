@@ -1,0 +1,143 @@
+<div class="search-box" [class.mobile-version]="isMobile">
+    <div class="search-bar-purple">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" [formControl]="searchControl"
+            [placeholder]="currentActiveCat ? 'Search in NYC360/' + currentActiveCat.name : 'Search in NYC360...'"
+            (focus)="onSearchFocus()" />
+
+        <!-- Search Results Dropdown -->
+        <div class="search-results-dropdown" *ngIf="showSearchResults">
+            <!-- Loading State -->
+            <div class="search-loading" *ngIf="isSearching">
+                <div class="spinner-border text-primary" role="status"></div>
+                <span>Finding the best matches...</span>
+            </div>
+
+            <!-- Results State -->
+            <div class="results-container" *ngIf="!isSearching && searchResults">
+
+                <!-- Tabs Header -->
+                <div class="search-tabs" *ngIf="searchResults.isSuccess">
+                    <button class="search-tab" [class.active]="activeSearchTab === 'all'"
+                        (click)="switchSearchTab('all'); $event.stopPropagation()">
+                        All
+                    </button>
+                    <button class="search-tab" [class.active]="activeSearchTab === 'posts'"
+                        (click)="switchSearchTab('posts'); $event.stopPropagation()"
+                        *ngIf="searchResults.data.posts.length">
+                        Posts <span class="count">{{searchResults.data.posts.length}}</span>
+                    </button>
+                    <button class="search-tab" [class.active]="activeSearchTab === 'users'"
+                        (click)="switchSearchTab('users'); $event.stopPropagation()"
+                        *ngIf="searchResults.data.users.length">
+                        People <span class="count">{{searchResults.data.users.length}}</span>
+                    </button>
+                    <button class="search-tab" [class.active]="activeSearchTab === 'communities'"
+                        (click)="switchSearchTab('communities'); $event.stopPropagation()"
+                        *ngIf="searchResults.data.communities.length">
+                        Groups <span class="count">{{searchResults.data.communities.length}}</span>
+                    </button>
+                    <button class="search-tab" [class.active]="activeSearchTab === 'tags'"
+                        (click)="switchSearchTab('tags'); $event.stopPropagation()"
+                        *ngIf="searchResults.data.tags.length">
+                        Tags <span class="count">{{searchResults.data.tags.length}}</span>
+                    </button>
+                </div>
+
+                <!-- Posts Section -->
+                <div class="result-section"
+                    *ngIf="(activeSearchTab === 'all' || activeSearchTab === 'posts') && searchResults.data.posts.length">
+                    <div class="section-header" *ngIf="activeSearchTab === 'all'">
+                        <h6 class="section-title">Latest Posts</h6>
+                    </div>
+                    <div class="result-item" *ngFor="let post of searchResults.data.posts"
+                        [routerLink]="['/public/post', post.id]" (click)="closeSearch()">
+                        <div class="icon-wrapper" *ngIf="!post.attachments?.length">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <img *ngIf="post.attachments?.length" [src]="post.attachments[0].url" class="post-thumbnail">
+
+                        <div class="item-info">
+                            <span class="item-name">{{post.title}}</span>
+                            <span class="item-meta">
+                                <i class="bi bi-person-circle"></i> {{post.author?.name || post.author}}
+                                <span class="dot-separator">&middot;</span>
+                                <i class="bi bi-clock"></i> {{post.createdAt | date:'shortDate'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div class="result-section"
+                    *ngIf="(activeSearchTab === 'all' || activeSearchTab === 'users') && searchResults.data.users.length">
+                    <div class="section-header" *ngIf="activeSearchTab === 'all'">
+                        <h6 class="section-title">People</h6>
+                    </div>
+                    <div class="result-item user-item" *ngFor="let user of searchResults.data.users"
+                        [routerLink]="['/public/profile', user.userName]" (click)="closeSearch()">
+                        <img [src]="user.imageUrl || 'https://ui-avatars.com/api/?name=' + user.userName"
+                            class="user-avatar"
+                            (error)="$any($event.target).src = 'https://ui-avatars.com/api/?name=' + user.userName">
+                        <div class="item-info">
+                            <span class="item-name">{{user.fullName || user.userName}}</span>
+                            <span class="item-meta">@{{user.userName}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Communities Section -->
+                <div class="result-section"
+                    *ngIf="(activeSearchTab === 'all' || activeSearchTab === 'communities') && searchResults.data.communities.length">
+                    <div class="section-header" *ngIf="activeSearchTab === 'all'">
+                        <h6 class="section-title">Communities</h6>
+                    </div>
+                    <div class="result-item" *ngFor="let community of searchResults.data.communities"
+                        [routerLink]="['/public/community', community.slug]" (click)="closeSearch()">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="item-info">
+                            <span class="item-name">{{community.name}}</span>
+                            <span class="item-meta">{{community.memberCount}} members &middot; {{community.isPrivate ?
+                                'Private' :
+                                'Public'}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags Section -->
+                <div class="result-section"
+                    *ngIf="(activeSearchTab === 'all' || activeSearchTab === 'tags') && searchResults.data.tags.length">
+                    <div class="section-header" *ngIf="activeSearchTab === 'all'">
+                        <h6 class="section-title">Popular Tags</h6>
+                    </div>
+                    <div class="tags-list">
+                        <a class="tag-pill" *ngFor="let tag of searchResults.data.tags"
+                            [routerLink]="['/public/tag', tag.name]" (click)="closeSearch()">
+                            #{{tag.name}}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- No Results Found -->
+                <div class="no-results"
+                    *ngIf="!searchResults.data.posts.length && !searchResults.data.users.length && !searchResults.data.communities.length && !searchResults.data.tags.length">
+                    <i class="bi bi-search"></i>
+                    <p class="no-results-text">No matches found for "{{searchControl.value}}"</p>
+                    <p class="no-results-sub">Try searching for something else or check your spelling.</p>
+                </div>
+            </div>
+
+            <!-- Error or Network Issue State -->
+            <div class="no-results" *ngIf="!isSearching && (searchError || !searchResults)">
+                <i class="bi bi-exclamation-circle text-danger"></i>
+                <p class="no-results-text">
+                    {{ isLoggedIn ? 'Search temporarily unavailable' : 'Please login to search' }}
+                </p>
+                <p class="no-results-sub" *ngIf="isLoggedIn">Please check your connection or try again later.</p>
+                <a *ngIf="!isLoggedIn" routerLink="/auth/login" class="btn btn-sm btn-primary mt-2">Go to Login</a>
+            </div>
+        </div>
+    </div>
+</div>

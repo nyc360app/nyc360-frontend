@@ -1,0 +1,246 @@
+// --- Variables ---
+$bg-page: #f8f9fa;
+$card-bg: #ffffff;
+$gold: #DAA520;
+$text-main: #333;
+$text-muted: #6c757d;
+$border: #e9ecef;
+
+.page-container {
+  padding: 30px;
+  min-height: 100vh;
+  background-color: $bg-page;
+  color: $text-main;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+// --- Header ---
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+
+  .title-section {
+    h2 {
+      font-weight: 800;
+      color: $text-main;
+      margin-bottom: 5px;
+    }
+
+    p {
+      color: $text-muted;
+      font-size: 0.95rem;
+    }
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid $border;
+    color: $text-muted;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+
+    &:hover {
+      color: $gold;
+      border-color: $gold;
+    }
+  }
+}
+
+// --- Form Card ---
+.form-card {
+  background: $card-bg;
+  border-radius: 12px;
+  border: 1px solid $border;
+  padding: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+}
+
+// --- Form Inputs ---
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-main;
+  }
+
+  input[type="text"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid $border;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 1rem;
+    color: $text-main;
+    transition: 0.3s;
+
+    &:focus {
+      outline: none;
+      border-color: $gold;
+      box-shadow: 0 0 0 3px rgba($gold, 0.1);
+    }
+
+    &::placeholder {
+      color: #ccc;
+    }
+  }
+
+  // Custom File Input Styling
+  input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    background: #fdfdfd;
+    border: 2px dashed rgba($gold, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+
+    &:hover {
+      background: rgba($gold, 0.05);
+      border-color: $gold;
+    }
+
+    &::file-selector-button {
+      background: $gold;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 5px;
+      margin-right: 15px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// --- Checkbox (Active Status) ---
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+
+  input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: $gold;
+    cursor: pointer;
+  }
+
+  label {
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+// --- Actions ---
+.form-actions {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid $border;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid $border;
+    color: $text-muted;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #f1f1f1;
+    }
+  }
+
+  .btn-gold {
+    background: $gold;
+    color: #fff;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover:not(:disabled) {
+      background: darken($gold, 10%);
+      box-shadow: 0 4px 12px rgba($gold, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// --- Animations ---
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// --- Specific Tweaks ---
+.input-with-action {
+  display: flex;
+  gap: 10px;
+
+  input {
+    flex: 1;
+  }
+
+  button {
+    white-space: nowrap;
+    height: 48px; // Match input height roughly
+    display: flex;
+    align-items: center;
+  }
+}
+
+.img-preview {
+  margin-top: 10px;
+  max-width: 150px;
+  border-radius: 6px;
+  border: 1px solid $border;
+  padding: 4px;
+}

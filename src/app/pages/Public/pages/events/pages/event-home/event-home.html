@@ -1,0 +1,102 @@
+<div class="events-home-page">
+    <!-- Header Section -->
+    <header class="page-header text-center">
+        <div class="container">
+            <p class="welcome-text">Welcome at NYC360</p>
+            <h1 class="main-title serif-font">Events</h1>
+            <p class="sub-title">Where New York gathers, celebrates, and connects.</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Featured Event Section -->
+        <section class="featured-section" *ngIf="featuredEvent">
+            <div class="featured-card shadow-lg">
+                <div class="card-img-wrapper">
+                    <img [src]="featuredEvent.imageUrl" alt="Featured Event">
+                </div>
+                <div class="card-content">
+                    <span class="event-date"><i class="bi bi-calendar-event"></i> {{ featuredEvent.date }}</span>
+                    <h2 class="serif-font">{{ featuredEvent.title }}</h2>
+                    <p class="event-desc">{{ featuredEvent.description }}</p>
+                    <div class="actions">
+                        <button class="btn btn-purple">Get Tickets</button>
+                        <button class="btn btn-outline">View Schedule</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Filters Bar -->
+        <div class="filters-bar">
+            <div class="category-filters">
+                <button *ngFor="let cat of categories" class="cat-pill" [class.active]="cat.active">
+                    <i class="bi" [class]="cat.icon"></i> {{ cat.name }}
+                </button>
+            </div>
+
+            <div class="dropdown-filters">
+                <select class="filter-select">
+                    <option>This weekend</option>
+                    <option>Next week</option>
+                </select>
+                <select class="filter-select">
+                    <option>Location</option>
+                    <option>Manhattan</option>
+                    <option>Brooklyn</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Popular Section -->
+        <section class="events-section">
+            <div class="section-header">
+                <h3 class="serif-font">Popular in NYC</h3>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="grid-popular">
+                <div class="event-card-popular" *ngFor="let event of popularEvents">
+                    <div class="img-wrapper">
+                        <img [src]="event.imageUrl" alt="Event">
+                        <span class="badge-cat">{{ event.category }}</span>
+                    </div>
+                    <div class="card-body">
+                        <span class="date-time text-purple">{{ event.date }}</span>
+                        <h4>{{ event.title }}</h4>
+                        <p class="location"><i class="bi bi-geo-alt"></i> Central Park - Manhattan</p>
+                        <div class="price-row">
+                            <span class="price">{{ event.price || 'For Free' }}</span>
+                            <button class="btn-get">Get Tickets</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- This Week Section -->
+        <section class="events-section pb-5">
+            <div class="section-header">
+                <h3 class="serif-font">This Week in NYC</h3>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="list-this-week">
+                <div class="event-item-week" *ngFor="let event of thisWeekEvents">
+                    <div class="item-img">
+                        <img [src]="event.imageUrl" alt="Event">
+                    </div>
+                    <div class="item-info">
+                        <span class="item-date text-purple">{{ event.date }}</span>
+                        <h4>{{ event.title }}</h4>
+                        <p class="item-desc">{{ event.description }}</p>
+                        <p class="item-meta"><i class="bi bi-geo-alt"></i> Bryant Park - Free</p>
+                    </div>
+                    <div class="item-action">
+                        <button class="btn-join">{{ event.category === 'Food' ? 'RSVP' : 'Join' }}</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

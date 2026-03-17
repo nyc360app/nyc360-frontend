@@ -1,0 +1,228 @@
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="title-group">
+            <h2 class="page-title">Forum Management</h2>
+            <p class="page-subtitle">Configure forums, assign moderators, and manage categories.</p>
+        </div>
+        <div class="action-group">
+            <button (click)="openCreateModal()" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Add New Forum
+            </button>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-card">
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Forum</th>
+                        <th>Slug</th>
+                        <th>Stats</th>
+                        <th>Moderators</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let forum of forums">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <a [routerLink]="['/public/forums', forum.slug]" class="text-decoration-none">
+                                    <img *ngIf="forum.iconUrl" [src]="forum.iconUrl" class="forum-icon me-3">
+                                    <div *ngIf="!forum.iconUrl" class="forum-icon me-3">
+                                        <i class="bi bi-chat-square-text"></i>
+                                    </div>
+                                </a>
+                                <div>
+                                    <a [routerLink]="['/public/forums', forum.slug]" class="forum-link fw-bold">
+                                        {{ forum.title }}
+                                    </a>
+                                    <small class="text-muted text-truncate d-inline-block" style="max-width: 200px;">
+                                        {{ forum.description }}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <code>/{{ forum.slug }}</code>
+                        </td>
+                        <td>
+                            <div class="badge bg-light text-dark">
+                                <i class="bi bi-question-circle me-1"></i>
+                                {{ forum.questionsCount }} Questions
+                            </div>
+                        </td>
+                        <td>
+                            <div class="moderator-avatars">
+                                <a *ngFor="let mod of forum.moderators | slice:0:3"
+                                    [routerLink]="['/public/profile', mod.username]" target="_blank" class="mod-link">
+                                    <img [src]="mod.imageUrl ? environment.apiBaseUrl2 + 'avatars/' + mod.imageUrl : 'assets/images/default-avatar.png'"
+                                        [title]="mod.fullName" class="mod-avatar">
+                                </a>
+                                <div *ngIf="forum.moderators.length > 3"
+                                    class="mod-avatar bg-secondary text-white d-flex align-items-center justify-content-center small">
+                                    +{{ forum.moderators.length - 3 }}
+                                </div>
+                            </div>
+                            <div *ngIf="forum.moderators.length > 0" class="mt-1">
+                                <a [routerLink]="['/public/profile', forum.moderators[0].username]" target="_blank"
+                                    class="mod-name-link small">
+                                    {{ forum.moderators[0].fullName }}
+                                </a>
+                                <span *ngIf="forum.moderators.length > 1" class="text-muted small">
+                                    +{{ forum.moderators.length - 1 }}
+                                </span>
+                            </div>
+                            <span *ngIf="forum.moderators.length === 0" class="text-muted small">
+                                No moderators
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="forum.isActive ? 'bg-success' : 'bg-danger'">
+                                {{ forum.isActive ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button (click)="openEditModal(forum)" class="btn btn-sm btn-outline-primary"
+                                    title="Edit Forum">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button (click)="openModeratorsModal(forum)" class="btn btn-sm btn-outline-info"
+                                    title="Manage Moderators">
+                                    <i class="bi bi-shield-check"></i>
+                                </button>
+                                <button (click)="onDelete(forum)" class="btn btn-sm btn-outline-danger"
+                                    title="Delete Forum">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="!isLoading && forums.length === 0">
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-inbox display-4 text-muted"></i>
+                            <p class="mt-2 text-muted">No forums found.</p>
+                        </td>
+                    </tr>
+                    <tr *ngIf="isLoading">
+                        <td colspan="6" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Forum Modal -->
+<div class="modal-overlay" *ngIf="showEditModal">
+    <div class="modal-content-custom">
+        <div class="modal-header">
+            <h5>{{ selectedForum ? 'Edit Forum' : 'Create New Forum' }}</h5>
+            <button class="btn-close" (click)="showEditModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form [formGroup]="editForm" (ngSubmit)="saveForum()">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" formControlName="title">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Slug</label>
+                    <input type="text" class="form-control" formControlName="slug">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" formControlName="description" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Icon Image</label>
+                    <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+                </div>
+                <div class="form-check form-switch mb-3" *ngIf="selectedForum">
+                    <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActiveSwitch">
+                    <label class="form-check-label" for="isActiveSwitch">Active</label>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-light" (click)="showEditModal = false">Cancel</button>
+            <button class="btn btn-primary" [disabled]="editForm.invalid || isSaving" (click)="saveForum()">
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+                Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Manage Moderators Modal -->
+<div class="modal-overlay" *ngIf="showModeratorsModal">
+    <div class="modal-content-custom">
+        <div class="modal-header">
+            <h5>Manage Moderators</h5>
+            <button class="btn-close" (click)="showModeratorsModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="selected-moderators-list">
+                <div class="mod-row" *ngFor="let mod of selectedModerators">
+                    <div class="mod-avatar-container">
+                        <img [src]="mod.imageUrl ? environment.apiBaseUrl2 + 'avatars/' + mod.imageUrl : 'assets/images/default-avatar.png'"
+                            class="mod-avatar">
+                    </div>
+                    <a [routerLink]="['/public/profile', mod.username]" target="_blank"
+                        class="mod-details text-decoration-none">
+                        <span class="mod-name">{{ mod.fullName }}</span>
+                        <span class="mod-username">@{{ mod.username }}</span>
+                    </a>
+                    <button class="btn-remove-mod" (click)="removeModerator(mod.id)" title="Remove Moderator">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div *ngIf="selectedModerators.length === 0" class="empty-moderators-state">
+                    <i class="bi bi-shield-slash"></i>
+                    <p>No moderators assigned to this forum yet.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h6>Add Moderator</h6>
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Search users by name..."
+                        [(ngModel)]="userSearchTerm" (input)="searchUsers()">
+                </div>
+
+                <div class="user-search-results" *ngIf="searchResults.length > 0">
+                    <div class="user-item" *ngFor="let user of searchResults" (click)="addModerator(user)">
+                        <img
+                            [src]="user.imageUrl ? environment.apiBaseUrl2 + 'avatars/' + user.imageUrl : 'assets/images/default-avatar.png'">
+                        <div>
+                            <div class="fw-bold">{{ user.fullName }}</div>
+                            <small class="text-muted">@{{ user.username }}</small>
+                        </div>
+                        <i class="bi bi-plus-circle ms-auto text-primary"></i>
+                    </div>
+                </div>
+                <div class="text-center py-2" *ngIf="isSearching">
+                    <div class="spinner-border spinner-border-sm text-primary"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-light" (click)="showModeratorsModal = false">Close</button>
+            <button class="btn btn-primary" [disabled]="isSaving" (click)="saveModerators()">
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+                Save Moderators
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+<div class="about-page">
+
+  <header class="hero-section">
+    <div class="container text-center">
+      <div class="logo-wrapper fade-in-down">
+        <img src="MAIN Blue & Orange.png" alt="NYC360 Logo" class="hero-logo">
+      </div>
+      
+      <h1 class="hero-title fade-in-up">The Pulse of the Metropolis</h1>
+      <p class="hero-subtitle fade-in-up delay-1">Your City. Your Story. Your 360° View.</p>
+    </div>
+    
+    <div class="scroll-indicator">
+      <div class="mouse"></div>
+    </div>
+  </header>
+
+  <section class="narrative-section">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9 text-center" #animateItem>
+          <span class="section-badge">Who We Are</span>
+          <h2 class="main-heading">More Than a Platform. <br> A Digital Ecosystem.</h2>
+          <div class="divider-center"></div>
+          <p class="body-text">
+            NYC360 is the definitive digital archive and live pulse of New York City. We are not just reporting the news; we are curating the lifestyle, the struggles, the art, and the ambition that make the five boroughs the center of the world.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blueprint-section">
+    <div class="container">
+      
+      <div class="section-header mb-5 text-center" #animateItem>
+        <span class="section-badge-dark">Our DNA</span>
+        <h2 class="light-heading">The Framework of NYC360</h2>
+        <p class="section-desc">Everything that makes us, us.</p>
+      </div>
+
+      <div class="bento-grid">
+        <a *ngFor="let item of pillars" 
+             [routerLink]="item.link"
+             class="bento-card" 
+             #animateItem>
+          
+          <div class="card-content">
+            <div class="icon-circle">
+              <i class="bi" [ngClass]="item.icon"></i>
+            </div>
+            <h3 class="card-title">{{ item.name }}</h3>
+            <p class="card-desc">{{ item.desc }}</p>
+          </div>
+          
+          <div class="card-action">
+            <!-- <span class="explore-text">Explore</span> -->
+            <!-- <i class="bi bi-arrow-right"></i> -->
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="vision-section">
+    <div class="container">
+      <div class="row align-items-center gy-5">
+        <div class="col-lg-6" #animateItem>
+          <div class="vision-visual">
+            <div class="visual-content">
+              <span class="big-char">NYC</span>
+              <span class="big-char-outline">360</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-6" #animateItem>
+          <div class="vision-text ps-lg-5">
+            <span class="section-badge">Our Vision</span>
+            <h2 class="main-heading">Connecting The Dots</h2>
+            <p class="body-text">
+              Our goal is to eliminate the noise and focus on the signal. By integrating <strong>Education</strong>, <strong>Recruitment</strong>, and <strong>Community</strong> action alongside traditional <strong>News</strong> and <strong>Media</strong>, we create a circle of value for every New Yorker.
+            </p>
+            <div class="cta-wrapper mt-4">
+              <a routerLink="/Signup" class="btn-premium">
+                <span>Join Our Community</span>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

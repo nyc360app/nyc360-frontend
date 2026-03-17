@@ -1,0 +1,186 @@
+<div class="profile-page-container">
+
+   <!-- 1. LOADING STATE -->
+   <div *ngIf="isLoading" class="loading-center">
+      <div class="loader-diamond"></div>
+   </div>
+
+   <div *ngIf="!isLoading && user" class="profile-wrapper">
+
+      <!-- 2. HEADER SECTION (Widgetized Premium Design) -->
+      <app-profile-header [user]="user" [isOwner]="isOwner" [activeTab]="activeTab" (tabChange)="switchTab($event)"
+         (profileUpdate)="loadProfile(currentUsername)">
+      </app-profile-header>
+
+      <!-- 4. CONTENT GRID -->
+      <div class="layout-grid" [ngSwitch]="activeTab">
+
+         <!-- LEFT SIDEBAR -->
+         <aside class="side-col">
+            <!-- About Me Card -->
+            <div class="premium-card" *ngIf="user.bio || isOwner">
+               <div class="sidebar-header">
+                  <h4>About Me</h4>
+               </div>
+               <p class="about-bio" *ngIf="user.bio">{{ user.bio }}</p>
+               <p class="about-bio" *ngIf="!user.bio && isOwner" style="opacity: 0.5;">Add a bio to tell people who you
+                  are.</p>
+            </div>
+
+            <!-- Social Links Card -->
+            <div class="premium-card" *ngIf="user.socialLinks.length || isOwner">
+               <div class="sidebar-header">
+                  <h4>Connect</h4>
+               </div>
+               <div class="social-grid-premium">
+                  <a *ngFor="let link of user.socialLinks" [href]="link.url" target="_blank" class="social-link-item"
+                     [title]="getPlatformName(link.platform)">
+                     <i class="bi" [ngClass]="getPlatformIcon(link.platform)"></i>
+                  </a>
+                  <div *ngIf="!user.socialLinks.length && isOwner" class="about-bio"
+                     style="opacity: 0.5; font-size: 0.85rem;">No social links added yet.</div>
+               </div>
+            </div>
+
+            <!-- Quick Stats Card -->
+            <div class="premium-card stats-card" *ngIf="user.stats">
+               <div class="sidebar-header">
+                  <h4>Quick Stats</h4>
+               </div>
+               <div class="stats-grid-compact">
+                  <div class="stat-box">
+                     <span class="val">{{ user.stats.postsCount || 0 }}</span>
+                     <span class="lbl">Posts</span>
+                  </div>
+                  <div class="stat-box">
+                     <span class="val">{{ user.stats.likesCount || 0 }}</span>
+                     <span class="lbl">Likes</span>
+                  </div>
+                  <div class="stat-box">
+                     <span class="val">{{ user.stats.followersCount || 0 }}</span>
+                     <span class="lbl">Followers</span>
+                  </div>
+                  <div class="stat-box">
+                     <span class="val">{{ user.stats.commentsCount || 0 }}</span>
+                     <span class="lbl">Comments</span>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Intersts Card -->
+            <div class="premium-card" *ngIf="user.interests && user.interests.length">
+               <div class="sidebar-header">
+                  <h4>My Interests</h4>
+               </div>
+               <div class="interests-tags">
+                  <span class="interest-tag" *ngFor="let intId of user.interests">
+                     {{ getInterestName(intId) }}
+                  </span>
+               </div>
+            </div>
+
+            <!-- Communities Card (Moved from Right) -->
+            <div class="premium-card" *ngIf="user.topCommunities.length">
+               <div class="sidebar-header">
+                  <h4>Communities</h4>
+               </div>
+               <div class="community-list" style="display: flex; flex-direction: column; gap: 16px;">
+                  <div *ngFor="let comm of user.topCommunities" class="comm-item" (click)="navigateToCommunity(comm)"
+                     style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                     <div class="comm-badge"
+                        style="width: 40px; height: 40px; background: #F3F3F3; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
+                        {{ getInitials(comm.name) }}</div>
+                     <div class="comm-info">
+                        <h6 style="margin: 0; font-size: 0.9rem; font-weight: 700;">{{ comm.name }}</h6>
+                        <p style="margin: 0; font-size: 0.75rem; color: #999;">Active Member</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </aside>
+
+         <!-- MAIN FEED -->
+         <main class="feed-col">
+
+            <!-- Timeline Tab -->
+            <div *ngSwitchCase="'posts'" class="animate__animated animate__fadeIn">
+               <!-- Create Post Trigger (Premium STYLE) -->
+               <div class="create-post-trigger-premium" *ngIf="isOwner" (click)="viewPostDetails('create', $event)">
+                  <img [src]="resolveImage(user.imageUrl)" class="trigger-avatar">
+                  <span>Share a new update...</span>
+                  <div class="plus-icon"><i class="bi bi-plus-lg"></i></div>
+               </div>
+
+               <!-- Empty Case -->
+               <div *ngIf="!user.recentPosts.length" class="empty-state-premium">
+                  <div class="icon-box"><i class="bi bi-journals"></i></div>
+                  <h3>No posts yet</h3>
+                  <p>Shared updates and insights will appear here when posted.</p>
+               </div>
+
+               <app-profile-post *ngFor="let post of user.recentPosts" [post]="post" [isOwner]="isOwner"
+                  [currentUserId]="currentUserId" [displayName]="displayName"
+                  [authorImageUrl]="getAuthorImage(post.author)">
+               </app-profile-post>
+            </div>
+
+            <!-- About Tab -->
+            <div *ngSwitchCase="'about'" class="animate__animated animate__fadeIn">
+               <div class="premium-card">
+                  <div class="sidebar-header">
+                     <h4>Work Experience</h4>
+                  </div>
+                  <div class="timeline-premium">
+                     <div *ngFor="let pos of user.positions" class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="time-period">{{ pos.startDate | date:'MMM yyyy' }} - {{ pos.isCurrent ? 'Present' :
+                           (pos.endDate | date:'MMM yyyy') }}</div>
+                        <h4>{{ pos.title }}</h4>
+                        <h5>{{ pos.company }}</h5>
+                     </div>
+                     <div *ngIf="!user.positions.length" class="about-bio" style="opacity: 0.5;">No professional history
+                        shared yet.</div>
+                  </div>
+               </div>
+
+               <div class="premium-card">
+                  <div class="sidebar-header">
+                     <h4>Education</h4>
+                  </div>
+                  <div class="timeline-premium">
+                     <div *ngFor="let edu of user.education" class="timeline-item">
+                        <div class="timeline-dot" style="background: #6366F1;"></div>
+                        <div class="time-period">{{ edu.startDate | date:'yyyy' }}</div>
+                        <h4>{{ edu.school }}</h4>
+                        <h5>{{ edu.degree }} • {{ edu.fieldOfStudy }}</h5>
+                     </div>
+                     <div *ngIf="!user.education.length" class="about-bio" style="opacity: 0.5;">No educational
+                        background shared.</div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Saved Posts Tab -->
+            <div *ngSwitchCase="'saved'" class="animate__animated animate__fadeIn">
+               <div *ngIf="isSavedLoading" class="text-center py-5">
+                  <div class="spinner-border text-primary" role="status"></div>
+               </div>
+
+               <div *ngIf="!isSavedLoading && !savedPosts.length" class="empty-state-premium">
+                  <div class="icon-box"><i class="bi bi-bookmark"></i></div>
+                  <h3>No saved items</h3>
+                  <p>Items you bookmark will appear here for private viewing.</p>
+               </div>
+
+               <app-profile-post *ngFor="let post of savedPosts" [post]="post" [isOwner]="isOwner"
+                  [currentUserId]="currentUserId" [displayName]="getAuthorName(post.author)"
+                  [authorImageUrl]="getAuthorImage(post.author)">
+               </app-profile-post>
+            </div>
+
+         </main>
+
+
+      </div>
+   </div>
+</div>

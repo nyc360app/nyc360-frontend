@@ -1,0 +1,219 @@
+.dashboard-container {
+  padding: 1rem;
+}
+
+.date-pill {
+  border-radius: 50px;
+  font-size: 0.85rem;
+  color: var(--luxury-navy);
+}
+
+.text-gold {
+  color: var(--luxury-gold);
+}
+
+.stat-card-luxury {
+  padding: 1.5rem;
+  border-radius: 20px;
+  height: 100%;
+  border-bottom: 4px solid rgba(212, 175, 55, 0.3);
+
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .stat-number {
+    color: var(--luxury-navy);
+  }
+
+  .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: var(--luxury-navy);
+  }
+
+  .trend-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(46, 204, 113, 0.1);
+    color: var(--luxury-green);
+
+    &.positive {
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--luxury-green);
+    }
+
+    &:not(.positive) {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+  }
+}
+
+.luxury-progress {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.gold {
+      background: var(--luxury-gold);
+    }
+
+    &.blue {
+      background: var(--luxury-blue);
+    }
+
+    &.green {
+      background: var(--luxury-green);
+    }
+  }
+}
+
+.luxury-alert {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem;
+  background: #fff9eb;
+  border-radius: 16px;
+  border-left: 4px solid var(--luxury-gold);
+
+  .icon-pulse {
+    width: 40px;
+    height: 40px;
+    background: var(--luxury-gold);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    animation: alertPulse 2s infinite;
+  }
+}
+
+@keyframes alertPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+  }
+}
+
+.luxury-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--luxury-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-initials {
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+}
+
+.role-pill {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  color: var(--luxury-slate);
+
+  &[data-role="SuperAdmin"],
+  &[data-role="Admin"] {
+    background: rgba(52, 152, 219, 0.1);
+    color: var(--luxury-blue);
+  }
+}
+
+.btn-icon-luxury {
+  width: 32px;
+  height: 32px;
+  background: var(--luxury-bg);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--luxury-slate);
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--luxury-gold);
+    color: white;
+    border-color: var(--luxury-gold);
+  }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 0.5rem;
+  }
+
+  .glass-panel {
+    padding: 1.25rem !important;
+    /* Slightly reduce padding on mobile */
+  }
+
+  .header-luxury {
+    h1 {
+      font-size: 1.5rem;
+      /* Smaller title on mobile */
+    }
+  }
+
+  .user-card-mobile {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .luxury-avatar {
+      // Slightly larger avatar for mobile cards for better touch target/visibility
+      width: 48px;
+      height: 48px;
+    }
+  }
+}

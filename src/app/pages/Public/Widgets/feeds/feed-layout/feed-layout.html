@@ -1,0 +1,104 @@
+<div class="feed-layout-container" [class.housing-theme]="isHousingCategory">
+
+  <header class="category-header">
+    <div class="container text-center">
+      <p class="top-meta">Welcome at NYC360</p>
+      <h1 class="main-title">{{ pageTitle }}</h1>
+      <p class="sub-meta">Where New Yorkers can share ideas, discussions, and local conversations</p>
+    </div>
+  </header>
+
+  <div class="search-container container">
+    <div class="search-floater shadow-lg">
+      <div class="search-box">
+        <i class="bi bi-search text-muted"></i>
+        <input type="text" placeholder="Search discussions..." [ngModel]="searchQuery" (input)="onSearchInput($event)">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="location-box">
+        <i class="bi bi-geo-alt" style="color: var(--primary-color)"></i>
+        <input type="text" placeholder="Location..." (input)="onLocationType($any($event.target).value)">
+
+        <div *ngIf="locations.length > 0" class="loc-dropdown shadow-sm">
+          <div *ngFor="let loc of locations" class="loc-item" (click)="selectLocation(loc.id)">
+            {{ loc.neighborhood }}
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-go" (click)="loadPosts()">Go</button>
+    </div>
+  </div>
+
+  <div class="posts-grid" *ngIf="loading">
+    <div class="card skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+      <div class="sk-img"></div>
+      <div class="sk-body">
+        <div class="sk-line w-75"></div>
+        <div class="sk-line w-50"></div>
+        <div class="sk-line w-100 mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="posts-grid" *ngIf="!loading">
+
+    <div *ngIf="posts.length === 0" class="empty-state">
+      <div class="icon-box"><i class="bi bi-inbox"></i></div>
+      <h3>No updates found</h3>
+      <p>Try adjusting your search filters.</p>
+      <button (click)="resetFilters()">Clear Filters</button>
+    </div>
+
+    <div *ngFor="let post of posts; trackBy: trackByPostId" class="feed-card" [class.has-image]="post.ui.displayImage"
+      [class.text-card]="!post.ui.displayImage">
+
+      <div class="card-media" *ngIf="post.ui.displayImage">
+        <img [src]="post.ui.displayImage" loading="lazy" alt="Post Cover" appImgFallback="post">
+        <span class="category-badge" [style.background]="post.ui.categoryColor">
+          <img *ngIf="post.ui.categoryIcon" [src]="post.ui.categoryIcon" alt="icon">
+          {{ post.ui.categoryName }}
+        </span>
+      </div>
+
+      <div class="card-content">
+        <div class="accent-line" *ngIf="!post.ui.displayImage" [style.background]="post.ui.categoryColor"></div>
+
+        <div class="card-meta">
+          <span class="date">{{ post.createdAt | date:'MMM d' }}</span>
+          <span class="dot" *ngIf="post.ui.locationName">•</span>
+          <span class="loc" *ngIf="post.ui.locationName">{{ post.ui.locationName }}</span>
+        </div>
+
+        <h3 class="card-title">{{ post.ui.title }}</h3>
+
+        <p class="card-excerpt" *ngIf="!post.ui.displayImage">
+          {{ (post.ui.content || post.ui.sharedContent) | slice:0:140 }}...
+        </p>
+
+        <div class="card-footer">
+          <div class="author">
+            <!-- <img [src]="post.ui.authorImg" alt="User"> -->
+            <span>{{ post.ui.authorName }}</span>
+          </div>
+          <a class="read-more" [routerLink]="['/public/posts/details', post.id]">
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="pagination-wrapper" *ngIf="totalPages > 1 && !loading">
+    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="page-btn prev">Previous</button>
+    <div class="pages">
+      <button *ngFor="let p of pagesArray" [class.active]="p === currentPage" (click)="changePage(p)">{{ p }}</button>
+    </div>
+    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+      class="page-btn next">Next</button>
+  </div>
+
+</div>

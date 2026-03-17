@@ -1,0 +1,52 @@
+<div class="container page-fade-in">
+  
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Edit Role: <strong>{{ roleName }}</strong></h1>
+      <p class="subtitle">Manage access capabilities for this role.</p>
+    </div>
+    
+    <a routerLink="/admin/Role" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Roles
+    </a>
+  </header>
+
+  <div *ngIf="isLoading" class="state-message">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p>Loading permissions...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="!isLoading && permissionsArray.length" [formGroup]="permissionsForm" (ngSubmit)="onSubmit()" class="permissions-container">
+    
+    <div class="section-title">
+      <h3>Available Permissions</h3>
+      <p>Select the actions this role can perform.</p>
+    </div>
+
+    <div formArrayName="permissions" class="permissions-grid">
+      <div *ngFor="let control of permissionsArray.controls; let i = index" class="permission-item">
+        <label>
+          <input type="checkbox" [formControlName]="i">
+          
+          <div class="permission-text">
+            <span class="permission-name">{{ allPermissions[i].split('.').pop() }}</span>
+            <span class="permission-group">{{ allPermissions[i].split('.')[1] }}</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" routerLink="/admin/Role" class="btn btn-ghost">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+        Save Changes
+      </button>
+    </div>
+
+  </form>
+
+</div>

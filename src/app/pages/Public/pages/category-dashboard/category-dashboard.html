@@ -1,0 +1,180 @@
+<div class="category-dashboard-wrapper" [style.--cat-color]="fallbackColor">
+
+    <!-- Sidebar / Bottom Nav on Mobile -->
+    <aside class="dashboard-sidebar">
+        <div class="brand-section">
+            <div class="cat-logo" [style.background-color]="fallbackColor">
+                <img *ngIf="categoryTheme?.icon" [src]="categoryTheme.icon" alt="">
+            </div>
+            <span class="brand-name">{{ categoryTheme?.label }} <br><small>Panel</small></span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
+                <i class="bi bi-grid-fill"></i>
+                <span>Dashboard</span>
+            </button>
+
+            <button class="nav-item" [class.active]="activeView === 'list'" (click)="setView('list')">
+                <i class="bi bi-journal-text"></i>
+                <span>My Articles</span>
+            </button>
+
+            <div class="nav-divider"></div>
+
+            <a class="nav-item" [routerLink]="['/public/feed', categoryTheme?.path]">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Back Home</span>
+            </a>
+        </nav>
+
+        <div class="user-profile-mini">
+            <div class="avatar-circle" [style.background-color]="fallbackColor">
+                {{ getInitials() }}
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ currentUsername }}</span>
+                <span class="user-status"><i class="bi bi-circle-fill"></i> Online</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main-content">
+
+        <header class="content-header">
+            <div class="header-title">
+                <h1>{{ activeView === 'dashboard' ? 'Analytics' : 'My List' }}</h1>
+                <p>{{ activeView === 'dashboard' ? 'Performance overview for ' + categoryTheme?.label : 'Manage articles
+                    for ' + categoryTheme?.label }}</p>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn-refresh" (click)="loadData()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <a [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
+                    class="btn-create-p">
+                    <i class="bi bi-plus-lg"></i> <span>Article</span>
+                </a>
+            </div>
+        </header>
+
+        <div *ngIf="isLoading" class="loader-overlay">
+            <div class="spinner-border" [style.color]="fallbackColor" role="status"></div>
+        </div>
+
+        <div *ngIf="!isLoading" class="view-content animate-in">
+
+            <!-- DASHBOARD VIEW -->
+            <div *ngIf="activeView === 'dashboard'" class="dashboard-view">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="label">Contributions</span>
+                        <div class="val-box">
+                            <span class="value">{{ analytics?.totalPosts || 0 }}</span>
+                            <div class="icon-circle" [style.background-color]="fallbackColor + '10'"
+                                [style.color]="fallbackColor">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                        </div>
+                        <div class="trend positive" *ngIf="analytics?.engagementRate">
+                            <i class="bi bi-graph-up"></i> {{ analytics.engagementRate }}% Reach
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="label">Total Views</span>
+                        <div class="val-box">
+                            <span class="value">{{ (analytics?.totalViews || 0) | number }}</span>
+                            <div class="icon-circle" [style.background-color]="fallbackColor + '10'"
+                                [style.color]="fallbackColor">
+                                <i class="bi bi-eye"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="label">Engagement</span>
+                        <div class="val-box">
+                            <span class="value">{{ (analytics?.totalLikes || 0) + (analytics?.totalComments || 0)
+                                }}</span>
+                            <div class="icon-circle" [style.background-color]="fallbackColor + '10'"
+                                [style.color]="fallbackColor">
+                                <i class="bi bi-chat-heart"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-row">
+                    <div class="top-post-card" *ngIf="analytics?.topPost">
+                        <div class="card-h">
+                            <h3>Top Content</h3>
+                            <span class="badge-top">Trending</span>
+                        </div>
+                        <div class="top-post-body">
+                            <img [src]="imageService.resolveImageUrl(analytics.topPost.imageUrl)" alt="Top post">
+                            <div class="top-post-info">
+                                <h4>{{ analytics.topPost.title }}</h4>
+                                <div class="stats-row">
+                                    <span><i class="bi bi-chat-dots-fill"></i> {{ analytics.topPost.commentsCount }}
+                                        Feedback</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tips-card">
+                        <h3>Insights</h3>
+                        <p>Articles with tags reach 40% more users in <strong>{{ categoryTheme?.label }}</strong>.</p>
+                        <div class="tip-i">
+                            <i class="bi bi-stars" [style.color]="fallbackColor"></i>
+                            <span>Keep posting to maintain your status!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIST VIEW -->
+            <div *ngIf="activeView === 'list'" class="list-view">
+                <div class="list-container">
+                    <div class="list-header-row">
+                        <h2>Articles History</h2>
+                    </div>
+
+                    <div class="posts-list-table" *ngIf="posts.length > 0; else emptyState">
+                        <div *ngFor="let post of posts" class="post-row-item">
+                            <div class="post-thumbnail">
+                                <img [src]="imageService.resolvePostImage(post)" alt="">
+                            </div>
+                            <div class="post-details">
+                                <h4 class="post-t">{{ post.title }}</h4>
+                                <div class="post-m">
+                                    <span>{{ post.createdAt | date:'MMM d, y' }}</span>
+                                    <span class="sep"></span>
+                                    <span>{{ post.stats?.views || 0 }} Views</span>
+                                </div>
+                            </div>
+                            <div class="post-actions-cell">
+                                <a [routerLink]="['/public/posts/details', post.id]" class="btn-v">View</a>
+                                <a [routerLink]="['/public/posts/edit', post.id]" class="btn-e"><i
+                                        class="bi bi-pencil-fill"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-template #emptyState>
+                        <div class="empty-state">
+                            <i class="bi bi-layout-text-sidebar-reverse"></i>
+                            <p>Your list is empty in this category.</p>
+                            <a [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
+                                class="btn-create-p">Start Now</a>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>

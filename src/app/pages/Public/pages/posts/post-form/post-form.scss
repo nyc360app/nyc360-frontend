@@ -1,0 +1,558 @@
+
+// --- Modern Luxury Design Tokens ---
+$primary: #000000;
+$gold: #B59B62;
+$bg-faint: #f8f9fc;
+$white: #ffffff;
+$border-light: rgba(0, 0, 0, 0.06);
+$text-main: #1a1a1a;
+$text-muted: #64748b;
+$radius-lg: 24px;
+$radius-md: 16px;
+$shadow-elegant: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+
+.luxury-theme {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba($gold, 0.08), transparent 28%),
+    linear-gradient(180deg, #f6f7fb 0%, #fbfcfe 100%);
+  min-height: 100vh;
+  padding: clamp(20px, 8vw, 60px) clamp(10px, 4vw, 20px);
+  color: $text-main;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto 28px;
+  padding: 28px 30px;
+  background: rgba($white, 0.94);
+  border: 1px solid rgba($gold, 0.16);
+  border-radius: 28px;
+  box-shadow: 0 18px 40px -26px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(14px);
+
+  .title-section {
+    display: grid;
+    gap: 10px;
+
+    .header-kicker {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba($gold, 0.12);
+      color: darken($gold, 12%);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    h2 {
+      font-weight: 900;
+      color: $primary;
+      margin: 0;
+      font-size: clamp(1.8rem, 6vw, 2.5rem);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba($gold, 0.14);
+      color: darken($gold, 18%);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+
+      i {
+        font-size: 0.78rem;
+      }
+    }
+
+    .subtitle {
+      color: $text-muted;
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  }
+
+  .btn-back {
+    background: $white;
+    border: 1px solid $border-light;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-weight: 700;
+    color: $primary;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover {
+      background: $primary;
+      color: $white;
+      transform: translateX(-5px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 22px 20px;
+    border-radius: 22px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+}
+
+.glass-panel {
+  background: $white;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 50px;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-elegant;
+  border: 1px solid rgba($gold, 0.08);
+
+  @media (max-width: 768px) {
+    padding: 30px 20px;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+
+  .form-group {
+    flex: 1;
+    min-width: 250px;
+  }
+}
+
+.form-group {
+  margin-bottom: 35px;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: $primary;
+    margin-bottom: 12px;
+    display: block;
+    letter-spacing: 0.05em;
+
+    .req {
+      color: #ef4444;
+      margin-left: 4px;
+    }
+  }
+
+  .input-wrapper,
+  .textarea-wrapper {
+    position: relative;
+
+    i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+      font-size: 1.1rem;
+      transition: 0.3s;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 16px 20px 16px 52px;
+      border: 2px solid #edeff5;
+      border-radius: $radius-md;
+      font-size: 1rem;
+      background: #fbfbfd;
+      color: $text-main;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+
+      &::placeholder {
+        color: #a0aec0;
+      }
+
+      &:focus {
+        border-color: $primary;
+        background: $white;
+        box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.1);
+        outline: none;
+
+        +i {
+          color: $primary;
+        }
+      }
+    }
+  }
+
+  .textarea-wrapper textarea {
+    width: 100%;
+    padding: 20px;
+    border: 2px solid #edeff5;
+    border-radius: $radius-md;
+    background: #fbfbfd;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    min-height: 250px;
+    resize: vertical;
+    transition: 0.3s;
+
+    &:focus {
+      border-color: $primary;
+      background: $white;
+      outline: none;
+    }
+  }
+
+  .predefined-category-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #f0fdf4;
+    border: 1.5px solid #bcf0da;
+    border-radius: $radius-md;
+    color: #166534;
+    font-size: 1rem;
+
+    i {
+      font-size: 1.25rem;
+      color: #22c55e;
+    }
+
+    strong {
+      color: #1a1a1a;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  .error-msg {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    &:before {
+      content: '●';
+      font-size: 0.6rem;
+    }
+  }
+}
+
+// --- Enhanced File Upload ---
+.file-upload-zone {
+  position: relative;
+
+  .hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    border: 1.5px dashed rgba($gold, 0.5);
+    border-radius: 22px;
+    background: linear-gradient(180deg, #fffdf9 0%, #f8fafc 100%);
+    cursor: pointer;
+    transition: 0.3s ease;
+    text-align: center;
+
+    .upload-icon-shell {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba($gold, 0.14);
+      margin-bottom: 16px;
+    }
+
+    i {
+      font-size: 3rem;
+      color: $gold;
+      margin-bottom: 0;
+    }
+
+    .upload-title {
+      font-weight: 700;
+      color: $text-main;
+      font-size: 1.1rem;
+    }
+
+    small {
+      margin-top: 8px;
+      color: $text-muted;
+      font-size: 0.86rem;
+      font-weight: 500;
+      max-width: 460px;
+      line-height: 1.5;
+    }
+
+    &:hover {
+      border-color: $gold;
+      background: rgba($gold, 0.04);
+      transform: translateY(-1px);
+      box-shadow: 0 16px 28px -24px rgba($gold, 0.8);
+    }
+  }
+}
+
+.attachments-preview {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+
+  .preview-item {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: $radius-md;
+    overflow: hidden;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      color: $white;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        background: #ef4444;
+        transform: scale(1.1);
+      }
+    }
+
+    &.new-file {
+      border: 3px solid $gold;
+
+      .new-badge {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: $gold;
+        color: $white;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-align: center;
+        padding: 3px 0;
+      }
+    }
+  }
+}
+
+// --- Modern Tags ---
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .tag-badge {
+    background: #f1f5f9;
+    color: $primary;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+
+    &:hover {
+      background: $primary;
+      color: $white;
+      border-color: $primary;
+    }
+
+    .remove-tag {
+      cursor: pointer;
+      color: #94a3b8;
+
+      &:hover {
+        color: #f87171;
+      }
+    }
+  }
+}
+
+// --- Action Buttons ---
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  padding-top: 40px;
+  margin-top: 40px;
+  border-top: 1px solid #edf2f7;
+
+  .btn-ghost {
+    background: none;
+    border: none;
+    color: $text-muted;
+    font-weight: 700;
+    padding: 12px 30px;
+    transition: 0.3s;
+
+    &:hover {
+      color: $primary;
+      transform: translateY(-2px);
+    }
+  }
+
+  .btn-luxury {
+    background: $primary;
+    color: $white;
+    padding: 16px 50px;
+    border-radius: 50px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.15);
+      background: #222;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      filter: grayscale(1);
+    }
+  }
+}
+
+// Dropdown Results
+.dropdown-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: $white;
+  border-radius: $radius-md;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 10px;
+  border: 1px solid #edf2f7;
+  list-style: none;
+  padding: 8px;
+
+  li {
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      color: $primary;
+      font-weight: 700;
+    }
+
+    small {
+      color: $text-muted;
+      font-size: 0.8rem;
+    }
+
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+}
+
+// --- Animations ---
+.fade-in-down {
+  animation: fadeInDown 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.1s backwards;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

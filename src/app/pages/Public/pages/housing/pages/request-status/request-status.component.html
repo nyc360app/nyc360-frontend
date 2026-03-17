@@ -1,0 +1,133 @@
+<div class="agent-request-modal-overlay" (click)="onClose()">
+    <div class="overlay-backdrop"></div>
+    <div class="modal-content-wrapper" (click)="$event.stopPropagation()">
+        <div class="modal-card">
+
+            <!-- Sticky Header -->
+            <div class="modal-header-section">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h2 class="m-0 fs-3 fw-bold text-dark mb-2">Application Status</h2>
+                        <div class="status-badge-large" [ngClass]="getStatus(requestInfo?.status).class">
+                            <i class="bi" [ngClass]="getStatus(requestInfo?.status).icon"></i>
+                            {{ getStatus(requestInfo?.status).name }}
+                        </div>
+                    </div>
+                    <button class="btn-close-custom" (click)="onClose()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="modal-scroll-content">
+                <!-- Applicant Details -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="step-badge rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 32px; height: 32px;">1</div>
+                        <h3 class="m-0 fs-5 fw-bold text-dark">Your Information</h3>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <span class="info-label">Applicant Name</span>
+                            <div class="info-value">{{ requestInfo?.name }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="info-label">Contact Details</span>
+                            <div class="info-value">{{ requestInfo?.email }}</div>
+                            <small class="text-muted d-block mt-1">{{ requestInfo?.phoneNumber }}</small>
+                        </div>
+                        <div class="col-12">
+                            <span class="info-label">Preferred Contact</span>
+                            <div class="info-value">
+                                <span class="badge bg-light text-dark border me-2">
+                                    <i class="bi" [ngClass]="{'bi-envelope': requestInfo?.preferredContactType === 0, 
+                                                  'bi-telephone': requestInfo?.preferredContactType === 1, 
+                                                  'bi-chat-dots': requestInfo?.preferredContactType === 2}"></i>
+                                    {{ getLabel(requestInfo?.preferredContactType, contactTypes) }}
+                                </span>
+                                <span class="text-muted small" *ngIf="requestInfo?.preferredContactDate">
+                                    Preferred on {{ requestInfo?.preferredContactDate | date:'MMM d, y' }}
+                                    <span *ngIf="requestInfo?.preferredContactTime">at {{
+                                        requestInfo?.preferredContactTime }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Details -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="step-badge rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 32px; height: 32px;">2</div>
+                        <h3 class="m-0 fs-5 fw-bold text-dark">Request Details</h3>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <span class="info-label">Household Profile</span>
+                            <div class="info-value">{{ getLabel(requestInfo?.householdType, householdTypes) }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="info-label">Move-in Date</span>
+                            <div class="info-value">
+                                <i class="bi bi-calendar-event me-2 text-warning"></i>
+                                {{ requestInfo?.moveInDate | date:'mediumDate' }}
+                            </div>
+                        </div>
+
+                        <!-- Tour Info -->
+                        <div class="col-12" *ngIf="requestInfo?.scheduleVirtualDate || requestInfo?.inPersonTourDate">
+                            <span class="info-label">Requested Tours</span>
+                            <div class="tour-alert mt-1">
+                                <div *ngIf="requestInfo?.scheduleVirtualDate" class="mb-1">
+                                    <i class="bi bi-camera-video me-2"></i>
+                                    <strong>Virtual Tour:</strong> {{ requestInfo?.scheduleVirtualDate | date:'MMM d, y'
+                                    }}
+                                    <span class="text-muted small" *ngIf="requestInfo?.scheduleVirtualTimeWindow">({{
+                                        requestInfo?.scheduleVirtualTimeWindow }})</span>
+                                </div>
+                                <div *ngIf="requestInfo?.inPersonTourDate">
+                                    <i class="bi bi-person-walking me-2"></i>
+                                    <strong>In-Person Tour:</strong> {{ requestInfo?.inPersonTourDate | date:'MMM d, y'
+                                    }}
+                                    <span class="text-muted small" *ngIf="requestInfo?.inPersonTourTimeWindow">({{
+                                        requestInfo?.inPersonTourTimeWindow }})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="col-12">
+                            <span class="info-label">Your Message</span>
+                            <div class="message-box mt-2">
+                                {{ requestInfo?.message }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Footer -->
+            <div class="modal-footer-section">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <button *ngIf="requestInfo?.status !== 4 && requestInfo?.status !== 3" 
+                            class="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm" 
+                            (click)="onCancel()"
+                            [disabled]="isCancelling">
+                        <span *ngIf="isCancelling" class="spinner-border spinner-border-sm me-2"></span>
+                        Cancel Request
+                    </button>
+                    <div *ngIf="requestInfo?.status === 3 || requestInfo?.status === 4"></div> <!-- Spacer if button is hidden -->
+                    <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" (click)="onClose()">
+                        Close Window
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

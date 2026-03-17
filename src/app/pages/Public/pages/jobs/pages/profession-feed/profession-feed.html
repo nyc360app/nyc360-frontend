@@ -1,0 +1,218 @@
+<div class="profession-feed-page">
+
+  <header class="page-header">
+    <div class="header-content text-center">
+      <small class="text-uppercase tracking-wider">Welcome at NYC360</small>
+      <h1 class="merriweather-font display-4 fw-bold my-3">Profession</h1>
+      <p class="lead mx-auto" style="max-width: 650px;">
+        Opportunities, career insights, and professional life in New York City.
+      </p>
+
+      <div class="header-nav-buttons">
+        <a routerLink="/public/profession/jobs" class="nav-btn">
+          <i class="bi bi-compass me-2"></i> Explore
+        </a>
+        <a routerLink="/public/category/professions/saved" class="nav-btn">
+          <i class="bi bi-chat-left-text me-2"></i> My Inquiries
+        </a>
+        <a routerLink="/public/profession/my-offers" class="nav-btn">
+          <i class="bi bi-envelope-paper me-2"></i> My Offers
+        </a>
+
+        <!-- Contributor Activity Dropdown -->
+        <div class="nav-dropdown-complex" style="position: relative; display: inline-block;">
+          <button class="nav-btn dropdown-toggle-btn" (click)="toggleActivityDropdown($event)"
+            [class.active]="isActivityDropdownOpen">
+            <i class="bi bi-person-fill-gear me-2"></i> Contributor Activity <i class="bi bi-chevron-down ms-2"
+              style="font-size: 0.8em;"></i>
+          </button>
+
+          <div class="dropdown-menu-main" *ngIf="isActivityDropdownOpen" style="
+                 position: absolute; 
+                 top: 100%; 
+                 left: 50%; 
+                 transform: translateX(-50%); 
+                 background: white; 
+                 min-width: 260px; 
+                 border-radius: 12px; 
+                 box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+                 margin-top: 10px; 
+                 z-index: 1000;
+                 padding: 8px 0;
+                 border: 1px solid rgba(0,0,0,0.05);">
+
+            <!-- Publish News -->
+            <ng-container *ngIf="hasProfessionAccess; else lockedNews">
+              <a routerLink="/public/posts/create" [queryParams]="{ category: 8 }" class="simple-item"
+                style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
+                <i class="bi bi-newspaper me-2" style="color: #00695C;"></i>Publish News Article
+              </a>
+            </ng-container>
+            <ng-template #lockedNews>
+              <div class="simple-item locked" (click)="openVerificationModal()"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; color: #aaa; cursor: pointer;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-newspaper me-2"></i>Publish News Article
+                </div>
+                <i class="bi bi-lock-fill ms-2" style="font-size: 0.9em; opacity: 0.6;"></i>
+              </div>
+            </ng-template>
+
+            <!-- Connect RSS -->
+            <ng-container *ngIf="hasProfessionAccess; else lockedRSS">
+              <a routerLink="/public/rss/connect" class="simple-item"
+                style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
+                <i class="bi bi-rss me-2" style="color: #00695C;"></i> Connect RSS Feed
+              </a>
+            </ng-container>
+            <ng-template #lockedRSS>
+              <div class="simple-item locked" (click)="openVerificationModal()"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; color: #aaa; cursor: pointer;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-rss me-2"></i> Connect RSS Feed
+                </div>
+                <i class="bi bi-lock-fill ms-2" style="font-size: 0.9em; opacity: 0.6;"></i>
+              </div>
+            </ng-template>
+
+          </div>
+        </div>
+
+        <a routerLink="/public/forums/professions" class="nav-btn">
+          <i class="bi bi-patch-question me-2"></i> Ask a Question
+        </a>
+      </div>
+
+
+    </div>
+  </header>
+
+  <div class="container py-5" *ngIf="!isLoading">
+
+    <!-- Hero Article (Visual or Shared) -->
+    <section class="mb-5" *ngIf="heroArticle">
+      <!-- Regular Hero -->
+      <app-article-hero *ngIf="!heroArticle.parentPost" [image]="getArticleImage(heroArticle)"
+        [title]="heroArticle.title" [description]="heroArticle.content"
+        [metaText]="'Published: ' + (heroArticle.createdAt | date:'MMM d, y')"
+        [link]="['/public/posts/details', heroArticle.id]" [customColor]="'#00695C'">
+      </app-article-hero>
+
+      <!-- Shared Hero LinkedIn Style -->
+      <div class="text-card-design p-4 shadow-sm" *ngIf="heroArticle.parentPost"
+        [routerLink]="['/public/posts/details', heroArticle.id]"
+        style="cursor: pointer; border-left: 8px solid #00695C; max-width: 1000px; margin: 0 auto;">
+        <div class="d-flex align-items-start gap-3">
+          <div class="flex-grow-1">
+            <h2 class="h3 mb-3">{{ heroArticle.title }}</h2>
+            <p class="text-muted mb-4">{{ heroArticle.content | slice:0:300 }}...</p>
+            <div class="d-flex align-items-center gap-2">
+              <img [src]="getAuthorAvatar(heroArticle.author)" class="rounded-circle" width="32" height="32"
+                appImgFallback="avatar">
+              <span class="fw-bold">{{ heroArticle.author.fullName }}</span>
+              <span class="text-muted">• {{ heroArticle.createdAt | date }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Articles Grid (With Images) -->
+    <section class="mb-5" *ngIf="visualArticles.length > 0">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <h2 class="h4 mb-0 fw-bold">Professional Insights</h2>
+        <div class="flex-grow-1 border-bottom"></div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4" *ngFor="let article of visualArticles">
+          <app-article-grid-card [image]="getArticleImage(article)" [title]="article.title"
+            [description]="article.content" [link]="['/public/posts/details', article.id]" [customColor]="'#00695C'">
+          </app-article-grid-card>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Text Listings (LinkedIn Feed Style) -->
+    <section class="mb-5" *ngIf="textArticles.length > 0">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <h2 class="h4 mb-0 fw-bold">Recent Updates</h2>
+        <div class="flex-grow-1 border-bottom"></div>
+      </div>
+      <div class="mx-auto" style="max-width: 800px;">
+        <div class="text-card-design mb-4 p-4 border rounded-3 bg-white hover-shadow transition-all"
+          *ngFor="let article of textArticles" [routerLink]="['/public/posts/details', article.id]"
+          style="cursor: pointer;">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <img [src]="getAuthorAvatar(article.author)" class="rounded-circle" width="40" height="40"
+              appImgFallback="avatar">
+            <div>
+              <h4 class="h6 mb-0 fw-bold text-dark">{{ article.author.fullName }}</h4>
+              <small class="text-muted">{{ article.createdAt | date:'mediumDate' }}</small>
+            </div>
+          </div>
+          <h3 class="h5 mb-3 fw-bold">{{ article.title }}</h3>
+          <p class="text-muted mb-0 leading-relaxed">{{ article.content | slice:0:220 }}...</p>
+          <div class="mt-3 text-primary-dark fw-bold small">Read Full Update →</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Job Opportunities Section -->
+    <section class="mb-5 bg-light p-5 rounded-4" *ngIf="hiringNews.length > 0">
+      <div class="text-center mb-5">
+        <h2 class="h2 fw-bold">Hiring Opportunities</h2>
+        <p class="text-muted">Direct openings from verified organizations</p>
+      </div>
+
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-6" *ngFor="let item of (hiringNews | slice:0:6)">
+          <div class="job-pill-card p-4 rounded-3 bg-white border h-100 hover-lift"
+            [routerLink]="['/public/job-profile', item.id]" style="cursor: pointer;">
+            <div class="d-flex align-items-start gap-3">
+              <div class="job-icon-box p-3 rounded-circle" style="background: rgba(0, 105, 92, 0.1);">
+                <i class="bi bi-briefcase-fill style='color: #00695C;' fs-4"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <h4 class="h6 fw-bold mb-0">{{ item.title }}</h4>
+                  <span class="badge bg-success-soft text-success small">{{ getEmploymentType(item.employmentType)
+                    }}</span>
+                </div>
+                <div class="text-muted small mb-3">
+                  <span class="me-2"><i class="bi bi-building me-1"></i> {{ item.ownerName }}</span>
+                  <span><i class="bi bi-geo-alt me-1"></i> {{ item.locationName || 'New York, NY' }}</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                  <span class="badge bg-light text-dark small">{{ getWorkArrangement(item.workArrangement) }}</span>
+                  <span class="badge bg-light text-dark small">{{ getLevel(item.level) }}</span>
+                  <span class="ms-auto fw-bold text-teal-dark">{{ item.startingPrice ? '$' +
+                    item.startingPrice.toLocaleString() : 'Negotiable' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <button class="btn px-5 py-3 rounded-pill fw-bold shadow-lg" style="background-color: #00695C; color: white;"
+          routerLink="/public/profession/jobs">
+          Browse All Openings <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Empty State -->
+  <div class="text-center py-5" *ngIf="!isLoading && visualArticles.length === 0 && textArticles.length === 0">
+    <i class="bi bi-cup-hot text-muted display-1 mb-4"></i>
+    <h2 class="h4 text-muted">No updates available at the moment</h2>
+    <p class="text-muted">Check back later for fresh professional insights</p>
+  </div>
+
+  <!-- Verification Modal -->
+  <app-verification-modal *ngIf="isVerificationModalOpen" (close)="closeVerificationModal()" (verified)="onVerified()">
+  </app-verification-modal>
+
+</div>

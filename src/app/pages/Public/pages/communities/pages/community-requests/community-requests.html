@@ -1,0 +1,30 @@
+<div class="requests-container">
+  <h3 class="req-title">
+    Membership Requests <span *ngIf="requests.length">({{requests.length}})</span>
+  </h3>
+  
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="!isLoading && requests.length === 0" class="empty-state">
+    <i class="bi bi-person-check"></i>
+    <p>No pending requests at the moment.</p>
+  </div>
+
+  <div class="req-grid" *ngIf="!isLoading && requests.length > 0">
+    <div class="req-card" *ngFor="let req of requests">
+      <div class="user-info">
+        <img [src]="resolveAvatar(req.userAvatar)" alt="User">
+        <div>
+          <h4>{{ req.userName }}</h4>
+          <span>Requested {{ req.requestedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-reject" (click)="handleAction(req, 'reject')">Reject</button>
+        <button class="btn-approve" (click)="handleAction(req, 'approve')">Approve</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,502 @@
+// 1. Variables
+$font-header: 'Merriweather', serif;
+$font-body: 'Inter', sans-serif;
+$primary: var(--primary-color, #BC5E3D); // Dynamic Color (Default is our new Terracotta)
+$dark: #1f2937;
+$gray: #6b7280;
+$light: #f3f4f6;
+$white: #ffffff;
+$radius: 16px;
+
+// 2. Mixins & Animations (Moved to Top)
+@mixin shimmer {
+  animation: shimmer 1.5s infinite linear;
+  background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-size: 1000px 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+// 3. Global Host Styles
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f9fafb; // Very light gray bg
+  font-family: $font-body;
+  padding-bottom: 100px;
+}
+
+.feed-layout-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+// 4. Premium Category Header (Match CategoryHome)
+.category-header {
+  background-color: #f7f7f7; // Fallback
+  padding: 80px 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  .main-title {
+    font-family: $font-header;
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    letter-spacing: -2px;
+    text-align: center;
+
+    @media (min-width: 768px) {
+      font-size: 5rem;
+    }
+  }
+
+  .sub-meta {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .top-meta {
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    text-transform: none;
+    margin-bottom: 10px;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+// Special Housing Header Theme
+:host-context(.housing-theme) {
+  .category-header {
+    background-color: #FDF8EB;
+    border-bottom: none;
+
+    .main-title {
+      color: #B59B62;
+    }
+  }
+}
+
+.search-container {
+  margin-top: -35px; // Overlap with header
+  position: relative;
+  z-index: 100;
+  margin-bottom: 60px;
+
+  .search-floater {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+    border-radius: 50px;
+    padding: 10px;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+
+    .search-box,
+    .location-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: 0 25px;
+      position: relative;
+
+      i {
+        font-size: 1.2rem;
+        margin-right: 12px;
+      }
+
+      input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+    }
+
+    .divider {
+      width: 1px;
+      height: 35px;
+      background: #e2e8f0;
+    }
+
+    .btn-go {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0 30px;
+      height: 50px;
+      border-radius: 30px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s;
+
+      &:hover {
+        transform: scale(1.03);
+        filter: brightness(1.1);
+      }
+    }
+
+    // Dropdown
+    .loc-dropdown {
+      position: absolute;
+      top: 120%;
+      left: 0;
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid #eee;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+      .loc-item {
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+
+        &:hover {
+          background: #f3f4f6;
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+}
+
+// Special Housing Theme for Container
+.feed-layout-container.housing-theme {
+  .category-header {
+    background-color: #FDF8EB;
+    border-bottom: none;
+
+    .main-title {
+      color: #B59B62;
+    }
+  }
+
+  .search-floater {
+    border-color: rgba(181, 155, 98, 0.2);
+  }
+}
+
+// 5. Grid System
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 30px;
+
+  // Empty State
+  .empty-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 80px 0;
+
+    .icon-box {
+      font-size: 3rem;
+      color: #d1d5db;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-family: $font-header;
+      font-size: 1.5rem;
+      color: $dark;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid #d1d5db;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+
+      &:hover {
+        border-color: $primary;
+        color: $primary;
+      }
+    }
+  }
+}
+
+// 6. PROFESSIONAL CARDS
+.feed-card {
+  background: $white;
+  border-radius: $radius;
+  overflow: hidden;
+  border: 1px solid transparent; // for hover transition
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    .card-title {
+      color: $primary;
+    }
+
+    .read-more {
+      background: $primary;
+      color: white;
+      border-color: $primary;
+    }
+  }
+
+  // A. Image Card Style
+  &.has-image {
+    .card-media {
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: 0.5s;
+      }
+
+      .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 6px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        img {
+          width: 12px;
+          height: 12px;
+          object-fit: contain;
+          filter: brightness(0) invert(1);
+        }
+      }
+    }
+
+    &:hover .card-media img {
+      transform: scale(1.05);
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+  }
+
+  // B. Text Only Card Style
+  &.text-card {
+    border: 1px solid #f3f4f6;
+
+    .card-content {
+      padding: 30px;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .accent-line {
+        width: 40px;
+        height: 4px;
+        border-radius: 2px;
+        margin-bottom: 20px;
+      }
+
+      .card-title {
+        font-size: 1.4rem;
+        line-height: 1.35;
+        margin-bottom: 15px;
+      }
+
+      .card-excerpt {
+        font-family: serif;
+        font-size: 1.05rem;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        flex-grow: 1;
+      }
+    }
+  }
+
+  // Common Inner Elements
+  .card-meta {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+
+    .dot {
+      margin: 0 5px;
+    }
+  }
+
+  .card-title {
+    font-family: $font-header;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $dark;
+    margin-bottom: 10px;
+    line-height: 1.3;
+    transition: 0.2s;
+  }
+
+  .card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 15px;
+
+    .author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      span {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: $dark;
+      }
+    }
+
+    .read-more {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $dark;
+      transition: 0.2s;
+    }
+  }
+}
+
+// 7. Pagination
+.pagination-wrapper {
+  margin-top: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+
+  .page-btn {
+    border: none;
+    background: white;
+    font-weight: 600;
+    color: $dark;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: 0.2s;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  .pages {
+    display: flex;
+    gap: 8px;
+
+    button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: $gray;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &.active {
+        background: $dark;
+        color: white;
+        box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      &:hover:not(.active) {
+        background: #e5e7eb;
+      }
+    }
+  }
+}
+
+// 8. Skeleton Styles (Using the defined mixin)
+.skeleton-card {
+  background: white;
+  border-radius: $radius;
+  height: 400px;
+  padding: 20px;
+  border: 1px solid #f3f4f6;
+
+  .sk-img {
+    height: 200px;
+    background: #f3f4f6;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    @include shimmer;
+  }
+
+  .sk-body {
+    .sk-line {
+      height: 12px;
+      background: #f3f4f6;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      @include shimmer;
+    }
+  }
+}

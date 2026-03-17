@@ -1,0 +1,185 @@
+<div>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="title-group">
+            <div class="d-flex align-items-center">
+                <a routerLink="../list" class="btn btn-sm btn-icon border me-3">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="page-title">Disband Requests</h2>
+                    <p class="page-subtitle">Review and process community disbandment applications.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div [class]="selectedRequest ? 'col-lg-8' : 'col-12'">
+            <!-- Filters -->
+            <div class="filters-card mb-4">
+                <div class="filter-group">
+                    <label class="me-2 fw-bold">Filter Status:</label>
+                    <div class="btn-group">
+                        <button *ngFor="let status of requestStatuses" class="btn btn-outline-secondary btn-sm"
+                            [class.active]="selectedStatus === status.value"
+                            (click)="selectedStatus = status.value; loadData(1)">
+                            {{ status.label }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="data-card">
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>Community</th>
+                                <th>Requested By</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let req of requests" [class.table-active]="selectedRequest?.id === req.id">
+                                <td>
+                                    <div class="fw-bold">{{ req.communityName }}</div>
+                                    <small class="text-muted">ID: {{ req.communityId }}</small>
+                                </td>
+                                <td>
+                                    <div class="small fw-bold">{{ req.requestedByUserName }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" [title]="req.reason">
+                                        {{ req.reason }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge" [ngClass]="getStatusBadgeClass(req.status)">
+                                        {{ getStatusName(req.status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="text-muted small">{{ req.requestedAt | date:'MMM d, HH:mm' }}</div>
+                                </td>
+                                <td class="text-end">
+                                    <button *ngIf="req.status === 0" class="btn btn-sm btn-primary"
+                                        (click)="openProcessModal(req)">
+                                        Process
+                                    </button>
+                                    <button *ngIf="req.status !== 0" class="btn btn-sm btn-outline-secondary"
+                                        (click)="selectedRequest = req">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="requests.length === 0 && !isLoading">
+                                <td colspan="6" class="text-center py-5">
+                                    <p class="text-muted">No disband requests found.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-md-none p-3">
+                    <div *ngIf="requests.length === 0 && !isLoading" class="text-center py-5 text-muted">
+                        No disband requests found.
+                    </div>
+
+                    <div class="request-card-mobile p-3 mb-3" *ngFor="let req of requests"
+                        (click)="selectedRequest = req" [class.selected]="selectedRequest?.id === req.id">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge" [ngClass]="getStatusBadgeClass(req.status)">
+                                {{ getStatusName(req.status) }}
+                            </span>
+                            <span class="text-muted tiny">{{ req.requestedAt | date:'shortDate' }}</span>
+                        </div>
+                        <h6 class="fw-bold mb-1">{{ req.communityName }}</h6>
+                        <div class="small text-muted mb-2">by {{ req.requestedByUserName }}</div>
+                        <div class="p-2 bg-light rounded text-muted small fst-italic mb-3">
+                            "{{ req.reason }}"
+                        </div>
+                        <button class="btn btn-sm w-100"
+                            [ngClass]="req.status === 0 ? 'btn-primary' : 'btn-outline-secondary'">
+                            {{ req.status === 0 ? 'Process Request' : 'View Details' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Panel -->
+        <div class="col-lg-4" *ngIf="selectedRequest">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 2rem; border-radius: 16px;">
+                <div
+                    class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">Request Details</h5>
+                    <button type="button" class="btn-close" (click)="selectedRequest = undefined"></button>
+                </div>
+                <div class="card-body p-4">
+                    <div class="detail-item mb-4">
+                        <label class="text-muted small text-uppercase fw-bold">Community</label>
+                        <div class="h6 mb-0">{{ selectedRequest.communityName }}</div>
+                    </div>
+
+                    <div class="detail-item mb-4">
+                        <label class="text-muted small text-uppercase fw-bold">Reason for Disband</label>
+                        <div class="p-3 bg-light rounded-3 small mt-1">
+                            {{ selectedRequest.reason }}
+                        </div>
+                    </div>
+
+                    <div class="detail-item mb-4">
+                        <label class="text-muted small text-uppercase fw-bold">Requested By</label>
+                        <div>{{ selectedRequest.requestedByUserName }} (ID: {{ selectedRequest.requestedByUserId }})
+                        </div>
+                        <small class="text-muted">{{ selectedRequest.requestedAt | date:'medium' }}</small>
+                    </div>
+
+                    <ng-container *ngIf="selectedRequest.status === 0; else processedView">
+                        <div class="form-group mb-4">
+                            <label class="text-muted small text-uppercase fw-bold mb-2">Admin Notes (Internal)</label>
+                            <textarea class="form-control" [(ngModel)]="adminNotes" rows="3"
+                                placeholder="Add notes about this decision..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success py-2 fw-bold" [disabled]="isProcessing"
+                                (click)="processRequest(true)">
+                                <i class="bi bi-check-circle me-2"></i> Approve & Disband
+                            </button>
+                            <button class="btn btn-danger py-2 fw-bold" [disabled]="isProcessing"
+                                (click)="processRequest(false)">
+                                <i class="bi bi-x-circle me-2"></i> Reject Request
+                            </button>
+                        </div>
+                    </ng-container>
+
+                    <ng-template #processedView>
+                        <div class="alert" [ngClass]="selectedRequest.status === 1 ? 'alert-success' : 'alert-danger'">
+                            <div class="fw-bold mb-1">
+                                {{ selectedRequest.status === 1 ? 'Approved' : 'Rejected' }}
+                            </div>
+                            <div class="small">
+                                Processed by {{ selectedRequest.processedByUserName }} on {{ selectedRequest.processedAt
+                                | date:'medium' }}
+                            </div>
+                        </div>
+                        <div *ngIf="selectedRequest.adminNotes" class="detail-item">
+                            <label class="text-muted small text-uppercase fw-bold">Admin Notes</label>
+                            <div class="p-3 border rounded-3 small mt-1 italic">
+                                "{{ selectedRequest.adminNotes }}"
+                            </div>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

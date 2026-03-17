@@ -1,0 +1,201 @@
+<div class="feed-page">
+    <!-- Header with Background Design -->
+    <header class="feed-header">
+        <div class="header-content">
+            <h1 class="page-title">Housing Feed</h1>
+            <p class="page-subtitle">Discover your next home in New York City with ease</p>
+        </div>
+    </header>
+
+    <!-- Filter & Search Bar -->
+    <div class="filter-section">
+        <div class="filter-container">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" [(ngModel)]="filters.Search" placeholder="Search by title, description..."
+                    (keyup.enter)="applyFilters()">
+            </div>
+
+            <div class="filter-controls">
+                <select class="form-select-premium" [(ngModel)]="filters.IsRenting" (change)="applyFilters()">
+                    <option value="">All Types</option>
+                    <option value="false">For Sale</option>
+                    <option value="true">For Rent</option>
+                </select>
+
+                <div class="price-inputs">
+                    <input type="number" class="price-field" [(ngModel)]="filters.MinPrice" placeholder="Min $">
+                    <span class="divider">-</span>
+                    <input type="number" class="price-field" [(ngModel)]="filters.MaxPrice" placeholder="Max $">
+                </div>
+
+                <button class="btn-apply" (click)="applyFilters()">
+                    Filter Results <i class="bi bi-sliders ms-2"></i>
+                </button>
+
+                <button class="btn-reset" (click)="resetFilters()" title="Reset Filters">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <main class="feed-content">
+        <div class="result-meta" *ngIf="!isLoading">
+            <span class="count">{{ totalCount }} properties found</span>
+            <div class="sort-options">
+                <span>View:</span>
+                <button type="button" class="view-btn" [class.active]="currentView === 'grid'" (click)="setView('grid')"
+                    aria-label="Grid view">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                </button>
+                <button type="button" class="view-btn" [class.active]="currentView === 'row'" (click)="setView('row')"
+                    aria-label="Row view">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="property-grid view-transition" *ngIf="!isLoading && listings.length > 0 && currentView === 'grid'">
+            <ng-container *ngFor="let item of listings">
+                <!-- 1. Standard Card (With Media) -->
+                <div class="property-card" *ngIf="item.mediaUrl" [routerLink]="['/public/housing/details', item.id]">
+                    <div class="card-image">
+                        <ng-container *ngIf="isVideo(item.mediaUrl); else imgBlock">
+                            <video [src]="item.mediaUrl" class="w-100 h-100 object-fit-cover" muted loop
+                                onmouseover="this.play()" onmouseout="this.pause()"></video>
+                            <div class="play-icon-overlay position-absolute top-50 start-50 translate-middle text-white"
+                                style="z-index: 2; pointer-events: none;">
+                                <i class="bi bi-play-circle-fill fs-1 opacity-75"></i>
+                            </div>
+                        </ng-container>
+                        <ng-template #imgBlock>
+                            <img [src]="item.mediaUrl" appImgFallback="housing">
+                        </ng-template>
+
+                        <span class="type-tag" [class.rent]="item.isRenting">
+                            {{ item.isRenting ? 'For Rent' : 'For Sale' }}
+                        </span>
+                    </div>
+                    <div class="card-details">
+                        <h3 class="title text-truncate">{{ item.title || 'NYC Property' }}</h3>
+                        <div class="stats">
+                            <span><i class="bi bi-door-open"></i> {{ item.numberOfRooms }} Rooms</span>
+                            <span><i class="bi bi-droplet"></i> {{ item.numberOfBathrooms }} Baths</span>
+                            <span><i class="bi bi-rulers"></i> {{ item.size }} sqft</span>
+                        </div>
+                        <div class="footer">
+                            <span class="price">{{ formatPrice(item.startingPrice) }}{{ item.isRenting ? '/mo' : ''
+                                }}</span>
+                            <button class="btn-more">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Text-Only Card (Different Design) -->
+                <div class="property-card text-only-card" *ngIf="!item.mediaUrl"
+                    [routerLink]="['/public/housing/details', item.id]">
+                    <div class="card-header-minimal">
+                        <span class="type-badge" [class.rent]="item.isRenting">
+                            {{ item.isRenting ? 'For Rent' : 'For Sale' }}
+                        </span>
+                        <span class="location-mini"><i class="bi bi-geo-alt"></i> NYC Area</span>
+                    </div>
+                    <div class="card-body-text">
+                        <h2 class="text-title">{{ item.title }}</h2>
+                        <p class="text-excerpt">{{ item.description || item.content | slice:0:150 }}...</p>
+
+                        <div class="luxury-divider"></div>
+
+                        <div class="stats-row">
+                            <div class="stat"><span class="val">{{ item.numberOfRooms }}</span> <span
+                                    class="lab">Beds</span></div>
+                            <div class="stat"><span class="val">{{ item.numberOfBathrooms }}</span> <span
+                                    class="lab">Baths</span></div>
+                            <div class="stat"><span class="val">{{ item.size }}</span> <span class="lab">Sqft</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer-luxury">
+                        <div class="price-container">
+                            <span class="label">Starting at</span>
+                            <span class="val">{{ formatPrice(item.startingPrice) }}{{ item.isRenting ? '/mo' : ''
+                                }}</span>
+                        </div>
+                        <i class="bi bi-arrow-right-circle-fill go-icon"></i>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+
+        <div class="property-row-list view-transition" *ngIf="!isLoading && listings.length > 0 && currentView === 'row'">
+            <article class="property-row-card" *ngFor="let item of listings" [routerLink]="['/public/housing/details', item.id]">
+                <div class="row-media" *ngIf="item.mediaUrl; else rowNoMedia">
+                    <ng-container *ngIf="isVideo(item.mediaUrl); else rowImageBlock">
+                        <video [src]="item.mediaUrl" class="w-100 h-100 object-fit-cover" muted loop
+                            onmouseover="this.play()" onmouseout="this.pause()"></video>
+                    </ng-container>
+                    <ng-template #rowImageBlock>
+                        <img [src]="item.mediaUrl" appImgFallback="housing">
+                    </ng-template>
+                    <span class="type-tag" [class.rent]="item.isRenting">
+                        {{ item.isRenting ? 'For Rent' : 'For Sale' }}
+                    </span>
+                </div>
+
+                <ng-template #rowNoMedia>
+                    <div class="row-media row-placeholder">
+                        <i class="bi bi-house-door"></i>
+                    </div>
+                </ng-template>
+
+                <div class="row-main">
+                    <div class="row-top">
+                        <h3 class="row-title">{{ item.title || 'NYC Property' }}</h3>
+                    </div>
+
+                    <p class="row-description">{{ (item.description || item.content || 'No description available') | slice:0:140 }}{{ (item.description || item.content || '').length > 140 ? '...' : '' }}</p>
+
+                    <div class="row-stats">
+                        <span><i class="bi bi-door-open"></i> {{ item.numberOfRooms }} Rooms</span>
+                        <span><i class="bi bi-droplet"></i> {{ item.numberOfBathrooms }} Baths</span>
+                        <span><i class="bi bi-rulers"></i> {{ item.size }} sqft</span>
+                    </div>
+                </div>
+
+                <div class="row-action">
+                    <span class="row-price">{{ formatPrice(item.startingPrice) }}{{ item.isRenting ? '/mo' : '' }}</span>
+                    <button class="btn-more">Details</button>
+                </div>
+            </article>
+        </div>
+
+        <!-- No Results -->
+        <div class="no-results" *ngIf="!isLoading && listings.length === 0">
+            <i class="bi bi-house-exclamation"></i>
+            <h3>No properties found</h3>
+            <p>Try adjusting your filters or search keywords.</p>
+            <button class="btn-reset-large" (click)="resetFilters()">Clear Filters</button>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+            <div class="spinner"></div>
+            <p>Searching for properties...</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" *ngIf="!isLoading && totalPages > 1">
+            <button class="page-btn" [disabled]="filters.Page === 1" (click)="changePage(filters.Page - 1)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <span class="page-info">Page {{ filters.Page }} of {{ totalPages }}</span>
+
+            <button class="page-btn" [disabled]="filters.Page === totalPages" (click)="changePage(filters.Page + 1)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+</div>

@@ -1,0 +1,405 @@
+// 1. Variables (Updated to match the Image - Green Theme)
+// Colors extracted from the reference image
+$primary-green: #2d8a6e; // The main green color from the button/header
+$primary-hover: #1e6b52; // Darker green for hover
+$bg-light: #f8f9fa; // Page background
+$tag-bg: #f3f4f6; // Light gray/purple for tags
+$text-dark: #1a1a1a; // Main headings
+$text-gray: #6b7280; // Subtitles/body
+$white: #ffffff;
+
+// Dimensions & Borders
+$radius-card: 12px;
+$radius-pill: 50px;
+$shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+$shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.1);
+
+// Fonts (Keeping your preferred fonts as they match the serif/sans-serif style)
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@400;700&display=swap');
+
+$font-header: 'Merriweather', serif;
+$font-body: 'Inter', sans-serif;
+
+// 2. Global Resets
+:host {
+  display: block;
+  font-family: $font-body;
+  color: $text-dark;
+  background-color: $bg-light;
+  min-height: 100vh;
+}
+
+// 3. Hero Section
+.hero-section {
+  position: relative;
+  height: 380px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px; // Space for the floating search bar
+
+  // Dark overlay to make text pop
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: $white;
+    padding: 0 20px;
+    max-width: 800px;
+
+    h1 {
+      font-family: $font-header;
+      font-size: clamp(1.8rem, 7vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+  }
+}
+
+// 4. Floating Search Bar & Filters
+.search-container {
+  margin-top: -70px; // Pull up to overlap hero
+  position: relative;
+  z-index: 10;
+  padding: 0 15px;
+  margin-bottom: 60px;
+}
+
+.main-search-bar {
+  background: $white;
+  border-radius: $radius-pill;
+  padding: 8px 8px 8px 25px; // Padding to fit button nicely
+  display: flex;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 850px;
+  margin: 0 auto 30px auto;
+  border: 1px solid #eee;
+
+  i.search-icon {
+    font-size: 1.2rem;
+    color: #9ca3af;
+    margin-right: 15px;
+  }
+
+  input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 1rem;
+    font-family: $font-body;
+    color: $text-dark;
+    padding: 10px 0;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+
+  .btn-search {
+    background-color: $primary-green;
+    color: $white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: $radius-pill;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 10px;
+
+    &:hover {
+      background-color: $primary-hover;
+    }
+  }
+}
+
+// Filters Row
+.filters-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .filter-pill {
+    background: $white;
+    border: 1px solid #e5e7eb;
+    border-radius: $radius-pill;
+    padding: 8px 24px;
+    font-size: 0.9rem;
+    color: $text-dark;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    font-weight: 500;
+
+    &:hover,
+    &:focus {
+      border-color: $primary-green;
+      color: $primary-green;
+      outline: none;
+    }
+
+    // Dropdown arrow custom styling
+    &.custom-select {
+      padding-right: 35px;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%226%22%20viewBox%3D%220%200%2010%206%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M1%201L5%205L9%201%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+  }
+
+  .btn-open-now {
+    background-color: #d1fae5; // Very light green
+    color: $primary-green;
+    border: 1px solid transparent;
+    font-weight: 600;
+
+    &:hover {
+      background-color: #a7f3d0;
+    }
+  }
+}
+
+// Location Dropdown (Auto-complete)
+.location-wrapper {
+  position: relative;
+
+  .dropdown-list {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 220px;
+    background: $white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+    overflow: hidden;
+    padding: 5px 0;
+
+    .item {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      cursor: pointer;
+
+      &:hover {
+        background: #f3f4f6;
+        color: $primary-green;
+      }
+    }
+  }
+}
+
+// 5. Job Grid & Cards
+.main-content {
+  padding-bottom: 80px;
+}
+
+.section-header {
+  margin-bottom: 30px;
+
+  h3 {
+    font-family: $font-header;
+    font-weight: 700;
+    color: $text-dark;
+  }
+
+  p {
+    color: $text-gray;
+  }
+}
+
+.job-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 30px;
+}
+
+.job-card {
+  background: $white;
+  border-radius: $radius-card;
+  overflow: hidden; // Ensures image corners are rounded
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-hover;
+    border-color: rgba($primary-green, 0.2);
+  }
+
+  .card-img-top {
+    height: 200px;
+    width: 100%;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    // Optional: Gradient overlay on image bottom
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+    }
+  }
+
+  .card-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .job-title {
+      font-family: $font-header;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin-bottom: 8px;
+    }
+
+    .location-text {
+      font-size: 0.9rem;
+      color: $text-gray;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      i {
+        color: $primary-green;
+      }
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+
+      .tag {
+        background: $tag-bg;
+        color: #4b5563;
+        font-size: 0.8rem;
+        padding: 6px 14px;
+        border-radius: 6px; // Slightly rounded squares like in image
+        font-weight: 500;
+      }
+    }
+
+    .btn-details {
+      margin-top: auto;
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid $primary-green; // Outline style
+      color: $primary-green;
+      border-radius: $radius-pill;
+      font-weight: 600;
+      transition: all 0.2s;
+
+      &:hover {
+        background: $primary-green;
+        color: $white;
+      }
+    }
+  }
+}
+
+// 6. Pagination
+.pagination-wrapper {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+
+  .page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: $text-dark;
+    font-weight: 600;
+    font-family: $font-body;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+
+    &.active {
+      background: $primary-green;
+      color: $white;
+      box-shadow: 0 4px 10px rgba($primary-green, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .hero-section {
+    height: 300px;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .main-search-bar {
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 15px;
+  }
+
+  .main-search-bar input {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .main-search-bar .btn-search {
+    width: 100%;
+    margin: 0;
+  }
+}

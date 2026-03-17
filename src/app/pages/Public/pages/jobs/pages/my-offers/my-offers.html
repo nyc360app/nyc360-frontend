@@ -1,0 +1,107 @@
+<div class="my-offers-page">
+
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+        <div>
+          <h1 class="merriweather-font">My Posted Jobs</h1>
+          <p class="opacity-75">Manage your job listings and track applicants.</p>
+        </div>
+        <button class="btn-create-job" routerLink="/public/create-offer">
+          <i class="bi bi-plus-lg"></i> Post New Job
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container main-content">
+
+    <div class="filter-bar shadow-sm">
+      <div class="tabs">
+        <button [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
+          All Jobs <span class="badge-count">{{ pagination.totalCount }}</span>
+        </button>
+        <button [class.active]="currentFilter === 'active'" (click)="setFilter('active')">Active</button>
+        <button [class.active]="currentFilter === 'closed'" (click)="setFilter('closed')">Closed</button>
+      </div>
+    </div>
+
+    <div class="offers-list mt-4">
+
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-success"></div>
+      </div>
+
+      <div class="offer-card shadow-sm" *ngFor="let offer of offers" [routerLink]="['/public/job-profile', offer.id]">
+        <div class="card-status-strip" [class.active]="offer.isActive"></div>
+
+        <div class="card-content">
+          <div class="info-section">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="status-badge" [class.active]="offer.isActive">
+                <i class="bi" [class.bi-check-circle-fill]="offer.isActive"
+                  [class.bi-x-circle-fill]="!offer.isActive"></i>
+                {{ offer.isActive ? 'Active' : 'Closed' }}
+              </span>
+              <span class="date-text text-muted">
+                <i class="bi bi-calendar3 me-1"></i>
+                Posted {{ offer.createdAt | date:'mediumDate' }}
+              </span>
+            </div>
+
+            <h3 class="offer-title merriweather-font">
+              {{ offer.title }}
+            </h3>
+
+            <div class="job-meta">
+              <span class="salary-box">
+                <i class="bi bi-cash-stack"></i>
+                ${{ offer.salaryMin | number }} - ${{ offer.salaryMax | number }}
+              </span>
+            </div>
+          </div>
+
+          <div class="stats-section">
+
+
+            <div class="actions">
+              <button class="btn-action view" title="View Details">
+                <i class="bi bi-eye"></i>
+              </button>
+
+              <button class="btn-action edit" title="Edit" [routerLink]="['/public/edit-offer', offer.id]"
+                (click)="$event.stopPropagation()">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+
+              <button class="btn-action delete" title="Delete"
+                (click)="$event.stopPropagation(); deleteOffer(offer.id)">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state text-center py-5" *ngIf="!isLoading && offers.length === 0">
+        <i class="bi bi-briefcase display-4 text-muted opacity-50"></i>
+        <h3 class="mt-3 merriweather-font">No jobs found.</h3>
+        <p class="text-muted">You haven't posted any jobs in this category yet.</p>
+        <button class="btn-create-job mt-2" routerLink="/public/create-offer">Post Your First Job</button>
+      </div>
+
+    </div>
+
+    <div class="pagination-container mt-5 mb-5" *ngIf="pagination.totalPages > 1">
+      <button class="page-nav" (click)="changePage(pagination.page - 1)" [disabled]="pagination.page === 1">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <span class="page-info">Page {{ pagination.page }} of {{ pagination.totalPages }}</span>
+      <button class="page-nav" (click)="changePage(pagination.page + 1)"
+        [disabled]="pagination.page === pagination.totalPages">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</div>

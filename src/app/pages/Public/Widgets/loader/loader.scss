@@ -1,0 +1,153 @@
+// Brand Colors
+$nyc-blue: #003580;
+$nyc-orange: #FF7A00;
+$white: #ffffff;
+
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.logo-loader {
+  width: 320px;
+  max-width: 90%;
+  margin-bottom: 30px;
+
+  .nyc-logo-svg {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 15px rgba(0, 53, 128, 0.1));
+
+    path {
+      fill: none;
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .letter-n,
+    .letter-y,
+    .letter-c {
+      stroke: $nyc-blue;
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: writeLogo 2s ease-in-out infinite alternate;
+    }
+
+    .letter-y {
+      animation-delay: 0.1s;
+    }
+
+    .letter-c {
+      animation-delay: 0.2s;
+    }
+
+    .char-3,
+    .char-6,
+    .char-0 {
+      stroke: $nyc-orange;
+      stroke-dasharray: 300;
+      stroke-dashoffset: 300;
+      animation: writeLogo 2s ease-in-out infinite alternate;
+      animation-delay: 0.3s;
+    }
+
+    .char-6 {
+      animation-delay: 0.4s;
+    }
+
+    .char-0 {
+      animation-delay: 0.5s;
+    }
+
+    .swoosh {
+      stroke: $nyc-orange;
+      stroke-width: 9;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: writeLogo 2s ease-in-out infinite alternate;
+      animation-delay: 0.6s;
+    }
+  }
+}
+
+.writing-status {
+  margin-top: 20px;
+  color: $nyc-blue;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Inter', sans-serif;
+  opacity: 0.8;
+  animation: pulseOpacity 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulseOpacity {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-bar-container {
+  width: 200px;
+  height: 4px;
+  background: rgba($nyc-blue, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+
+  .loading-bar {
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, $nyc-blue, $nyc-orange);
+    border-radius: 10px;
+    position: absolute;
+    animation: loadingMove 1.5s infinite ease-in-out;
+  }
+}
+
+@keyframes writeLogo {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes loadingMove {
+  0% {
+    left: -40%;
+  }
+
+  50% {
+    left: 100%;
+  }
+
+  100% {
+    left: -40%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

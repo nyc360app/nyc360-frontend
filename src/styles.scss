@@ -1,0 +1,276 @@
+@use "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+@import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css";
+
+:root {
+  --luxury-gold: #d4af37;
+  --luxury-gold-dark: #b8860b;
+  --luxury-navy: #0f172a;
+  --luxury-blue: #3498db;
+  --luxury-green: #2ecc71;
+  --luxury-slate: #64748b;
+  --luxury-bg: #f8fafc;
+  --luxury-white: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  // New Category Specific Gold
+  --housing-gold: #B59B62;
+  --housing-bg: #FCF9F1;
+}
+
+// --- Responsive Mixins ---
+@mixin mobile {
+  @media (max-width: 576px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (max-width: 992px) {
+    @content;
+  }
+}
+
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  position: relative;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background-color: var(--luxury-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// Global Luxury Components
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.gold-title {
+  font-family: 'Merriweather', serif;
+  background: linear-gradient(135deg, #d4af37 0%, #f1c40f 50%, #d4af37 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.btn-luxury-gold {
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  color: white !important;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+    background: linear-gradient(135deg, #e5c04a 0%, #B59B62 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+.btn-luxury-outline {
+  background: transparent;
+  color: var(--luxury-gold) !important;
+  border: 2px solid var(--luxury-gold);
+  padding: 0.6rem 1.4rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--luxury-gold);
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+  }
+}
+
+.luxury-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+
+  thead th {
+    background: transparent;
+    border: none;
+    color: var(--luxury-slate);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 1rem 1.5rem;
+  }
+
+  tbody tr {
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    border-radius: 12px;
+
+    td {
+      padding: 1.2rem 1.5rem;
+      border: none;
+      vertical-align: middle;
+
+      &:first-child {
+        border-radius: 12px 0 0 12px;
+      }
+
+      &:last-child {
+        border-radius: 0 12px 12px 0;
+      }
+    }
+
+    &:hover {
+      transform: scale(1.01);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+      background-color: #fafbfc;
+    }
+  }
+}
+
+.luxury-select,
+.luxury-input {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  color: var(--luxury-navy);
+  transition: all 0.3s ease;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: var(--luxury-gold);
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  }
+}
+
+// --- Global Responsive Utilities ---
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  @include tablet {
+    padding: 0 16px;
+  }
+}
+
+.responsive-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.mobile-hide {
+  @include mobile {
+    display: none !important;
+  }
+}
+
+.mobile-only {
+  display: none !important;
+
+  @include mobile {
+    display: block !important;
+  }
+}
+
+.text-luxury {
+  &.h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  &.h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+  }
+
+  &.p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--luxury-slate);
+  }
+}
+
+// Adjust Bootstrap Utility if needed
+.row.g-responsive {
+  --bs-gutter-x: 2rem;
+  --bs-gutter-y: 2rem;
+
+  @include tablet {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+  }
+}
+
+// Custom Scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+
+  &:hover {
+    background: #94a3b8;
+  }
+}

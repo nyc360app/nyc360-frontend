@@ -1,0 +1,117 @@
+<div class="edit-offer-page">
+  <div class="container">
+
+    <div class="form-header text-center mb-5">
+      <h2 class="merriweather-font">Edit Job Offer</h2>
+      <p class="text-muted">Update the details for "{{ editForm.get('title')?.value || 'this job' }}"</p>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border custom-spinner"></div>
+    </div>
+
+    <div *ngIf="!isLoading" class="form-wrapper shadow">
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+
+        <div class="form-section">
+          <h4 class="section-title"><i class="bi bi-info-circle"></i> Basic Information</h4>
+
+          <div class="mb-3">
+            <label class="form-label">Job Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="title">
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Min Salary ($)</label>
+              <input type="number" class="form-control" formControlName="salaryMin">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Max Salary ($)</label>
+              <input type="number" class="form-control" formControlName="salaryMax">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-geo-alt-fill"></i></span>
+              <input type="text" class="form-control" [value]="selectedLocationName" readonly disabled>
+              <input type="hidden" formControlName="locationId">
+            </div>
+            <small class="text-muted">To change location, please create a new offer.</small>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4 class="section-title"><i class="bi bi-file-text"></i> Job Details</h4>
+
+          <div class="mb-3">
+            <label class="form-label">Description <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="5" formControlName="description"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Responsibilities</label>
+            <textarea class="form-control" rows="4" formControlName="responsibilities"
+              placeholder="List key responsibilities..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Requirements</label>
+            <textarea class="form-control" rows="4" formControlName="requirements"
+              placeholder="Skills, education, experience..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Benefits</label>
+            <textarea class="form-control" rows="3" formControlName="benefits"
+              placeholder="Insurance, PTO, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="form-section no-border">
+          <h4 class="section-title"><i class="bi bi-briefcase"></i> Employment Type</h4>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Work Arrangement</label>
+              <select class="form-select" formControlName="workArrangement">
+                <option *ngFor="let item of workArrangements" [value]="item.id">{{ item.name }}</option>
+              </select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Employment Type</label>
+              <select class="form-select" formControlName="employmentType">
+                <option *ngFor="let item of employmentTypes" [value]="item.id">{{ item.name }}</option>
+              </select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Level</label>
+              <select class="form-select" formControlName="employmentLevel">
+                <option *ngFor="let item of employmentLevels" [value]="item.id">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions d-flex justify-content-between align-items-center mt-4 pt-4 border-top">
+          <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" (click)="goBack()">Cancel</button>
+          <button type="submit" class="btn btn-save px-5 rounded-pill" [disabled]="isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+            Update Job
+          </button>
+        </div>
+
+        <div *ngIf="editForm.invalid && editForm.touched" class="alert alert-danger mt-3 py-2 px-3 small rounded-3">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Please fill in all required fields (Title, Description, etc.)
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

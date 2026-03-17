@@ -1,0 +1,78 @@
+<div class="tag-create-luxury">
+  <div class="luxury-card shadow-lg">
+
+    <div class="card-header-luxury">
+      <i class="bi bi-bookmark-plus-fill"></i>
+      <h2 class="gold-title">Create New Tag</h2>
+    </div>
+
+    <form (ngSubmit)="onSubmit($event)" class="p-4 p-md-5" novalidate>
+      <div class="form-grid">
+
+        <!-- Tag Name -->
+        <div class="input-field full-width">
+          <label>Tag Name <span class="text-danger">*</span></label>
+          <input type="text" [(ngModel)]="tagName" name="tagName" [class.invalid-border]="formSubmitted && !tagName"
+            placeholder="E.g. Sustainable Development" required>
+          <span class="error-msg" *ngIf="formSubmitted && !tagName">This field is required</span>
+        </div>
+
+        <!-- Division -->
+        <div class="input-field">
+          <label>System Division <span class="text-danger">*</span></label>
+          <select [(ngModel)]="selectedDivision" name="division"
+            [class.invalid-border]="formSubmitted && selectedDivision === null" required>
+            <option [ngValue]="null" disabled>Select Division</option>
+            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.label }}</option>
+          </select>
+          <span class="error-msg" *ngIf="formSubmitted && selectedDivision === null">Please select a division</span>
+        </div>
+
+        <!-- Type -->
+        <div class="input-field">
+          <label>Classification Type</label>
+          <select [(ngModel)]="selectedType" name="type">
+            <option [value]="1">Identity</option>
+            <option [value]="2">Professional</option>
+            <option [value]="3">Interest</option>
+            <option [value]="4">Location</option>
+          </select>
+        </div>
+
+        <!-- Parent Tag Search -->
+        <div class="input-field full-width position-relative">
+          <label>Parent Tag (Optional)</label>
+          <div class="search-wrapper position-relative">
+            <input type="text" (input)="onSearchParent($event)" placeholder="Search parent tag..."
+              [value]="selectedParentName">
+            <i class="bi bi-search position-absolute" style="right: 15px; top: 14px; opacity: 0.5;"></i>
+          </div>
+          <small class="text-muted mt-1 d-block" *ngIf="selectedParentName && selectedParentName !== ''">
+            <i class="bi bi-link-45deg gold-text"></i> Linked to: <strong>{{ selectedParentName }}</strong>
+          </small>
+
+          <ul class="results-dropdown" *ngIf="parentSearchResults.length > 0">
+            <li (click)="selectParent(0)">
+              <i class="bi bi-x-circle me-2"></i> No Parent (Top Level)
+            </li>
+            <li *ngFor="let tag of parentSearchResults" (click)="selectParent(tag)">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>{{ tag.name }}</span>
+                <span class="badge bg-light text-dark">#{{ tag.id }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-cancel-luxury" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn-save-luxury" [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+          <span *ngIf="!isSubmitting">Save Tag</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

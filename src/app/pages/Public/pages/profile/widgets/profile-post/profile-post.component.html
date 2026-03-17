@@ -1,0 +1,186 @@
+<article class="post-card-premium animate__animated animate__fadeInUp">
+    <div class="post-top">
+        <div class="author-info">
+            <img [src]="resolveImage(authorImageUrl)" class="author-avatar">
+            <div class="author-meta" (click)="viewPostDetails(post.id, $event)">
+                <h3>{{ displayName }}</h3>
+                <span>{{ post.createdAt | date:'longDate' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-content-area" (click)="viewPostDetails(post.id, $event)">
+        <a class="post-title-link" *ngIf="post.title">{{ post.title }}</a>
+
+        <!-- ✅ JOB DATA VIEW (If linkedResource exists) -->
+        <div class="job-preview-container" *ngIf="post.linkedResource">
+            <div class="job-main-stats">
+                <span class="salary-range" *ngIf="post.linkedResource.salaryMin">
+                    {{ formatPrice(post.linkedResource.salaryMin) }} - {{ formatPrice(post.linkedResource.salaryMax) }}
+                </span>
+                <span class="company-name" *ngIf="post.linkedResource.companyName">
+                    <i class="bi bi-building"></i> {{ post.linkedResource.companyName }}
+                </span>
+            </div>
+
+            <div class="job-tags-premium">
+                <div class="job-tag">
+                    <i class="bi bi-briefcase"></i>
+                    {{ getType(post.linkedResource.employmentType) }}
+                </div>
+                <div class="job-tag">
+                    <i class="bi bi-bar-chart"></i>
+                    {{ getLevel(post.linkedResource.employmentLevel) }}
+                </div>
+                <div class="job-tag" [ngClass]="{'tag-remote': post.linkedResource.workArrangement === 1}">
+                    <i class="bi"
+                        [ngClass]="post.linkedResource.workArrangement === 1 ? 'bi-cloud-check' : 'bi-geo-alt'"></i>
+                    {{ getArrangement(post.linkedResource.workArrangement) }}
+                </div>
+            </div>
+
+            <!-- ✅ Job Author Link -->
+            <div class="job-author-link" *ngIf="post.linkedResource.authorUsername"
+                (click)="navigateToProfile(post.linkedResource.authorUsername, $event)">
+                <i class="bi bi-person-circle"></i>
+                <span>Posted by @{{ post.linkedResource.authorUsername }}</span>
+            </div>
+        </div>
+
+        <p class="post-text" *ngIf="post.content && post.category !== 4">{{ post.content | stripHtml }}</p>
+
+        <!-- ✅ HOUSING DATA VIEW (If category 4) -->
+        <div class="housing-preview-container" *ngIf="post.category === 4">
+            <div class="housing-main-row">
+                <span class="house-price" *ngIf="getHousingMetadata(post.content)?.Price">
+                    {{ formatPrice(getHousingMetadata(post.content).Price) }}
+                    <small *ngIf="getHousingMetadata(post.content).IsRenting">/mo</small>
+                </span>
+                <span class="house-location" *ngIf="post.location">
+                    <i class="bi bi-geo-alt-fill"></i> {{ post.location.neighborhood || post.location.borough }}
+                </span>
+            </div>
+
+            <div class="house-specs-premium">
+                <div class="spec-item">
+                    <i class="bi bi-house-door"></i>
+                    {{ getHousingMetadata(post.content)?.Type || 'Property' }}
+                </div>
+                <div class="spec-item">
+                    <i class="bi bi-aspect-ratio"></i>
+                    {{ getHousingMetadata(post.content)?.SizeSqFt || 0 }} sqft
+                </div>
+                <div class="spec-item">
+                    <i class="bi bi-door-open"></i>
+                    {{ getHousingMetadata(post.content)?.Rooms || 0 }} Rms
+                </div>
+            </div>
+
+            <p class="house-description" *ngIf="getCleanContent(post.content)">
+                {{ getCleanContent(post.content) }}
+            </p>
+        </div>
+
+        <!-- Repost Box -->
+        <div *ngIf="post.parentPost" class="repost-box" (click)="viewPostDetails(post.parentPost.id, $event)"
+            style="cursor: pointer;">
+            <div class="re-header" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                <img [src]="getAuthorImage(post.parentPost.author)" class="re-avatar"
+                    style="width: 24px; height: 24px; border-radius: 6px;">
+                <strong style="font-size: 0.9rem;">{{ getAuthorName(post.parentPost.author) }}</strong>
+            </div>
+            <h5 style="font-weight: 700; margin-bottom: 8px;">{{ post.parentPost.title }}</h5>
+            <p style="font-size: 0.95rem; color: #555; margin-bottom: 12px;">{{ post.parentPost.content | stripHtml }}
+            </p>
+
+            <!-- Parent Post Attachments -->
+            <div *ngIf="(post.parentPost.attachments && post.parentPost.attachments.length > 0) || post.parentPost.imageUrl"
+                class="parent-media-preview" style="border-radius: 12px; overflow: hidden; margin-top: 10px;">
+                <img *ngIf="post.parentPost.attachments && post.parentPost.attachments.length > 0"
+                    [src]="resolveImageUrl(post.parentPost.attachments[0].url)"
+                    style="width: 100%; height: auto; display: block;">
+                <img *ngIf="(!post.parentPost.attachments || post.parentPost.attachments.length === 0) && post.parentPost.imageUrl"
+                    [src]="resolveImageUrl(post.parentPost.imageUrl)"
+                    style="width: 100%; height: auto; display: block;">
+            </div>
+        </div>
+
+        <!-- Primary Media -->
+        <div *ngIf="(post.attachments && post.attachments.length > 0) || post.imageUrl" class="post-media-main">
+            <img *ngIf="post.attachments && post.attachments.length > 0"
+                [src]="resolveImageUrl(post.attachments[0].url)">
+            <img *ngIf="(!post.attachments || post.attachments.length === 0) && post.imageUrl"
+                [src]="resolveImageUrl(post.imageUrl)">
+        </div>
+    </div>
+
+    <!-- INTERACTION BAR -->
+    <div class="post-footer-actions">
+        <div class="left-actions">
+            <button class="action-pill" [class.active-like]="post.userInteraction === InteractionType.Like"
+                (click)="toggleInteraction(post, InteractionType.Like, $event)">
+                <i class="bi"
+                    [ngClass]="post.userInteraction === InteractionType.Like ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
+                <span>{{ post.stats?.likes || 0 }}</span>
+            </button>
+
+            <button class="action-pill" (click)="toggleComments(post, $event)">
+                <i class="bi bi-chat-left"></i>
+                <span>{{ post.stats?.comments || 0 }}</span>
+            </button>
+        </div>
+
+        <div class="share-icon-btn" (click)="openShareModal($event)" title="Repost">
+            <i class="bi bi-arrow-repeat" style="font-size: 1.4rem;"></i>
+        </div>
+    </div>
+
+    <!-- COMMENTS SECTION -->
+    <section class="premium-comments animate__animated animate__fadeIn" *ngIf="post.showComments"
+        style="margin-top: 24px; border-top: 1px solid #F5F5F5; padding-top: 24px;">
+
+        <div class="comment-entry" (click)="$event.stopPropagation()">
+            <input type="text" placeholder="Add a comment..." [(ngModel)]="post.newCommentContent"
+                (keydown.enter)="submitComment(post, $event)">
+            <button class="btn-submit-comment" (click)="submitComment(post, $event)"
+                [disabled]="!((post.newCommentContent || '').trim())">
+                <i class="bi bi-arrow-right-short fs-4"></i>
+            </button>
+        </div>
+
+        <div class="comments-thread">
+            <div class="comment-node" *ngFor="let comment of (post.comments || [])" style="margin-bottom: 20px;">
+                <div class="comment-card" style="display: flex; gap: 12px;">
+                    <div class="comment-content-box">
+                        <div class="header" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="font-size: 0.9rem;">{{ getAuthorName(comment.author) }}</strong>
+                            <time style="font-size: 0.75rem; color: #999;">{{ comment.createdAt | date:'shortTime'
+                                }}</time>
+                        </div>
+                        <div class="text" style="font-size: 0.95rem; color: #444;">{{ comment.content }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</article>
+
+<!-- REPOST MODAL -->
+<div class="modal-overlay" *ngIf="showShareModal" (click)="closeShareModal()">
+    <div class="modal-card glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Republish Post</h3>
+            <button class="btn-close-modal" (click)="closeShareModal()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+            <textarea [(ngModel)]="shareCommentary" placeholder="What's on your mind?"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" (click)="closeShareModal()">Cancel</button>
+            <button class="btn-confirm" (click)="submitShare()" [disabled]="isSharing">
+                <span *ngIf="!isSharing">Repost</span>
+                <span *ngIf="isSharing" class="spinner-border spinner-border-sm"></span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,166 @@
+<div class="home-container">
+  
+  <div class="layout-grid">
+    
+    <main class="main-content">
+      
+      <h1 class="page-title">NYC360 Featured Posts</h1>
+      
+      <section class="featured-row" *ngIf="featuredPosts.length > 0">
+        <div class="feat-card" *ngFor="let post of featuredPosts" [routerLink]="['/public/posts/details', post.id]">
+          <img [src]="resolvePostImage(post)" alt="Post Image">
+          
+          <button class="save-btn" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+            <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+          </button>
+
+          <div class="overlay">
+            <span class="badge-pill" [ngClass]="'cat-'+post.category">{{ getCategoryName(post.category) }}</span>
+            <h3>{{ post.title | slice:0:50 }}...</h3>
+            <p>{{ getAuthorName(post.author) }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero-section" *ngIf="heroBanner">
+        <div class="hero-card" [routerLink]="['/public/posts/details', heroBanner.id]">
+          <img [src]="resolvePostImage(heroBanner)" alt="Hero Image">
+          
+          <button class="save-btn" [class.saved]="heroBanner.isSaved" (click)="onSavePost(heroBanner, $event)">
+            <i class="bi" [ngClass]="heroBanner.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+          </button>
+
+          <div class="play-icon"><i class="bi bi-play-fill"></i></div>
+          <div class="hero-overlay">
+            <h2>{{ heroBanner.title }}</h2>
+            <p>{{ heroBanner.content | slice:0:120 }}...</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="category-block" *ngFor="let group of interestGroups">
+        <div class="block-header">
+          <div class="vertical-bar" [ngClass]="'bar-'+group.category"></div>
+          <h2>{{ getCategoryName(group.category) }}</h2>
+        </div>
+        
+        <div class="posts-grid">
+          <div class="std-card" *ngFor="let post of group.posts | slice:0:4" [routerLink]="['/public/posts/details', post.id]">
+            <div class="img-wrapper">
+              <img [src]="resolvePostImage(post)">
+              <button class="save-btn" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+                <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+              </button>
+              <div class="bottom-gradient">
+                <h4>{{ post.title | slice:0:60 }}</h4>
+                <small>{{ getCategoryName(post.category) }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlights-section" *ngIf="highlightedPosts.length > 0">
+        <div class="block-header">
+           <div class="vertical-bar" style="background: #29B6F6;"></div>
+           <h2>Top Stories</h2>
+        </div>
+        <div class="horizontal-cards-list">
+          <div class="horizontal-card" *ngFor="let post of highlightedPosts" [routerLink]="['/public/posts/details', post.id]">
+            <div class="h-img-wrapper">
+              <span class="h-badge">{{ getCategoryName(post.category) }}</span>
+              <button class="save-btn" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+                <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+              </button>
+              <img [src]="resolvePostImage(post)">
+            </div>
+            <div class="h-content">
+              <h2 class="h-title">{{ post.title }}</h2>
+              <p class="h-desc">{{ post.content | slice:0:150 }}...</p>
+              <div class="h-footer">
+                <div class="h-author">
+                  <img [src]="getAuthorImage(post.author)" class="auth-img">
+                  <span class="auth-name">{{ getAuthorName(post.author) }}</span>
+                  <span class="post-time">{{ post.createdAt | date:'shortTime' }}</span>
+                </div>
+                <span class="read-more">Read More <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      
+      <div class="widget weather" *ngIf="weatherData">
+        <div class="w-head">
+          <span class="sun-icon"><i class="bi bi-geo-alt-fill"></i> {{ currentDate | date:'fullDate' }}</span>
+        </div>
+        <div class="w-body">
+          <div class="temp-box">
+            <span class="degree">{{ weatherData.temp }}°F</span>
+            <span class="desc">{{ weatherData.desc | titlecase }}</span>
+          </div>
+          <div class="aqi-box">
+             <img [src]="weatherData.icon" alt="weather icon" style="width: 50px; height: 50px;">
+          </div>
+        </div>
+        
+        <ng-container *ngFor="let alert of alerts">
+            <div class="alert-item" [ngClass]="alert.type">
+            <i class="bi" [ngClass]="alert.icon"></i>
+            <div class="alert-text">
+                <strong>{{ alert.title }}</strong>
+                <span>{{ alert.desc }}</span>
+            </div>
+            </div>
+        </ng-container>
+      </div>
+      
+      <div class="widget weather" *ngIf="!weatherData">
+          <p class="text-center text-muted">Loading Weather...</p>
+      </div>
+
+      <div class="widget">
+        <h3>Trending Now</h3>
+        <div class="tags-container">
+          <a *ngFor="let tag of trendingTags; let i = index" 
+             [routerLink]="['/public/posts/tags', tag]" 
+             class="tag" [ngClass]="['green', 'blue', 'pink', 'purple', 'cyan', 'indigo'][i % 6]">
+             {{ tag }}
+          </a>
+          <p *ngIf="trendingTags.length === 0" style="color: #999; font-size:12px;">No trending topics.</p>
+        </div>
+      </div>
+
+      <div class="widget">
+        <h3>Communities For You</h3>
+        <div class="comm-list">
+          <div class="comm-row" *ngFor="let comm of suggestedCommunities">
+            <div class="c-avatar">{{ comm.name.charAt(0) | uppercase }}</div>
+            <div class="c-info">
+              <strong>{{ comm.name }}</strong>
+              <span>{{ comm.memberCount || 0 }} members</span>
+            </div>
+            <button class="join-btn" [class.joined]="comm.isJoined" (click)="onJoinCommunity(comm)" [disabled]="comm.isLoadingJoin || comm.isJoined">
+              <i *ngIf="!comm.isLoadingJoin && !comm.isJoined" class="bi bi-plus-lg"></i>
+              <span *ngIf="comm.isLoadingJoin" class="spinner-border spinner-border-sm"></span>
+              <i *ngIf="comm.isJoined" class="bi bi-check-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <div class="toast-container">
+    <div class="custom-toast" *ngFor="let toast of toasts" [ngClass]="toast.type" (click)="removeToast(toast.id)">
+        <div class="toast-icon">
+            <i class="bi" [ngClass]="{'bi-check-circle-fill': toast.type==='success', 'bi-x-circle-fill': toast.type==='error', 'bi-info-circle-fill': toast.type==='info'}"></i>
+        </div>
+        <div class="toast-content"><span>{{ toast.message }}</span></div>
+    </div>
+  </div>
+</div>

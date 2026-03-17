@@ -1,0 +1,346 @@
+<div class="page-container" [class.housing-theme]="isHousingCategory"
+  [style.--theme-color]="activeTheme?.color || '#333'" style="min-height: 100vh;">
+
+  <div *ngIf="isLoading" class="container mt-5">
+    <!-- Header Skeleton -->
+    <div class="text-center mb-5">
+      <div class="skeleton-line w-25 mx-auto mb-3" style="height: 12px; border-radius: 10px;"></div>
+      <div class="skeleton-line w-50 mx-auto mb-3" style="height: 50px; border-radius: 10px;"></div>
+      <div class="skeleton-line w-75 mx-auto" style="height: 18px; border-radius: 10px;"></div>
+    </div>
+
+    <!-- Top Section Skeleton -->
+    <div class="row g-4 mb-5">
+      <div class="col-lg-8">
+        <!-- Match 16:9 Hero aspect ratio -->
+        <div class="skeleton-rect" style="width: 100%; aspect-ratio: 16/9; border-radius: 16px;"></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="skeleton-rect mb-3" style="height: 400px; border-radius: 16px;"></div>
+      </div>
+    </div>
+
+    <!-- Chips Skeleton -->
+    <div class="d-flex gap-3 mb-5 overflow-hidden">
+      <div class="skeleton-rect" style="min-width: 80px; height: 38px; border-radius: 20px;"></div>
+      <div class="skeleton-rect" style="min-width: 100px; height: 38px; border-radius: 20px;"></div>
+      <div class="skeleton-rect" style="min-width: 120px; height: 38px; border-radius: 20px;"></div>
+      <div class="skeleton-rect" style="min-width: 90px; height: 38px; border-radius: 20px;"></div>
+    </div>
+
+    <!-- Grid Skeleton -->
+    <div class="row g-4">
+      <div class="col-md-4" *ngFor="let i of [1,2,3]">
+        <div class="skeleton-rect mb-2" style="width: 100%; aspect-ratio: 16/10; border-radius: 12px;"></div>
+        <div class="skeleton-line w-75 mb-2" style="height: 15px;"></div>
+        <div class="skeleton-line w-50" style="height: 12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper" *ngIf="!isLoading">
+    <header class="category-header">
+      <div class="container text-center header-inner">
+        <p class="top-meta">Welcome at NYC360</p>
+        <h1 class="main-title">{{ activeTheme?.label || 'News' }}</h1>
+        <p class="sub-meta">{{ dynamicDescription }}</p>
+
+        <div class="header-nav-buttons" *ngIf="activeTheme">
+          <ng-container *ngFor="let btn of headerButtons">
+            <!-- Case: Dropdown -->
+            <div class="nav-dropdown-wrapper" *ngIf="btn.isDropdown">
+              <button class="nav-btn dropdown-toggle-btn">
+                <i class="bi" [ngClass]="btn.icon || 'bi-dot'"></i>
+                <span class="ms-2">{{ btn.label }}</span>
+                <i class="bi bi-chevron-down ms-2 small-arrow"></i>
+              </button>
+              <div class="dropdown-menu-custom">
+                <ng-container *ngFor="let child of btn.children">
+                  <!-- Action Link -->
+                  <a *ngIf="child.isAction" [routerLink]="hasContributorAccess() ? child.link : null"
+                    [queryParams]="child.queryParams" class="dropdown-item-custom"
+                    (click)="handleContributorAction($event)" [class.locked]="!hasContributorAccess()">
+                    <i class="bi" [ngClass]="!hasContributorAccess() ? 'bi-lock-fill' : (child.icon || 'bi-dot')"></i>
+                    {{ child.label }}
+                  </a>
+                  <!-- Regular Link -->
+                  <a *ngIf="!child.isAction" [routerLink]="child.link" [queryParams]="child.queryParams"
+                    class="dropdown-item-custom">
+                    <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
+                    {{ child.label }}
+                  </a>
+                </ng-container>
+              </div>
+            </div>
+
+            <!-- Case: Standard Button -->
+            <a *ngIf="!btn.isDropdown" [routerLink]="btn.link" [queryParams]="btn.queryParams" class="nav-btn">
+              <i *ngIf="btn.icon" [class]="'bi ' + btn.icon + ' me-2'"></i>
+              {{ btn.label }}
+            </a>
+          </ng-container>
+        </div>
+
+
+      </div>
+    </header>
+
+    <div style="height: 30px;"></div>
+
+    <div class="container main-content">
+
+      <section class="hero-section mb-5 fade-in-up" *ngIf="heroPost">
+        <app-article-hero [image]="getImg(heroPost)" [title]="heroPost.title || ''"
+          [description]="(heroPost.cleanDescription || heroPost.content) || ''"
+          [metaText]="'Published: ' + (heroPost.createdAt | date:'MMM d, y')"
+          [link]="['/public/posts/details', heroPost.id]" [customColor]="activeTheme?.color || '#00695C'">
+        </app-article-hero>
+      </section>
+
+      <!-- Filter bar section removed per user request -->
+
+
+      <section class="chips-scroll mb-5 fade-in-up">
+        <button class="chip active" (click)="navigateToFeed({ filter: 'all' })">All</button>
+        <button class="chip" (click)="navigateToFeed({ filter: 'trending' })">Trending</button>
+        <button class="chip" (click)="navigateToFeed({ filter: 'discussions' })">Discussions</button>
+        <button class="chip" (click)="navigateToFeed({ filter: 'events' })">Events</button>
+        <div class="dropdown-filters ms-auto">
+          <!-- <button class="chip-drop">Most Recent <i class="bi bi-chevron-down"></i></button> -->
+        </div>
+      </section>
+
+      <!-- Standard Dashboard (Non-Housing) -->
+      <section class="latest-grid-section mb-5 fade-in-up" *ngIf="gridPosts.length > 0 && !isHousingCategory">
+        <div class="section-header mb-3">
+          <h3>Highlights</h3>
+          <a [routerLink]="['/public/feed', activeTheme?.path]" class="view-all">View All</a>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-4" *ngFor="let post of gridPosts">
+            <div class="grid-card">
+              <div class="img-wrapper">
+                <img [src]="getImg(post)" alt="Post Thumb" [routerLink]="['/public/posts/details', post.id]"
+                  loading="lazy" appImgFallback="post">
+                <div class="color-bar"></div>
+              </div>
+              <div class="card-content">
+                <h4 [routerLink]="['/public/posts/details', post.id]">{{ post.title | slice:0:60 }}...</h4>
+                <p class="desc">{{ post.content | slice:0:100 }}...</p>
+                <a [routerLink]="['/public/posts/details', post.id]" class="read-more">Read More <i
+                    class="bi bi-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Housing Specific Sections -->
+      <ng-container *ngIf="isHousingCategory">
+
+        <!-- Housing Filter Bar Sub -->
+        <div class="housing-sub-filters mb-5">
+          <button class="filter-btn">Location <i class="bi bi-chevron-down"></i></button>
+          <button class="filter-btn">Privacy Type <i class="bi bi-chevron-down"></i></button>
+          <button class="filter-btn">Property Type <i class="bi bi-chevron-down"></i></button>
+          <button class="filter-btn">Rooms/Baths <i class="bi bi-chevron-down"></i></button>
+          <button class="filter-btn">Price <i class="bi bi-chevron-down"></i></button>
+          <button class="filter-btn accent ms-auto">Open Now</button>
+        </div>
+
+        <!-- Homes for Sale -->
+        <section class="housing-row-section mb-5" *ngIf="homesForSale.length > 0">
+          <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">Homes For Sale</h2>
+            <a class="view-all-link">View All</a>
+          </div>
+          <div class="row g-4">
+            <div class="col-lg-4 col-md-6" *ngFor="let post of homesForSale | slice:0:3">
+              <div class="housing-premium-card">
+                <div class="img-box">
+                  <img [src]="getImg(post)" alt="home" appImgFallback="post">
+                </div>
+                <div class="card-body">
+                  <h4 class="property-title">{{ post.title }}</h4>
+                  <div class="specs-row">
+                    <span class="spec"><i class="bi bi-arrows-fullscreen"></i> {{ post.housingMetadata?.SizeSqFt }}
+                      sqft</span>
+                    <span class="spec"><i class="bi bi-house-door"></i> {{ post.housingMetadata?.Rooms }} rooms</span>
+                    <span class="spec"><i class="bi bi-droplet"></i> {{ post.housingMetadata?.Bathrooms }} baths</span>
+                  </div>
+                  <div class="price-row">
+                    <span class="price">{{ post.housingMetadata?.Price | currency:'USD':'symbol':'1.0-0' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Homes for Rent -->
+        <section class="housing-row-section mb-5" *ngIf="homesForRent.length > 0">
+          <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">Homes For Rent</h2>
+            <a class="view-all-link">View All</a>
+          </div>
+          <div class="row g-4">
+            <div class="col-lg-3 col-md-6" *ngFor="let post of homesForRent | slice:0:4">
+              <div class="rental-premium-card">
+                <div class="img-box">
+                  <img [src]="getImg(post)" alt="rental" appImgFallback="post">
+                </div>
+                <div class="card-body">
+                  <div class="location-tag" *ngIf="post.location">{{ post.location.borough | uppercase }}</div>
+                  <h4 class="price" *ngIf="post.housingMetadata">{{ post.housingMetadata.Price |
+                    currency:'USD':'symbol':'1.0-0' }}<span class="period">/mo</span></h4>
+                  <p class="building-name">{{ post.title }}</p>
+                  <div class="specs-grid" *ngIf="post.housingMetadata">
+                    <span class="spec-pill"><i class="bi bi-door-open"></i> {{ post.housingMetadata.Rooms }} Bed</span>
+                    <span class="spec-pill"><i class="bi bi-droplet"></i> {{ post.housingMetadata.Bathrooms }}
+                      Bath</span>
+                    <button class="details-btn">Details</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Official Programs -->
+        <section class="housing-row-section mb-5" *ngIf="officialPosts.length > 0">
+          <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">NYC Housing Programs Official Posts</h2>
+            <a class="view-all-link">View All</a>
+          </div>
+          <div class="row g-4">
+            <div class="col-lg-4 col-md-6" *ngFor="let post of officialPosts | slice:0:3">
+              <div class="housing-premium-card official">
+                <div class="img-box">
+                  <img [src]="getImg(post)" alt="program" appImgFallback="post">
+                </div>
+                <div class="card-body">
+                  <h4 class="property-title">{{ post.title }}</h4>
+                  <div class="specs-row" *ngIf="post.housingMetadata">
+                    <span class="spec"><i class="bi bi-arrows-fullscreen"></i> {{ post.housingMetadata.SizeSqFt }}
+                      sqft</span>
+                    <span class="spec"><i class="bi bi-house-door"></i> {{ post.housingMetadata.Rooms }} rooms</span>
+                    <span class="spec"><i class="bi bi-droplet"></i> {{ post.housingMetadata.Bathrooms }} baths</span>
+                  </div>
+                  <div class="price-row" *ngIf="post.housingMetadata">
+                    <span class="price">{{ post.housingMetadata.Price | currency:'USD':'symbol':'1.0-0' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </ng-container>
+
+      <div class="row g-5 mb-5 fade-in-up">
+        <div class="col-lg-8" *ngIf="moreNewsPosts.length > 0">
+          <div class="section-header mb-4">
+            <h3>More Stories</h3>
+          </div>
+          <div class="more-news-list">
+            <div class="news-list-item mb-4" *ngFor="let post of moreNewsPosts">
+              <div class="row g-3">
+                <div class="col-4 col-sm-3">
+                  <div class="list-img">
+                    <img [src]="getImg(post)" alt="thumb" [routerLink]="['/public/posts/details', post.id]"
+                      loading="lazy" appImgFallback="post">
+                  </div>
+                </div>
+                <div class="col-8 col-sm-9">
+                  <span class="cat-small">{{ activeTheme?.label }}</span>
+                  <h5 [routerLink]="['/public/posts/details', post.id]">{{ post.title }}</h5>
+                  <p class="desc d-none d-sm-block">{{ post.content | slice:0:120 }}...</p>
+                  <div class="meta">
+                    <span>{{ post.author.name || post.author.username }}</span>
+                    <span class="dot">•</span>
+                    <span>{{ post.createdAt | date:'mediumDate' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="structured-gallery mb-5 fade-in-up" *ngIf="structuredPosts.length > 0 && !isHousingCategory">
+        <div class="section-header-premium mb-4">
+          <div class="line"></div>
+          <h3>NYC360 Marketplace</h3>
+          <p>Explore exclusive opportunities and listings across the city</p>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-4" *ngFor="let post of structuredPosts">
+            <div class="grid-card luxury-feature h-100">
+              <div class="img-wrapper">
+                <img [src]="getImg(post)" alt="Listing" [routerLink]="['/public/posts/details', post.id]" loading="lazy"
+                  appImgFallback="post">
+                <span class="price-badge" *ngIf="post.housingMetadata">{{ post.housingMetadata.Price |
+                  currency:'USD':'symbol':'1.0-0' }}</span>
+                <div class="overlay-specs" *ngIf="post.housingMetadata">
+                  <span *ngIf="post.housingMetadata.Rooms"><i class="bi bi-door-open-fill"></i> {{
+                    post.housingMetadata.Rooms }}</span>
+                  <span *ngIf="post.housingMetadata.Bathrooms"><i class="bi bi-droplet-fill"></i> {{
+                    post.housingMetadata.Bathrooms }}</span>
+                  <span *ngIf="post.housingMetadata.SizeSqFt"><i class="bi bi-arrows-fullscreen"></i> {{
+                    post.housingMetadata.SizeSqFt }}</span>
+                </div>
+              </div>
+              <div class="card-content d-flex flex-column h-100">
+                <div class="top-row">
+                  <span class="type-label" *ngIf="post.housingMetadata">{{ post.housingMetadata.Type || 'Offer'
+                    }}</span>
+                  <span class="date">{{ post.createdAt | date:'MMM d' }}</span>
+                </div>
+                <h4 [routerLink]="['/public/posts/details', post.id]">{{ post.title }}</h4>
+                <p class="desc">{{ post.cleanDescription || (post.content | slice:0:100) }}...</p>
+                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                  <span class="location-mini" *ngIf="post.location">
+                    <i class="bi bi-geo-alt"></i> {{ post.location.neighborhood }}
+                  </span>
+                  <a [routerLink]="['/public/posts/details', post.id]" class="view-btn-premium">
+                    Details <i class="bi bi-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="text-only-section pt-5 border-top fade-in-up" *ngIf="textOnlyPosts.length > 0">
+        <div class="section-header mb-4 text-center">
+          <h3>Community Discussions</h3>
+          <p class="text-muted">Latest questions and posts from the community</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-4" *ngFor="let post of textOnlyPosts">
+            <div class="text-card-design" [routerLink]="['/public/posts/details', post.id]" style="cursor: pointer;">
+              <div class="card-top-row">
+                <span class="pill-tag">{{ activeTheme?.label }}</span>
+                <span class="post-time">{{ post.createdAt | date:'shortTime' }} ago</span>
+              </div>
+              <h3 class="text-title">“{{ post.title }}”</h3>
+
+              <!-- <div class="card-footer-meta">
+                <img [src]="getAuthorImg(post.author)" class="mini-avatar">
+                <span>{{ post.author.username }}</span>
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- 🔐 Verification Modal -->
+  <app-verification-modal *ngIf="showVerificationModal" [categoryName]="activeTheme?.label || 'General'"
+    [categoryId]="activeCategoryId" [extraOccupations]="categoryTags" (close)="closeModal()" (verified)="onVerified()">
+  </app-verification-modal>
+</div>

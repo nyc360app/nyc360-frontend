@@ -1,0 +1,305 @@
+@use "../../../../../../styles.scss" as *;
+
+// Classic Design Tokens
+$primary-blue: #2563eb;
+$primary-blue-dark: #1e40af;
+$primary-blue-light: #3b82f6;
+$white: #ffffff;
+$bg-light: #f8fafc;
+$text-dark: #1e293b;
+$text-light: #64748b;
+$border-color: #e2e8f0;
+$card-radius: 12px;
+$input-radius: 8px;
+
+.rss-connect-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: $white;
+
+    .rss-card {
+        background: $white;
+        padding: 3rem;
+        border-radius: $card-radius;
+        border: 1px solid $border-color;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        width: 100%;
+        max-width: 600px;
+        transition: box-shadow 0.3s ease;
+
+        &:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid $bg-light;
+
+            h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                color: $text-dark;
+                margin-bottom: 0.5rem;
+                font-family: 'Outfit', 'Inter', sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.75rem;
+
+                i {
+                    color: $primary-blue;
+                }
+            }
+
+            p {
+                color: $text-light;
+                font-size: 1rem;
+                font-weight: 400;
+                margin-bottom: 1rem;
+            }
+
+            .category-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1.25rem;
+                background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+                color: white;
+                border-radius: 50px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                margin-top: 1rem;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+                transition: all 0.3s ease;
+
+                i {
+                    font-size: 1.1rem;
+                }
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+                }
+            }
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                /* Removed animation properties for classic design */
+
+                /* Removed @for loop for animation-delay */
+
+                label {
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    color: $text-dark;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+
+                    i {
+                        color: $primary-blue;
+                        font-size: 0.95rem;
+                    }
+                }
+
+                input,
+                textarea,
+                select {
+                    padding: 0.875rem 1rem;
+                    border: 1px solid $border-color;
+                    border-radius: $input-radius;
+                    font-size: 0.95rem;
+                    transition: all 0.2s ease;
+                    background-color: $white;
+                    font-family: inherit;
+                    color: $text-dark;
+
+                    &:hover {
+                        border-color: #cbd5e1;
+                    }
+
+                    &:focus {
+                        outline: none;
+                        border-color: $primary-blue;
+                        background-color: $white;
+                        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+                    }
+
+                    &::placeholder {
+                        color: #94a3b8;
+                    }
+                }
+
+                textarea {
+                    resize: vertical;
+                    min-height: 100px;
+                }
+
+                .select-wrapper {
+                    position: relative;
+
+                    &::after {
+                        content: '\f107';
+                        font-family: 'FontAwesome';
+                        position: absolute;
+                        right: 1rem;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        pointer-events: none;
+                        color: $text-light;
+                        font-size: 1rem;
+                        /* Removed transition for classic design */
+                    }
+
+                    /* Removed hover effect for classic design */
+
+                    select {
+                        width: 100%;
+                        appearance: none;
+                        cursor: pointer;
+                        padding-right: 2.5rem;
+                    }
+                }
+
+                .error {
+                    color: #dc2626;
+                    font-size: 0.85rem;
+                    margin-top: 0.25rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    /* Removed animation for classic design */
+
+                    &::before {
+                        content: '⚠';
+                        font-size: 0.9rem;
+                    }
+                }
+            }
+
+            .message {
+                padding: 1rem;
+                border-radius: $input-radius;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                font-weight: 500;
+                /* Removed animation for classic design */
+
+                i {
+                    font-size: 1.1rem;
+                }
+
+                &.error-msg {
+                    background: #fef2f2;
+                    color: #dc2626;
+                    border: 1px solid #fecaca;
+                }
+
+                &.success-msg {
+                    background: #f0fdf4;
+                    color: #16a34a;
+                    border: 1px solid #bbf7d0;
+                }
+            }
+
+            .submit-btn {
+                margin-top: 1rem;
+                padding: 1rem;
+                border: none;
+                border-radius: $input-radius;
+                background: $primary-blue;
+                color: white;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 0.5rem;
+                /* Removed position, overflow, and box-shadow for classic design */
+
+                /* Removed ::before for classic design */
+
+                &:hover {
+                    background: $primary-blue-dark;
+                    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+                    /* Removed ::before for classic design */
+                }
+
+                &:active {
+                    transform: scale(0.98);
+                }
+
+                &:disabled {
+                    background: #cbd5e1;
+                    cursor: not-allowed;
+                    transform: none;
+                    box-shadow: none;
+
+                    /* Removed ::before for classic design */
+                }
+
+                .loader {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    border-top-color: #fff;
+                    border-radius: 50%;
+                    display: inline-block;
+                    animation: rotation 0.8s linear infinite;
+                }
+            }
+        }
+    }
+}
+
+// Animations
+/* Removed @keyframes float, slideUp, fadeIn, fadeInUp, slideIn, shake for classic design */
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .rss-connect-container {
+        padding: 20px 15px;
+
+        .rss-card {
+            padding: 2rem 1.5rem;
+
+            .header {
+                h2 {
+                    font-size: 1.75rem;
+                }
+
+                p {
+                    font-size: 0.95rem;
+                }
+            }
+        }
+    }
+}

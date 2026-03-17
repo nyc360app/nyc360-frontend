@@ -1,0 +1,259 @@
+<div>
+    <!-- Header Section -->
+    <div class="header-section mb-4">
+        <div class="title-group d-flex align-items-center">
+            <a routerLink="../../list" class="btn btn-icon me-3">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="page-title">Community Moderation</h2>
+                <p class="page-subtitle" *ngIf="community">Managing <strong>{{ community.name }}</strong> (@{{
+                    community.slug }})</p>
+            </div>
+        </div>
+        <div class="action-group" *ngIf="community">
+            <span class="badge" [ngClass]="community.isActive ? 'bg-success' : 'bg-danger'">
+                {{ community.isActive ? 'Active' : 'Disabled' }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="data-card p-5 text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Fetching community details...</p>
+    </div>
+
+    <!-- Error / Empty State -->
+    <div *ngIf="!isLoading && !community" class="data-card p-5 text-center">
+        <i class="bi bi-exclamation-circle text-danger display-4"></i>
+        <h4 class="fw-bold mt-3">Community Not Found</h4>
+        <p class="text-muted">We couldn't retrieve the details for this community.</p>
+        <a routerLink="../../list" class="btn btn-primary mt-3">
+            <i class="bi bi-arrow-left me-2"></i> Back to Communities
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoading && community" class="row g-4">
+        <!-- Left Column: Overview & Controls -->
+        <div class="col-lg-8">
+            <!-- Overview Card -->
+            <div class="data-card mb-4 overflow-hidden">
+                <div class="community-header-banner"
+                    [style.background-image]="community.coverUrl ? 'url(' + community.coverUrl + ')' : 'linear-gradient(135deg, #3b82f6, #2563eb)'">
+                    <div class="avatar-container">
+                        <div class="avatar-box">
+                            {{ community.name.charAt(0) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 pt-5 mt-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h3 class="fw-bold mb-1">{{ community.name }}</h3>
+                            <p class="text-muted mb-4">{{ community.description }}</p>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-tag-fill me-1"></i> {{ getCommunityTypeName(community.type) }}
+                                </span>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi" [ngClass]="community.isPrivate ? 'bi-lock-fill' : 'bi-globe'"></i>
+                                    {{ community.isPrivate ? 'Private' : 'Public' }}
+                                </span>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-calendar-event me-1"></i> Created {{ community.createdAt | date:'MMM
+                                    d, y' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mini-stats-grid">
+                                <div class="mini-stat">
+                                    <span class="label">Members</span>
+                                    <span class="value">{{ community.memberCount }}</span>
+                                </div>
+                                <div class="mini-stat">
+                                    <span class="label">Moderators</span>
+                                    <span class="value">{{ community.moderatorCount }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Required Section -->
+            <div *ngIf="community.pendingDisbandRequest" class="data-card border-warning mb-4 bg-warning bg-opacity-10">
+                <div class="p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-warning-emphasis mb-1">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Pending Disband Request
+                        </h5>
+                        <p class="mb-0 text-muted small">Requested by <strong>{{
+                                community.pendingDisbandRequest.requestedByUserName }}</strong> for: "{{
+                            community.pendingDisbandRequest.reason }}"</p>
+                    </div>
+                    <a [routerLink]="['../../disband-requests']" class="btn btn-warning btn-sm fw-bold">Review Now</a>
+                </div>
+            </div>
+
+            <!-- Moderation Actions -->
+            <div class="data-card">
+                <div class="p-4 border-bottom">
+                    <h5 class="fw-bold mb-0">Moderation Controls</h5>
+                </div>
+                <div class="p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="control-item p-3 border rounded-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="fw-bold text-dark">Activation Status</div>
+                                    <span class="badge" [ngClass]="community.isActive ? 'bg-success' : 'bg-danger'">
+                                        {{ community.isActive ? 'Active' : 'Suspended' }}
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-3">Suspend this community to hide it from all users and
+                                    disable interactions.</p>
+                                <button class="btn w-100"
+                                    [ngClass]="community.isActive ? 'btn-outline-danger' : 'btn-success'">
+                                    {{ community.isActive ? 'Suspend Community' : 'Enable Community' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="control-item p-3 border rounded-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="fw-bold text-dark">Visibility</div>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ community.isPrivate ? 'Private' : 'Public' }}
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-3">Public communities can be joined by anyone. Private
+                                    require a request.</p>
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    Toggle Privacy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Leaders & Location -->
+        <div class="col-lg-4">
+            <!-- Leaders Card -->
+            <div class="data-card mb-4">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Platform Leaders</h5>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="showSearchModal = true">
+                        <i class="bi bi-person-plus-fill me-1"></i> Add
+                    </button>
+                </div>
+                <div class="p-0">
+                    <div class="list-group list-group-flush">
+                        <div *ngFor="let leader of leaders"
+                            class="list-group-item p-3 border-0 border-bottom d-flex align-items-center justify-content-between transition-hover">
+                            <div class="d-flex align-items-center">
+                                <div class="leader-avatar-sm">
+                                    <img *ngIf="leader.avatarUrl" [src]="getAvatarUrl(leader.avatarUrl)"
+                                        [alt]="leader.name">
+                                    <div *ngIf="!leader.avatarUrl" class="initials">{{ leader.name.charAt(0) }}</div>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="fw-bold text-dark">{{ leader.name }}</div>
+                                    <small class="text-muted">Since {{ leader.joinedAt | date:'MMM y' }}</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-link text-danger p-0" (click)="removeLeader(leader.userId)"
+                                title="Remove Leader">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                        <div *ngIf="leaders.length === 0 && !isLoadingLeaders" class="p-5 text-center">
+                            <i class="bi bi-people text-muted display-6"></i>
+                            <p class="text-muted small mt-2">No leaders assigned.</p>
+                        </div>
+
+                        <div *ngIf="isLoadingLeaders" class="p-4 text-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Card -->
+            <div class="data-card">
+                <div class="p-3 border-bottom">
+                    <h5 class="fw-bold mb-0">Location & Area</h5>
+                </div>
+                <div class="p-4">
+                    <div *ngIf="community.location" class="d-flex align-items-start gap-3">
+                        <div class="location-box text-primary bg-primary bg-opacity-10">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">{{ community.location.name }}</div>
+                            <small class="text-muted d-block">Neighborhood: {{ community.location.neighborhood
+                                }}</small>
+                            <small class="text-muted d-block">NYC ID: {{ community.locationId }}</small>
+                        </div>
+                    </div>
+                    <div *ngIf="!community.location" class="text-center py-3">
+                        <p class="text-muted small mb-0">No specific geo-location assigned.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div class="modal-overlay" *ngIf="showSearchModal" (click)="showSearchModal = false">
+    <div class="search-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header border-bottom p-4">
+            <h5 class="fw-bold mb-0">Assign New Leader</h5>
+            <button class="btn-close" (click)="showSearchModal = false"></button>
+        </div>
+        <div class="modal-body p-4">
+            <div class="search-box mb-4 position-relative">
+                <i class="bi bi-search position-absolute text-muted"
+                    style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                <input type="text" class="form-control ps-5" placeholder="Search community members..."
+                    [(ngModel)]="userSearchQuery" (input)="onUserSearch($event)">
+            </div>
+
+            <div class="search-results custom-scrollbar" style="max-height: 400px; overflow-y: auto;">
+                <div *ngIf="isSearchingUsers" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+
+                <div *ngFor="let user of searchResults"
+                    class="user-result-row p-3 rounded-3 mb-2 d-flex align-items-center justify-content-between transition-hover"
+                    (click)="assignLeader(user.userId)">
+                    <div class="d-flex align-items-center">
+                        <div class="leader-avatar-sm">
+                            <img *ngIf="user.avatarUrl" [src]="getAvatarUrl(user.avatarUrl)" alt="Avatar">
+                            <div *ngIf="!user.avatarUrl" class="initials">{{ user.name.charAt(0) }}</div>
+                        </div>
+                        <div class="ms-3">
+                            <div class="fw-bold text-dark">{{ user.name }}</div>
+                            <small class="text-muted">{{ user.role }}</small>
+                        </div>
+                    </div>
+                    <i class="bi bi-plus-circle text-primary fs-5"></i>
+                </div>
+
+                <div *ngIf="!isSearchingUsers && userSearchQuery.length >= 2 && searchResults.length === 0"
+                    class="text-center py-4 text-muted">
+                    No members found.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

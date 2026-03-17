@@ -1,0 +1,187 @@
+<div class="requests-container">
+    <div class="header">
+        <div class="title-section">
+            <h1>RSS Feed Requests</h1>
+            <p>Manage and review user-submitted RSS sources</p>
+        </div>
+
+        <div class="filters">
+            <select [(ngModel)]="statusFilter" (change)="loadRequests()" class="status-select">
+                <option [ngValue]="undefined">All Statuses</option>
+                <option [ngValue]="0">Pending</option>
+                <option [ngValue]="1">Approved</option>
+                <option [ngValue]="2">Rejected</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <div *ngIf="isLoading" class="loader-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <div *ngIf="errorMessage" class="error-banner">
+            {{ errorMessage }}
+        </div>
+
+        <!-- Cards Layout -->
+        <div class="cards-container" *ngIf="requests.length > 0; else emptyState">
+            <div class="request-card" *ngFor="let req of requests">
+                <!-- Card Header (Permanent Visible) -->
+                <div class="card-header">
+                    <div class="header-left">
+                        <img [src]="req.imageUrl || 'assets/images/rss-placeholder.png'" alt="" class="source-icon">
+                        <div class="header-info">
+                            <h3 class="source-name">{{ req.name }}</h3>
+                            <a [href]="req.url" target="_blank" class="source-url">{{ req.url }}</a>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <ng-container *ngIf="req.status === 0">
+                            <button (click)="openActionModal(req, 1)" class="btn-approve" title="Approve">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button (click)="openActionModal(req, 2)" class="btn-reject" title="Reject">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </ng-container>
+
+                    </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="card-details-toggle">
+                    <button class="toggle-btn" (click)="req['_showDetails'] = !req['_showDetails']">
+                        <i class="fas" [class.fa-chevron-down]="!req['_showDetails']"
+                            [class.fa-chevron-up]="req['_showDetails']"></i>
+                        {{ req['_showDetails'] ? 'Hide Details' : 'View More Details' }}
+                    </button>
+                </div>
+
+                <!-- Expandable Content -->
+                <div class="expanded-content" *ngIf="req['_showDetails']">
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label><i class="fas fa-tag"></i> Category</label>
+                                <span class="category-badge">{{ getCategoryLabel(req.category) }}</span>
+                            </div>
+
+                            <div class="info-item">
+                                <label><i class="fas fa-user"></i> Requester</label>
+                                <div class="requester-info">
+                                    <img [src]="'https://api.nyc360.us/users/' + req.requester.imageUrl"
+                                        (error)="$event.target['src'] = 'assets/images/default-avatar.png'"
+                                        alt="{{ req.requester.fullName }}" class="requester-avatar">
+                                    <div>
+                                        <span class="requester-name">{{ req.requester.fullName }}</span>
+                                        <span class="requester-id">ID: {{ req.requester.id }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <label><i class="fas fa-calendar"></i> Submitted</label>
+                                <span>{{ req.createdAt | date:'medium' }}</span>
+                            </div>
+
+                            <div class="info-item">
+                                <label><i class="fas fa-info-circle"></i> Status</label>
+                                <span class="status-badge" [ngClass]="getStatusClass(req.status)">
+                                    {{ getStatusLabel(req.status) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer" *ngIf="req.description || req.adminNote">
+                        <div class="detail-section" *ngIf="req.description">
+                            <div class="detail-header">
+                                <strong><i class="fas fa-align-left"></i> Description</strong>
+                            </div>
+                            <pre class="detail-content">{{ req.description }}</pre>
+                        </div>
+
+                        <div class="detail-section admin-note-section" *ngIf="req.adminNote">
+                            <div class="detail-header">
+                                <strong><i class="fas fa-comment-dots"></i> Admin Note</strong>
+                            </div>
+                            <pre class="detail-content">{{ req.adminNote }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+            <button [disabled]="page === 1" (click)="onPageChange(page - 1)">Previous</button>
+            <span>Page {{ page }} of {{ totalPages }}</span>
+            <button [disabled]="page === totalPages" (click)="onPageChange(page + 1)">Next</button>
+        </div>
+
+        <ng-template #emptyState>
+            <div class="empty-state">
+                <i class="fas fa-rss-square"></i>
+                <h3>No requests found</h3>
+                <p>There are no user-submitted RSS sources matching your criteria.</p>
+            </div>
+        </ng-template>
+    </div>
+</div>
+
+<!-- Action Modal -->
+<div class="modal-overlay" *ngIf="showActionModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>{{ actionStatus === 1 ? 'Approve' : 'Reject' }} Request</h2>
+            <button class="close-btn" (click)="showActionModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="req-preview" *ngIf="selectedRequest">
+                <strong>Source:</strong> {{ selectedRequest.name }}<br>
+                <strong>URL:</strong> {{ selectedRequest.url }}
+            </div>
+
+            <div class="form-group">
+                <label>Admin Note (Optional)</label>
+                <textarea [(ngModel)]="adminNote" placeholder="Add a reason or note for this decision..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="showActionModal = false">Cancel</button>
+            <button [class]="actionStatus === 1 ? 'btn-primary' : 'btn-danger'" (click)="submitAction()">
+                Confirm {{ actionStatus === 1 ? 'Approval' : 'Rejection' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal-overlay" *ngIf="showReplyModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>Add/Update Admin Note</h2>
+            <button class="close-btn" (click)="showReplyModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="req-preview" *ngIf="selectedRequest">
+                <strong>Source:</strong> {{ selectedRequest.name }}<br>
+                <strong>URL:</strong> {{ selectedRequest.url }}<br>
+                <strong>Status:</strong> <span [ngClass]="getStatusClass(selectedRequest.status)">{{
+                    getStatusLabel(selectedRequest.status) }}</span>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Note</label>
+                <textarea [(ngModel)]="adminNote" placeholder="Add a note or reply to this request..."
+                    rows="5"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="showReplyModal = false">Cancel</button>
+            <button class="btn-primary" (click)="submitReply()">
+                Save Note
+            </button>
+        </div>
+    </div>
+</div>

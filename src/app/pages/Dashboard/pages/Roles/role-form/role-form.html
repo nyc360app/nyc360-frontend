@@ -1,0 +1,71 @@
+<div class="page-container page-fade-in">
+  
+  <div class="page-header">
+    <div class="title-section">
+      <h2>Create New Role</h2>
+      <p>Define role name and assign initial permissions.</p>
+    </div>
+    <a routerLink="/admin/Role" class="btn-back">
+      <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-section">
+        <label class="section-label">Role Details</label>
+        <div class="input-group">
+          <span class="input-icon"><i class="bi bi-shield-lock"></i></span>
+          <input type="text" formControlName="roleName" placeholder="e.g. Sales Manager, Content Editor" class="form-control">
+        </div>
+        <small class="text-danger" *ngIf="roleForm.get('roleName')?.invalid && roleForm.get('roleName')?.touched">
+          Role name is required (minimum 3 characters).
+        </small>
+      </div>
+
+      <hr class="divider">
+
+      <div class="form-section">
+        <label class="section-label">Assign Permissions</label>
+        
+                <div *ngIf="isLoading" class="spinner-container">
+          <div class="spinner-border text-gold" role="status"></div>
+          <p class="text-muted mt-2">Loading system permissions...</p>
+        </div>
+        
+        <div *ngIf="errorMessage && !allPermissions.length" class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
+        </div>
+
+                <div class="permissions-grid" formArrayName="permissions" *ngIf="allPermissions.length && !isLoading">
+          <div *ngFor="let control of permissionsArray.controls; let i = index" class="permission-item">
+            <label class="checkbox-label">
+              <input type="checkbox" [formControlName]="i">
+              <span class="custom-checkmark"></span>
+              
+              <div class="perm-text">
+                                <span class="perm-module">{{ allPermissions[i].split('.')[1] || 'General' }}</span>
+                <span class="perm-action">{{ allPermissions[i].split('.')[2] || allPermissions[i] }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage && roleForm.dirty" class="alert alert-danger mt-4">
+        <i class="bi bi-exclamation-circle"></i> {{ errorMessage }}
+      </div>
+
+      <div class="form-actions">
+        <button type="button" routerLink="/admin/Role" class="btn-ghost">Cancel</button>
+        <button type="submit" class="btn-gold" [disabled]="isLoading || roleForm.invalid">
+          <span *ngIf="!isLoading">Create Role</span>
+          <span *ngIf="isLoading"><i class="spinner-border spinner-border-sm"></i> Saving...</span>
+        </button>
+       
+      </div>
+
+    </form>
+  </div>
+</div>

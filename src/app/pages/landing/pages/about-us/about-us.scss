@@ -1,0 +1,273 @@
+@use "sass:color";
+
+// --- Theme Variables (Unified & High-End) ---
+$bg-dark: #081223;       // Deep Navy
+$bg-card: #0F1C30;       // Slightly lighter Navy for cards
+$bg-light: #ffffff;      // White
+$text-light: #E8EBF2;    // Off-white
+$text-muted: #A0AEC0;    // Grey text
+$text-dark: #1a1a1a;     // Dark text
+$accent: #B59B62;        // Copper (The Luxury Color)
+
+$font-serif: 'Playfair Display', serif; 
+$font-sans: 'Segoe UI', sans-serif;
+
+.about-page {
+  font-family: $font-sans;
+  overflow-x: hidden;
+  background-color: $bg-light;
+}
+
+/* =========================================
+   1. Hero Section
+   ========================================= */
+.hero-section {
+  background-color: $bg-dark;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 120px 20px;
+  // Subtle radial gradient for depth
+  background-image: radial-gradient(circle at 50% 30%, color.adjust($bg-dark, $lightness: 8%) 0%, $bg-dark 70%);
+
+  .logo-wrapper {
+    margin-bottom: 30px;
+    .hero-logo {
+      height: 180px; // Responsive size
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));
+      
+      @media(max-width: 768px) { height: 140px; }
+    }
+  }
+
+  .hero-title {
+    color: $text-light;
+    font-family: $font-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    
+    @media(max-width: 768px) { font-size: 2.5rem; }
+  }
+
+  .hero-subtitle {
+    color: $accent;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.9;
+    
+    @media(max-width: 768px) { font-size: 0.9rem; letter-spacing: 1.5px; }
+  }
+
+  .scroll-indicator {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    .mouse {
+      width: 24px; height: 36px;
+      border: 2px solid rgba($text-light, 0.3); border-radius: 20px; position: relative;
+      &::before {
+        content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+        width: 4px; height: 4px; background: $accent; border-radius: 50%;
+        animation: scrollWheel 2s infinite;
+      }
+    }
+  }
+}
+
+/* =========================================
+   2. Narrative Section (Typography)
+   ========================================= */
+.narrative-section {
+  padding: 100px 0;
+  background-color: $bg-light;
+
+  .section-badge {
+    display: inline-block;
+    font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+    color: $accent; border: 1px solid $accent;
+    padding: 6px 14px; border-radius: 50px; margin-bottom: 20px;
+  }
+
+  .main-heading {
+    color: $text-dark; font-family: $font-serif; font-size: 3rem; font-weight: 700;
+    margin-bottom: 25px; line-height: 1.2;
+    @media(max-width: 768px) { font-size: 2rem; }
+  }
+
+  .divider-center {
+    width: 60px; height: 3px; background: $accent; margin: 0 auto 30px auto;
+  }
+
+  .body-text {
+    font-size: 1.15rem; color: #555; line-height: 1.8;
+    max-width: 800px; margin: 0 auto;
+  }
+}
+
+/* =========================================
+   3. BLUEPRINT SECTION (The Bento Grid)
+   ========================================= */
+.blueprint-section {
+  background-color: $bg-dark;
+  padding: 100px 0;
+  color: $text-light;
+
+  .section-badge-dark {
+    display: inline-block;
+    font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+    color: $accent; margin-bottom: 10px;
+  }
+
+  .light-heading {
+    font-family: $font-serif; font-size: 2.8rem; color: $text-light; margin-bottom: 10px;
+    @media(max-width: 768px) { font-size: 2rem; }
+  }
+
+  .section-desc { color: $text-muted; font-size: 1.1rem; }
+
+  // --- GRID SYSTEM (Responsive) ---
+  .bento-grid {
+    display: grid;
+    // Auto-fit ensures responsiveness: 
+    // Desktop: 3 or 4 columns, Tablet: 2, Mobile: 1
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 50px;
+  }
+
+  .bento-card {
+    background-color: $bg-card;
+    border: 1px solid rgba(255, 255, 255, 0.05); // Subtle border
+    border-radius: 12px;
+    padding: 30px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+
+    // Hover State
+    &:hover {
+      transform: translateY(-5px);
+      background-color: color.adjust($bg-card, $lightness: 3%);
+      border-color: rgba($accent, 0.5); // Copper border on hover
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+      .icon-circle {
+        background-color: $accent;
+        color: #fff;
+      }
+
+      .card-action {
+        color: $accent;
+        transform: translateX(5px);
+      }
+    }
+
+    .icon-circle {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      color: $accent; font-size: 1.4rem;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .card-title {
+      color: $text-light; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px;
+      font-family: $font-serif;
+    }
+
+    .card-desc {
+      color: $text-muted; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;
+    }
+
+    .card-action {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: rgba($text-light, 0.5);
+      transition: all 0.3s ease;
+    }
+  }
+}
+
+/* =========================================
+   4. Vision Section
+   ========================================= */
+.vision-section {
+  padding: 100px 0;
+  background-color: $bg-light;
+
+  .vision-visual {
+    width: 100%; height: 400px;
+    background-color: $bg-dark;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    position: relative;
+    
+    // Decorative Frame
+    &::after {
+      content: ''; position: absolute;
+      top: 20px; left: 20px; right: 20px; bottom: 20px;
+      border: 1px solid rgba($accent, 0.3);
+    }
+
+    .big-char { font-size: 5rem; font-weight: 900; color: $text-light; line-height: 0.8; }
+    .big-char-outline { 
+      font-size: 5rem; font-weight: 900; line-height: 0.8; 
+      color: transparent; -webkit-text-stroke: 2px $accent; display: block;
+    }
+  }
+
+  .vision-text {
+    .section-badge { color: $accent; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; }
+    .main-heading { font-family: $font-serif; font-size: 3rem; color: $text-dark; margin: 15px 0 25px; }
+    .body-text { font-size: 1.1rem; color: #555; line-height: 1.8; margin-bottom: 20px; }
+  }
+
+  .btn-premium {
+    display: inline-flex; align-items: center; gap: 10px;
+    background-color: $accent; color: #fff;
+    padding: 14px 35px; border-radius: 4px;
+    text-decoration: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: $bg-dark;
+      gap: 15px; // Arrow moves
+    }
+  }
+}
+
+/* =========================================
+   5. Animations
+   ========================================= */
+@keyframes fadeInUp { from { opacity: 0; transform: translate3d(0, 40px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes fadeInDown { from { opacity: 0; transform: translate3d(0, -40px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes scrollWheel { 0% { opacity: 1; top: 8px; } 100% { opacity: 0; top: 24px; } }
+
+.fade-in-up { animation: fadeInUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.fade-in-down { animation: fadeInDown 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.delay-1 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+
+// Animation Initial States
+.narrative-section .col-lg-9, 
+.section-header, 
+.bento-card, 
+.vision-section .col-lg-6 {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  &.visible { opacity: 1; transform: translateY(0); }
+}

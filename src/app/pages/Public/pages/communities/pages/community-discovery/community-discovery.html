@@ -1,0 +1,126 @@
+<div class="discovery-page">
+  
+  <header class="discovery-header">
+    <div class="header-inner">
+      <h1>Explore Communities</h1>
+      <p>Find your tribe in New York City</p>
+
+      <div class="filter-bar">
+        
+        <div class="search-input">
+          <i class="bi bi-search"></i>
+          <input 
+            type="text" 
+            placeholder="Search communities..." 
+            [(ngModel)]="searchText" 
+            (keyup.enter)="onSearch()">
+        </div>
+
+        <div class="location-search">
+          <i class="bi bi-geo-alt"></i>
+          <input 
+            type="text" 
+            placeholder="Neighborhood" 
+            [ngModel]="locationSearchText"
+            (ngModelChange)="onLocationInput($event)">
+          
+          <i *ngIf="locationSearchText" class="bi bi-x-circle clear-icon" (click)="clearLocation()"></i>
+
+          <div class="loc-dropdown" *ngIf="showLocationDropdown">
+            <div class="loc-item" *ngFor="let loc of locationSuggestions" (click)="selectLocation(loc)">
+              <strong>{{ loc.neighborhood }}</strong>
+              <span>{{ loc.borough }}, {{ loc.zipCode }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="type-select">
+          <i class="bi bi-funnel"></i>
+          <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+            <option [ngValue]="null">All Categories</option>
+            <option *ngFor="let type of communityTypes" [ngValue]="type.id">
+              {{ type.name }}
+            </option>
+          </select>
+        </div>
+        
+        <button class="btn-search" (click)="onSearch()">Find</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <div *ngIf="!isLoading && communities.length === 0" class="empty-state">
+      <i class="bi bi-search"></i>
+      <h3>No communities found</h3>
+      <p>Try adjusting your search or filters.</p>
+    </div>
+
+    <div class="comm-grid">
+      <div class="comm-card" *ngFor="let comm of communities">
+        <div class="card-head">
+          <img [src]="resolveAvatar(comm.avatarUrl)" class="comm-img" [routerLink]="['/public/community', comm.slug]" [alt]="comm.name">
+          <div class="badges">
+            <span class="type-badge" *ngIf="comm.type">{{ communityTypes[comm.type - 1]?.name }}</span>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <h3 [routerLink]="['/public/community', comm.slug]">{{ comm.name }}</h3>
+          
+          <p class="desc" title="{{comm.description}}">
+            {{ (comm.description || 'Join this community to connect with others.') | slice:0:80 }}
+            {{ (comm.description && comm.description.length > 80) ? '...' : '' }}
+          </p>
+          
+          <div class="meta">
+            <span><i class="bi bi-people-fill"></i> {{ comm.memberCount }} Members</span>
+            <span [class.private]="comm.isPrivate" [class.public]="!comm.isPrivate">
+              <i class="bi" [ngClass]="comm.isPrivate ? 'bi-lock-fill' : 'bi-globe'"></i> 
+              {{ comm.isPrivate ? 'Private' : 'Public' }}
+            </span>
+          </div>
+
+          <button 
+            class="btn-join" 
+            [class.joined]="comm.isJoined"
+            [class.success-state]="comm.showSuccess"
+            (click)="joinCommunity(comm)" 
+            [disabled]="comm.isLoadingJoin || comm.isJoined">
+            
+            <ng-container *ngIf="comm.showSuccess">
+              <i class="bi bi-check-circle-fill"></i> Successfully Joined!
+            </ng-container>
+
+            <ng-container *ngIf="!comm.showSuccess">
+              <ng-container *ngIf="comm.isLoadingJoin">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              </ng-container>
+              
+              <ng-container *ngIf="!comm.isLoadingJoin">
+                <ng-container *ngIf="!comm.isJoined">Join Community</ng-container>
+                <ng-container *ngIf="comm.isJoined"><i class="bi bi-check-lg"></i> Joined</ng-container>
+              </ng-container>
+            </ng-container>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination">
+      <button [disabled]="currentPage <= 1 || isLoading" (click)="onPageChange(currentPage - 1)">
+        <i class="bi bi-chevron-left"></i> Prev
+      </button>
+      
+      <span class="page-info">
+        Page {{ currentPage }} of {{ totalPages || 1 }}
+      </span>
+      
+      <button [disabled]="currentPage >= totalPages || isLoading" (click)="onPageChange(currentPage + 1)">
+        Next <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</div>

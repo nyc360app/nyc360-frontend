@@ -1,0 +1,60 @@
+<!-- 
+  RSS Feed Connection - Quick Implementation Examples
+  ================================================
+  
+  This file shows how to add "Connect RSS Feed" links from any category page.
+-->
+
+<!-- Example 1: Direct Link with Category ID -->
+<a [routerLink]="['/rss/connect']" [queryParams]="{ category: 4 }">
+    <i class="bi bi-rss"></i> Connect Housing RSS Feed
+</a>
+
+<!-- Example 2: Button with Category Enum -->
+<!-- In TypeScript: import { CategoryEnum } from '../path/to/categories'; -->
+<button (click)="navigateToRssConnect()">
+    <i class="fa fa-rss"></i> Connect RSS Feed
+</button>
+
+<!-- TypeScript Method: -->
+<!-- 
+navigateToRssConnect() {
+  this.router.navigate(['/rss/connect'], {
+    queryParams: { category: CategoryEnum.Housing } // or any other category
+  });
+}
+-->
+
+<!-- Example 3: Dropdown Menu Item (like in Housing) -->
+<div class="dropdown-menu">
+    <a [routerLink]="['/rss/connect']" [queryParams]="{ category: 1 }" class="dropdown-item">
+        <i class="bi bi-broadcast"></i> Connect Culture RSS Feed
+    </a>
+</div>
+
+<!-- Example 4: All Categories Quick Reference -->
+<!-- 
+Community      = 0
+Culture        = 1
+Education      = 2
+Health         = 3
+Housing        = 4
+Lifestyle      = 5
+Legal          = 6
+News           = 7
+Professions    = 8
+Social         = 9
+Transportation = 10
+TV             = 11
+-->
+
+<!-- Example 5: Dynamic Category from Component -->
+<a [routerLink]="['/rss/connect']" [queryParams]="{ category: currentCategoryId }">
+    Connect RSS Feed
+</a>
+
+<!-- Example 6: With Permission Check (like Housing) -->
+<a [routerLink]="hasPermission ? '/rss/connect' : null" [queryParams]="{ category: 7 }"
+    (click)="checkPermission($event)">
+    <i class="bi bi-rss"></i> Connect News RSS Feed
+</a>

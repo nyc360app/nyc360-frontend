@@ -1,0 +1,692 @@
+// Variables
+$font-family: 'Inter', sans-serif;
+$color-text: #333;
+$color-label: #000;
+$color-placeholder: #999;
+$color-gold: #C5A065; // Approximate gold color from image
+$color-gold-hover: #b08d55;
+$color-bg-yellow: #FAF3E0;
+$color-bg-purple: #F3E5F5;
+$color-bg-blue: #C5D6E8; // Muted blue from image
+$border-radius-card: 16px;
+$border-radius-input: 10px;
+
+.authorization-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+    font-family: $font-family;
+    color: $color-text;
+
+    h2.page-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        color: #000;
+        letter-spacing: -0.5px;
+    }
+}
+
+.auth-section {
+    border-radius: $border-radius-card;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+
+    &.bg-yellow {
+        background-color: $color-bg-yellow;
+    }
+
+    &.bg-purple {
+        background-color: $color-bg-purple;
+    }
+
+    &.bg-blue {
+        background-color: $color-bg-blue;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+
+        .step-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 14px;
+            font-size: 1.1rem;
+
+            // Customize badge colors to match section but slightly darker/different
+            &.badge-yellow {
+                background-color: rgba(255, 236, 179, 0.8);
+                color: #8D6E63;
+            }
+
+            &.badge-purple {
+                background-color: rgba(225, 190, 231, 0.8);
+                color: #6A1B9A;
+            }
+
+            &.badge-blue {
+                background-color: rgba(255, 255, 255, 0.5);
+                color: #78909C;
+            }
+
+            /* Example */
+
+            // Actually image uses text color gold/brown for numbers inside badge
+            background-color: rgba(255, 255, 255, 0.6) !important;
+            color: $color-gold !important;
+        }
+
+        h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0;
+            color: #000;
+        }
+    }
+
+    .form-group-row {
+        margin-bottom: 1.5rem;
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: $color-label;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            background: #fff; // Force white background for "soft" look
+            border: 1px solid rgba(0, 0, 0, 0.1); // Soft border
+            border-radius: 12px; // Rounded corners (softer than previous 10px)
+            padding: 0.9rem 1rem;
+            font-size: 1rem;
+            color: #333;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); // Smooth transition
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); // Subtle shadow for depth
+
+            &::placeholder {
+                color: #777;
+                font-weight: 400;
+            }
+
+            &:focus {
+                outline: none;
+                border-color: $color-gold;
+                box-shadow: 0 4px 12px rgba(197, 160, 101, 0.15); // Glow effect
+                transform: translateY(-1px); // Subtle lift
+            }
+
+            &.is-invalid {
+                border-color: #dc3545 !important;
+                background-color: #fff8f8;
+                box-shadow: none;
+
+                &:focus {
+                    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+                }
+            }
+        }
+
+        .helper-text {
+            font-size: 0.7rem;
+            color: #555; // Slightly dark for visibility on blue
+            margin-top: 4px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .helper-text-bold {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #444;
+            margin-top: 4px;
+        }
+    }
+}
+
+// Upload Area Styling (Drag & Drop)
+.upload-wrapper {
+    background: #fff;
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        border-color: $color-gold;
+        background: #FFFEFA;
+    }
+
+    &.is-invalid {
+        border-color: #dc3545;
+        background-color: #fff8f8;
+    }
+
+    .upload-icon-circle {
+        width: 50px;
+        height: 50px;
+        background: $color-gold; // Gold circle? In image it's gold icon
+        background: #FDF4E3;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+
+        i {
+            font-size: 1.5rem;
+            color: $color-gold;
+        }
+    }
+
+    h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: #000;
+    }
+
+    p {
+        font-size: 0.7rem;
+        color: #666;
+        margin-bottom: 1.25rem;
+        line-height: 1.4;
+    }
+
+    .btn-select-files {
+        background: #F5E8D0; // Light beige/gold
+        border: none;
+        padding: 0.6rem 2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        color: #6D4C41; // Brownish text
+        font-size: 0.85rem;
+        cursor: pointer;
+
+        &:hover {
+            background: #e6d9c0;
+        }
+    }
+}
+
+.accepted-docs {
+    h5 {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        color: #000;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        columns: 1;
+
+        li {
+            margin-bottom: 0.35rem;
+            font-size: 0.8rem;
+            color: #444;
+            position: relative;
+            padding-left: 12px;
+
+            &::before {
+                content: "•";
+                position: absolute;
+                left: 0;
+                color: #555;
+            }
+        }
+    }
+}
+
+.add-section-btn {
+    border: none;
+    background: none;
+    color: $color-gold;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0;
+    margin-top: 1.5rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.footer-action {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    // Line separator above footer? Image doesn't show one, just spacing.
+
+    .terms {
+        font-size: 0.75rem;
+        color: $color-gold;
+        font-weight: 700;
+        line-height: 1.4;
+        max-width: 60%;
+
+        span {
+            font-weight: 400;
+            color: #666;
+        }
+    }
+
+    .btn-post-listing {
+        background-color: #9C8252; // Muted gold/brown from image
+        color: white;
+        border: none;
+        padding: 14px 48px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+            background-color: #8a7346;
+        }
+
+        &:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// Custom Switch Styling
+.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+
+    &:checked {
+        background-color: $color-gold;
+        border-color: $color-gold;
+    }
+}
+
+// Description text blocks in Section 3
+.description-block {
+    margin-bottom: 1.5rem;
+
+    h4 {
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        color: #000;
+    }
+
+    p {
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.4;
+        margin: 0;
+    }
+}
+
+// Max Docs Badge
+.max-docs-badge {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    color: $color-gold;
+    font-weight: 700;
+    z-index: 2;
+}
+
+// Availability Grid Layout (Now Vertical Stack)
+.availability-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    .type-column {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px; // More padding for full width
+        border: 1px solid rgba(0, 0, 0, 0.06); // Subtle border back
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        height: auto; // Auto height for stack
+        min-height: auto;
+
+        // Header tweaks for horizontal layout potential?
+        // for now keeping it simple stack
+        .column-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+
+            i {
+                font-size: 1.4rem; // Slightly larger
+                margin-right: 12px;
+                color: #C5A065;
+            }
+
+            h5 {
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin: 0;
+                color: #2c3e50;
+            }
+        }
+
+
+        .schedules-list {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-add-schedule {
+            margin-top: 16px;
+            width: 100%;
+            background: #fff;
+            border: 1.5px dashed #ccc;
+            border-radius: 12px;
+            padding: 10px;
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+
+            &:hover {
+                border-color: #C5A065;
+                color: #C5A065;
+                background: #fdfdfd;
+            }
+        }
+    }
+}
+
+// Compact Schedule Card
+.schedule-card {
+    background: #fff;
+    border: 1px solid #eef0f2;
+    border-left-width: 4px; // Thicker accent
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    &.contact {
+        border-left-color: #3498db;
+    }
+
+    &.virtual {
+        border-left-color: #C5A065;
+    }
+
+    // Using Gold instead of purple to match 'Virtual' intuition or image
+    &.person {
+        border-left-color: #e67e22;
+    }
+
+    // Orange/Bronze for in-person
+
+    .btn-remove {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        opacity: 0.4;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    label {
+        font-size: 0.85rem;
+        font-weight: 700; // Bolder labels
+        margin-bottom: 6px;
+        display: block;
+        color: #333;
+
+        &.small-label {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+    }
+
+    .form-control-custom.sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        height: auto;
+        border-radius: 6px;
+        border-color: #e0e0e0;
+
+        &:focus {
+            border-color: #C5A065;
+            box-shadow: 0 0 0 2px rgba(197, 160, 101, 0.1);
+        }
+    }
+
+    .d-flex.flex-wrap {
+        min-height: 32px; // Ensure space if empty? No, handled by ngIf
+        margin-bottom: 8px;
+    }
+
+    .date-chip {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        color: #495057;
+        margin-bottom: 4px;
+
+        i {
+            font-size: 1rem;
+            margin-left: 6px;
+            cursor: pointer;
+            color: #adb5bd;
+
+            &:hover {
+                color: #ff6b6b;
+            }
+        }
+    }
+}
+
+// Text gold utility
+.text-gold {
+    color: $color-gold !important;
+}
+
+// Upload Section Updates
+.descriptions-group {
+    .desc-item {
+        margin-bottom: 1.25rem;
+
+        h5 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 0.25rem;
+        }
+
+        p {
+            font-size: 0.8rem;
+            color: #555;
+            line-height: 1.4;
+            margin: 0;
+        }
+    }
+}
+
+.max-docs-badge-static {
+    background: #fff;
+    color: $color-gold;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.golden-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, $color-gold, transparent);
+    opacity: 0.5;
+}
+
+.accepted-docs-list {
+    list-style: none;
+    padding: 0;
+
+    li {
+        position: relative;
+        padding-left: 15px;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+        color: #555;
+
+        &::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #888;
+        }
+    }
+}
+
+.bg-white-50 {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+// Animations
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    opacity: 0; // Start hidden
+    animation: fadeInUp 0.6s ease-out forwards;
+
+    &.delay-1 {
+        animation-delay: 0.1s;
+    }
+
+    &.delay-2 {
+        animation-delay: 0.2s;
+    }
+
+    &.delay-3 {
+        animation-delay: 0.3s;
+    }
+}
+
+// Section Hover & Completed Effects
+.auth-section {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    border: 2px solid transparent; // Reserve space for border transition
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    }
+
+    &.section-completed {
+        border-color: #2ecc71; // Green border when done
+        background-color: rgba(46, 204, 113, 0.03); // Very subtle green tint override
+
+        // This targets the step badge inside
+        .section-header .step-badge {
+            background-color: #2ecc71 !important;
+            color: #fff !important;
+            box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.2) !important;
+        }
+    }
+}
+
+// Input Focus Animation
+.form-control-custom {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    &:focus {
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(197, 160, 101, 0.1);
+    }
+}
+
+// Checkmark Animation in Badge
+.bi-check-lg {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

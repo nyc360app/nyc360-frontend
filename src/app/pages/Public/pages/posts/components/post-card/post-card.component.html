@@ -1,0 +1,97 @@
+<article class="post-card-premium animate__animated animate__fadeInUp">
+    <div class="post-top">
+        <div class="author-info">
+            <img [src]="resolveImage(authorImageUrl)" class="author-avatar">
+            <div class="author-meta" (click)="viewPostDetails(post.id, $event)">
+                <h3>{{ displayName }}</h3>
+                <span>{{ post.createdAt | date:'longDate' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-content-area" (click)="viewPostDetails(post.id, $event)">
+        <a class="post-title-link" *ngIf="post.title">{{ post.title }}</a>
+        <p class="post-text">{{ post.content | stripHtml }}</p>
+
+        <!-- Repost Box -->
+        <div *ngIf="post.parentPost" class="repost-box">
+            <div class="re-header" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                <img [src]="getAuthorImage(post.parentPost.author)" class="re-avatar"
+                    style="width: 24px; height: 24px; border-radius: 6px;">
+                <strong style="font-size: 0.9rem;">{{ getAuthorName(post.parentPost.author) }}</strong>
+            </div>
+            <h5 style="font-weight: 700; margin-bottom: 8px;">{{ post.parentPost.title }}</h5>
+            <p style="font-size: 0.95rem; color: #555; margin-bottom: 12px;">{{ post.parentPost.content | stripHtml }}
+            </p>
+
+            <!-- Parent Post Attachments (Display if present) -->
+            <div *ngIf="(post.parentPost.attachments && post.parentPost.attachments.length > 0) || post.parentPost.imageUrl"
+                class="parent-media-preview" style="border-radius: 12px; overflow: hidden; margin-top: 10px;">
+                <img *ngIf="post.parentPost.attachments && post.parentPost.attachments.length > 0"
+                    [src]="resolveImageUrl(post.parentPost.attachments[0].url)"
+                    style="width: 100%; height: auto; display: block;">
+                <img *ngIf="(!post.parentPost.attachments || post.parentPost.attachments.length === 0) && post.parentPost.imageUrl"
+                    [src]="resolveImageUrl(post.parentPost.imageUrl)"
+                    style="width: 100%; height: auto; display: block;">
+            </div>
+        </div>
+
+        <!-- Primary Media -->
+        <div *ngIf="(post.attachments && post.attachments.length > 0) || post.imageUrl" class="post-media-main">
+            <img *ngIf="post.attachments && post.attachments.length > 0"
+                [src]="resolveImageUrl(post.attachments[0].url)">
+            <img *ngIf="(!post.attachments || post.attachments.length === 0) && post.imageUrl"
+                [src]="resolveImageUrl(post.imageUrl)">
+        </div>
+    </div>
+
+    <!-- INTERACTION BAR -->
+    <div class="post-footer-actions">
+        <div class="left-actions">
+            <button class="action-pill" [class.active-like]="post.userInteraction === InteractionType.Like"
+                (click)="toggleInteraction(post, InteractionType.Like, $event)">
+                <i class="bi"
+                    [ngClass]="post.userInteraction === InteractionType.Like ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
+                <span>{{ post.stats?.likes || 0 }}</span>
+            </button>
+
+            <button class="action-pill" (click)="toggleComments(post, $event)">
+                <i class="bi bi-chat-left"></i>
+                <span>{{ post.stats?.comments || 0 }}</span>
+            </button>
+        </div>
+
+        <div class="share-icon-btn" (click)="openShareModal(post, $event)" title="Repost">
+            <i class="bi bi-arrow-repeat" style="font-size: 1.4rem;"></i>
+        </div>
+    </div>
+
+    <!-- COMMENTS SECTION -->
+    <section class="premium-comments animate__animated animate__fadeIn" *ngIf="post.showComments"
+        style="margin-top: 24px; border-top: 1px solid #F5F5F5; padding-top: 24px;">
+
+        <div class="comment-entry" (click)="$event.stopPropagation()">
+            <input type="text" placeholder="Add a comment..." [(ngModel)]="post.newCommentContent"
+                (keydown.enter)="submitComment(post, $event)">
+            <button class="btn-submit-comment" (click)="submitComment(post, $event)"
+                [disabled]="!((post.newCommentContent || '').trim())">
+                <i class="bi bi-arrow-right-short fs-4"></i>
+            </button>
+        </div>
+
+        <div class="comments-thread">
+            <div class="comment-node" *ngFor="let comment of (post.comments || [])" style="margin-bottom: 20px;">
+                <div class="comment-card" style="display: flex; gap: 12px;">
+                    <div class="comment-content-box">
+                        <div class="header" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="font-size: 0.9rem;">{{ getAuthorName(comment.author) }}</strong>
+                            <time style="font-size: 0.75rem; color: #999;">{{ comment.createdAt | date:'shortTime'
+                                }}</time>
+                        </div>
+                        <div class="text" style="font-size: 0.95rem; color: #444;">{{ comment.content }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</article>

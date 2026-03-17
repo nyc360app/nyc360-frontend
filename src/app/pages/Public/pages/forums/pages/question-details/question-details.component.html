@@ -1,0 +1,165 @@
+<div class="question-details-container">
+    <div class="header">
+    </div>
+
+    <!-- Question Card -->
+    <div class="question-card" *ngIf="question">
+        <div class="question-header">
+            <div class="status-badges">
+                <span class="badge badge-pinned" *ngIf="question.isPinned">
+                    <i class="bi bi-pin-angle-fill"></i>
+                    Pinned
+                </span>
+                <span class="badge badge-locked" *ngIf="question.isLocked">
+                    <i class="bi bi-lock-fill"></i>
+                    Locked
+                </span>
+            </div>
+            <h1 class="question-title">{{ question.title }}</h1>
+            <div class="question-meta">
+                    <div class="author-info">
+                    <app-initials-avatar
+                        class="author-avatar"
+                        [name]="question.author.fullName || question.author.username"
+                        [src]="question.author.imageUrl"
+                        [alt]="question.author.fullName">
+                    </app-initials-avatar>
+                    <div class="author-details">
+                        <div class="author-name-row">
+                            <a [routerLink]="['/public/profile', question.author.username]" class="author-name">{{
+                                question.author.fullName }}</a>
+                            <span class="author-badge" [ngClass]="getAuthorBadgeClass(question.author.type)">
+                                {{ getAuthorBadgeText(question.author.type) }}
+                            </span>
+                        </div>
+                        <span class="question-date">
+                            <i class="bi bi-clock"></i>
+                            Asked {{ getTimeSince(question.createdAt) }}
+                        </span>
+                    </div>
+                </div>
+                <div class="question-stats">
+                    <div class="stat-item">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>{{ question.answersCount }} {{ question.answersCount === 1 ? 'Answer' : 'Answers'
+                            }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="question-content">
+            <p>{{ question.content }}</p>
+        </div>
+    </div>
+
+    <!-- Answers Section -->
+    <div class="answers-section">
+        <div class="answers-header">
+            <h2>
+                <i class="bi bi-chat-dots-fill"></i>
+                {{ answers.length }} {{ answers.length === 1 ? 'Answer' : 'Answers' }}
+            </h2>
+            <button class="btn-answer" *ngIf="!question?.isLocked && !showAnswerForm" (click)="toggleAnswerForm()">
+                <i class="bi bi-plus-circle-fill"></i>
+                Write an Answer
+            </button>
+        </div>
+
+        <!-- Answer Form -->
+        <div class="answer-form-card" *ngIf="showAnswerForm && !question?.isLocked">
+            <div class="form-header">
+                <h3>
+                    <i class="bi bi-pencil-square"></i>
+                    Your Answer
+                </h3>
+                <button class="btn-close-form" (click)="toggleAnswerForm()" [disabled]="isSubmitting">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form (ngSubmit)="onSubmitAnswer()" #answerForm="ngForm">
+                <div class="form-group">
+                    <textarea id="answerContent" name="answerContent" #answerInput="ngModel" [(ngModel)]="answerContent"
+                        required minlength="20"
+                        placeholder="Share your knowledge and help others by providing a detailed answer..." rows="8"
+                        [disabled]="isSubmitting"></textarea>
+                    <div class="field-footer">
+                        <div class="validation-message" *ngIf="answerInput.invalid && answerInput.touched">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span *ngIf="answerInput.errors?.['required']">Answer is required</span>
+                            <span *ngIf="answerInput.errors?.['minlength']">Please provide at least 20 characters</span>
+                        </div>
+                        <div class="char-count">{{ answerContent.length }} characters</div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" (click)="toggleAnswerForm()" [disabled]="isSubmitting">
+                        <i class="bi bi-x-lg"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-submit" [disabled]="!answerForm.form.valid || isSubmitting">
+                        <i class="bi bi-send-fill" *ngIf="!isSubmitting"></i>
+                        <i class="bi bi-hourglass-split spinner" *ngIf="isSubmitting"></i>
+                        {{ isSubmitting ? 'Posting...' : 'Post Answer' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Locked Message -->
+        <div class="locked-message" *ngIf="question?.isLocked">
+            <i class="bi bi-lock-fill"></i>
+            <div>
+                <strong>This question is locked</strong>
+                <p>New answers cannot be added at this time</p>
+            </div>
+        </div>
+
+        <!-- Answers List -->
+        <div class="answers-list" *ngIf="answers.length > 0">
+            <div class="answer-card" *ngFor="let answer of answers" [class.correct-answer]="answer.isCorrectAnswer">
+                <div class="answer-header">
+                    <div class="author-info">
+                        <app-initials-avatar
+                            class="author-avatar"
+                            [name]="answer.author.fullName || answer.author.username"
+                            [src]="answer.author.imageUrl"
+                            [alt]="answer.author.fullName">
+                        </app-initials-avatar>
+                        <div class="author-details">
+                            <div class="author-name-row">
+                                <a [routerLink]="['/public/profile', answer.author.username]" class="author-name">{{
+                                    answer.author.fullName }}</a>
+                                <span class="author-badge" [ngClass]="getAuthorBadgeClass(answer.author.type)">
+                                    {{ getAuthorBadgeText(answer.author.type) }}
+                                </span>
+                            </div>
+                            <span class="answer-date">
+                                <i class="bi bi-clock"></i>
+                                Answered {{ getTimeSince(answer.createdAt) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="correct-badge" *ngIf="answer.isCorrectAnswer">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Accepted Answer</span>
+                    </div>
+                </div>
+                <div class="answer-content">
+                    <p>{{ answer.content }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Answers Message -->
+        <div class="no-answers" *ngIf="answers.length === 0 && !showAnswerForm">
+            <i class="bi bi-chat-left-dots"></i>
+            <h3>No answers yet</h3>
+            <p>Be the first to help by answering this question</p>
+            <button class="btn-answer-primary" *ngIf="!question?.isLocked" (click)="toggleAnswerForm()">
+                <i class="bi bi-pencil-square"></i>
+                Write the First Answer
+            </button>
+        </div>
+    </div>
+</div>

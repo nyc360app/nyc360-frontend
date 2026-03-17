@@ -1,0 +1,125 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileMenuOpen">
+    <!-- Logo Section -->
+    <div class="sidebar-header">
+        <div class="logo-container" routerLink="/admin/dashboard">
+            <div class="logo-icon">NYC</div>
+            <span class="logo-text" *ngIf="!isCollapsed">360<span>.</span></span>
+        </div>
+        <button class="collapse-btn d-none d-lg-flex" (click)="toggleSidebar()">
+            <i class="bi" [ngClass]="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+        </button>
+        <button class="mobile-close d-lg-none" (click)="toggleMobileMenu()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="sidebar-content">
+        <div class="nav-group">
+            <div class="group-label" *ngIf="!isCollapsed">MAIN MENU</div>
+
+            <a class="nav-item" routerLink="/admin/dashboard" routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewUsers" routerLink="/admin/User" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-people-fill"></i>
+                <span class="link-text">Users</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewRoles" routerLink="/admin/Role" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span class="link-text">Roles</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <div class="group-label" *ngIf="!isCollapsed">CONTENT</div>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/posts" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span class="link-text">Posts Manager</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/rss" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-rss-fill"></i>
+                <span class="link-text">RSS Feeds</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/trending" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span class="link-text">Trending</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/tags" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-tags-fill"></i>
+                <span class="link-text">Tags</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/topics" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-chat-square-quote-fill"></i>
+                <span class="link-text">Topics</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewForums" routerLink="/admin/forums" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-chat-left-dots-fill"></i>
+                <span class="link-text">Forums</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewHousing" routerLink="/admin/housing" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-houses-fill"></i>
+                <span class="link-text">Housing Listings</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <div class="group-label" *ngIf="!isCollapsed">SYSTEM</div>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/flags" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-flag-fill"></i>
+                <span class="link-text">Reports</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/locations" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span class="link-text">Locations</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewCommunities" routerLink="/admin/communities/list"
+                routerLinkActive="active" (click)="closeMobileMenu()">
+                <i class="bi bi-people-fill"></i>
+                <span class="link-text">Communities</span>
+            </a>
+
+            <a class="nav-item" *ngIf="canViewSupport" routerLink="/admin/support" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-headset"></i>
+                <span class="link-text">Support Tickets</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer / Auth Info -->
+    <div class="sidebar-footer">
+        <a class="nav-item exit" routerLink="/public/home">
+            <i class="bi bi-box-arrow-left"></i>
+            <span class="link-text">Exit Dashboard</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMobileMenu()"></div>

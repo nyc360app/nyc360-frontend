@@ -1,0 +1,192 @@
+<div class="registration-container">
+    <div class="form-container">
+        <button class="btn-back" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i> Back to Selection
+        </button>
+
+        <div class="form-header">
+            <h2 class="main-question">Visitor Registration</h2>
+            <p class="sub-text">Create your visitor profile to get personalized recommendations.</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+            <!-- Personal Identity -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-person-badge me-2"></i>My Identity</h4>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="FirstName" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('FirstName')">
+                        <label class="floating-label">First Name *</label>
+                        <i class="bi bi-person input-icon"></i>
+                        <div *ngIf="isFieldInvalid('FirstName')" class="text-danger">Required</div>
+                    </div>
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="LastName" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('LastName')">
+                        <label class="floating-label">Last Name *</label>
+                        <i class="bi bi-person input-icon"></i>
+                        <div *ngIf="isFieldInvalid('LastName')" class="text-danger">Required</div>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="Username" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Username')">
+                        <label class="floating-label">Username *</label>
+                        <i class="bi bi-at input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Username')" class="text-danger">Username (min 4 chars) is required.
+                        </div>
+                    </div>
+                    <div class="input-group-premium">
+                        <input type="email" class="form-control" formControlName="Email" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Email')">
+                        <label class="floating-label">Email Address *</label>
+                        <i class="bi bi-envelope input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Email')" class="text-danger">A valid email address is required.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <input type="password" class="form-control" formControlName="Password" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('Password')">
+                    <label class="floating-label">Password *</label>
+                    <i class="bi bi-lock input-icon"></i>
+                </div>
+            </div>
+
+            <!-- Origin & Visit -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-map me-2"></i>Visit Details</h4>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="CityOfOrigin" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('CityOfOrigin')">
+                        <label class="floating-label">City of Origin *</label>
+                        <i class="bi bi-building-up input-icon"></i>
+                    </div>
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="CountryOfOrigin" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('CountryOfOrigin')">
+                        <label class="floating-label">Country of Origin *</label>
+                        <i class="bi bi-globe-americas input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="VisitPurpose"
+                            [class.is-invalid]="isFieldInvalid('VisitPurpose')">
+                            <option [ngValue]="null">Select Purpose *</option>
+                            <option *ngFor="let p of visitPurposes" [ngValue]="p.value">{{ p.label }}</option>
+                        </select>
+                        <label class="floating-label">Visit Purpose *</label>
+                        <i class="bi bi-compass-fill input-icon"></i>
+                    </div>
+
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="LengthOfStay"
+                            [class.is-invalid]="isFieldInvalid('LengthOfStay')">
+                            <option [ngValue]="null">Select Duration *</option>
+                            <option *ngFor="let l of lengthsOfStay" [ngValue]="l.value">{{ l.label }}</option>
+                        </select>
+                        <label class="floating-label">Length of Stay *</label>
+                        <i class="bi bi-calendar-event input-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interests -->
+            <div class="form-section">
+                <label class="section-label">What interests you in NYC? <span class="req">*</span></label>
+                <p class="text-muted small mb-3">Select categories to help us personalize your guide.</p>
+                <div class="chips-grid">
+                    <div class="interest-chip" *ngFor="let interest of interestsList"
+                        [class.active]="isSelected(interest.id)" (click)="toggleInterest(interest.id)"
+                        [style.--chip-color]="interest.color">
+                        <span>{{ interest.name }}</span>
+                    </div>
+                </div>
+                <div *ngIf="form.touched && selectedInterestIds.length === 0" class="text-danger mt-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one interest focus area.
+                </div>
+            </div>
+
+            <!-- Preferences (Toggles) -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-sliders me-2"></i>Discovery Preferences</h4>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Event & Culture Recommendations</span>
+                        <span class="pref-desc">Get customized suggestions based on your interests.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="ReceiveEventAndCultureRecommendations">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Location Suggestions</span>
+                        <span class="pref-desc">Enable location-based alerts for nearby gems.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="EnableLocationBasedSuggestions">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Save History</span>
+                        <span class="pref-desc">Allow saving places, events, and guides to your profile.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="SavePlacesEventsGuides">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Discoverable Profile</span>
+                        <span class="pref-desc">Allow other travelers and partners to see your profile.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="DiscoverableProfile">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Partner Communication</span>
+                        <span class="pref-desc">Receive exclusive offers from NYC verified partners.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="AllowMessagesFromNycPartners">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="isLoading">
+                <span *ngIf="!isLoading">Start My NYC Journey <i class="bi bi-compass ms-2"></i></span>
+                <span *ngIf="isLoading"><i class="spinner-border spinner-border-sm"></i> Curating
+                    Experience...</span>
+            </button>
+
+        </form>
+    </div>
+
+    <app-auth-success-modal [visible]="showModal" [title]="modalTitle" [message]="modalMessage" buttonText="Go to Login"
+        (closed)="onModalClose()">
+    </app-auth-success-modal>
+</div>

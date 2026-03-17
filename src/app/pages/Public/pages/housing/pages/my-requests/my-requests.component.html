@@ -1,0 +1,246 @@
+<div class="requests-page-container">
+
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">My Requests</h1>
+            <p class="page-subtitle">Track the status of your housing applications.</p>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner-gold"></div>
+        <p>Loading your requests...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && requests.length === 0">
+        <div class="empty-icon">
+            <i class="bi bi-send-x"></i>
+        </div>
+        <h3>No Requests Yet</h3>
+        <p>You haven't submitted any housing inquiries yet.</p>
+        <button class="btn-browse" routerLink="/public/housing/feed">Browse Housing</button>
+    </div>
+
+    <!-- Horizontal Requests List -->
+    <div class="requests-list" *ngIf="!isLoading && requests.length > 0">
+        <div class="request-row-card" *ngFor="let req of requests">
+            <div class="row-main-info">
+                <div class="property-mini-preview">
+                    <div class="avatar-ring">
+                        <i class="bi bi-house-door"></i>
+                    </div>
+                    <div class="property-text">
+                        <h3 class="property-title" (click)="viewPost(req.housingInfo?.id)">
+                            {{ req.housingInfo?.title || 'Unknown Property' }}
+                        </h3>
+                        <div class="row-specs">
+                            <span class="price">{{ req.housingInfo?.startingPrice | currency:'USD':'symbol':'1.0-0'
+                                }}</span>
+                            <span class="spec-dot"></span>
+                            <span>{{ req.housingInfo?.numberOfRooms }} Bed</span>
+                            <span class="spec-dot"></span>
+                            <span>{{ req.housingInfo?.numberOfBathrooms }} Bath</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="request-status">
+                    <span class="status-pill" [class]="getStatusLabel(req.status).toLowerCase().replace(' ', '-')">
+                        {{ getStatusLabel(req.status) }}
+                    </span>
+                    <span class="request-time">Sent {{ req.createdAt | date:'MMM d, h:mm a' }}</span>
+                </div>
+            </div>
+
+            <div class="row-actions">
+                <button class="btn-summary" (click)="openDetails(req)">
+                    <i class="bi bi-text-paragraph"></i>
+                    Full Details
+                </button>
+                <button class="btn-goto" (click)="viewPost(req.housingInfo?.id)">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" *ngIf="showDetailsModal && selectedRequest" (click)="closeDetails()">
+        <div class="details-modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <div class="header-main">
+                    <h2>Application Detail</h2>
+                    <span class="app-id">#RQ-{{ selectedRequest.id }}</span>
+                </div>
+                <button class="btn-close" (click)="closeDetails()"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-content-scroller">
+                <!-- Section 1: Property Snapshot -->
+                <div class="detail-section">
+                    <div class="section-badge-header">
+                        <i class="bi bi-house"></i>
+                        <h3>Property Snapshot</h3>
+                    </div>
+                    <div class="property-snapshot-grid">
+                        <div class="snap-item">
+                            <label>Property</label>
+                            <p class="highlight">{{ selectedRequest.housingInfo?.title || 'Unknown' }}</p>
+                        </div>
+                        <div class="snap-item">
+                            <label>Starting Price</label>
+                            <p class="price-val">{{ selectedRequest.housingInfo?.startingPrice |
+                                currency:'USD':'symbol':'1.0-0' }}</p>
+                        </div>
+                        <div class="snap-item">
+                            <label>Structure</label>
+                            <p>{{ selectedRequest.housingInfo?.numberOfRooms }} Bed / {{
+                                selectedRequest.housingInfo?.numberOfBathrooms }} Bath</p>
+                        </div>
+                        <div class="snap-item">
+                            <label>Area</label>
+                            <p>{{ selectedRequest.housingInfo?.size || '0' }} sqft</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Applicant Information -->
+                <div class="detail-section">
+                    <div class="section-badge-header">
+                        <i class="bi bi-person-badge"></i>
+                        <h3>Applicant Information</h3>
+                    </div>
+                    <div class="applicant-card">
+                        <div class="applicant-profile">
+                            <div class="user-avatar"
+                                [style.background-image]="selectedRequest.user?.imageUrl ? 'url(' + imageService.resolveImageUrl(selectedRequest.user.imageUrl, 'avatar') + ')' : ''">
+                                <i class="bi bi-person-fill" *ngIf="!selectedRequest.user?.imageUrl"></i>
+                            </div>
+                            <div class="user-meta">
+                                <h4>{{ selectedRequest.user?.fullName }}</h4>
+                                <span>@{{ selectedRequest.user?.username }}</span>
+                            </div>
+                        </div>
+                        <div class="contact-grid-modern">
+                            <div class="c-item">
+                                <i class="bi bi-person"></i>
+                                <div>
+                                    <label>Full Name</label>
+                                    <p>{{ selectedRequest.name }}</p>
+                                </div>
+                            </div>
+                            <div class="c-item">
+                                <i class="bi bi-envelope"></i>
+                                <div>
+                                    <label>Email Address</label>
+                                    <p>{{ selectedRequest.email }}</p>
+                                </div>
+                            </div>
+                            <div class="c-item">
+                                <i class="bi bi-telephone"></i>
+                                <div>
+                                    <label>Phone Number</label>
+                                    <p>{{ selectedRequest.phoneNumber }}</p>
+                                </div>
+                            </div>
+                            <div class="c-item">
+                                <i class="bi bi-chat-dots"></i>
+                                <div>
+                                    <label>Preferred Contact</label>
+                                    <p>{{ getContactType(selectedRequest.preferredContactType) }}</p>
+                                </div>
+                            </div>
+                            <div class="c-item full">
+                                <i class="bi bi-clock"></i>
+                                <div>
+                                    <label>Available for contact since</label>
+                                    <p>{{ selectedRequest.preferredContactDate | date:'fullDate' }} at {{
+                                        selectedRequest.preferredContactTime }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Housing Preferences -->
+                <div class="detail-section">
+                    <div class="section-badge-header">
+                        <i class="bi bi-sliders"></i>
+                        <h3>Housing Preferences</h3>
+                    </div>
+                    <div class="pref-grid">
+                        <div class="p-card">
+                            <i class="bi bi-people"></i>
+                            <div class="p-data">
+                                <label>Household Type</label>
+                                <span>{{ getHouseholdType(selectedRequest.householdType) }}</span>
+                            </div>
+                        </div>
+                        <div class="p-card">
+                            <i class="bi bi-calendar-check"></i>
+                            <div class="p-data">
+                                <label>Target Move-in</label>
+                                <span>{{ selectedRequest.moveInDate | date:'longDate' }}</span>
+                            </div>
+                        </div>
+                        <div class="p-card" *ngIf="selectedRequest.moveOutDate">
+                            <i class="bi bi-calendar-x"></i>
+                            <div class="p-data">
+                                <label>Target Move-out</label>
+                                <span>{{ selectedRequest.moveOutDate | date:'longDate' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Scheduled Tours -->
+                <div class="detail-section">
+                    <div class="section-badge-header">
+                        <i class="bi bi-camera-video"></i>
+                        <h3>Scheduled Tours</h3>
+                    </div>
+                    <div class="tours-grid-modern">
+                        <div class="tour-entry" *ngIf="selectedRequest.scheduleVirtualDate">
+                            <div class="tour-type virtual"><i class="bi bi-display"></i> Virtual Tour</div>
+                            <div class="tour-time">
+                                <strong>{{ selectedRequest.scheduleVirtualDate | date:'MMM d, y' }}</strong>
+                                <span>At {{ selectedRequest.scheduleVirtualTimeWindow }}</span>
+                            </div>
+                        </div>
+                        <div class="tour-entry" *ngIf="selectedRequest.inPersonTourDate">
+                            <div class="tour-type physical"><i class="bi bi-geo-alt"></i> In-Person Tour</div>
+                            <div class="tour-time">
+                                <strong>{{ selectedRequest.inPersonTourDate | date:'MMM d, y' }}</strong>
+                                <span>At {{ selectedRequest.inPersonTourTimeWindow }}</span>
+                            </div>
+                        </div>
+                        <div class="no-tours"
+                            *ngIf="!selectedRequest.scheduleVirtualDate && !selectedRequest.inPersonTourDate">
+                            No tours were requested.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Message to Agent -->
+                <div class="detail-section no-border">
+                    <div class="section-badge-header">
+                        <i class="bi bi-chat-right-quote"></i>
+                        <h3>Message to Agent</h3>
+                    </div>
+                    <div class="full-message-box">
+                        <p>{{ selectedRequest.message || 'No message provided.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" (click)='closeDetails()'>Close Details</button>
+                <button class="btn-primary" (click)="viewPost(selectedRequest.housingInfo?.id); closeDetails()">View
+                    Property</button>
+            </div>
+        </div>
+    </div>
+</div>

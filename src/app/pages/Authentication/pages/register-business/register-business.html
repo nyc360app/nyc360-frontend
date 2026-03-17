@@ -1,0 +1,259 @@
+<div class="registration-container">
+    <div class="form-container">
+        <button class="btn-back" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i> Back to Selection
+        </button>
+
+        <div class="form-header">
+            <h2 class="main-question">Register Your Business</h2>
+            <p class="sub-text">Create a verified business profile to engage with your community.</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+            <!-- Core Identity -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-person-badge me-2"></i>Account Identity</h4>
+
+                <div class="input-group-premium">
+                    <input type="text" class="form-control" formControlName="Name" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('Name')">
+                    <label class="floating-label">Official Business Name *</label>
+                    <i class="bi bi-shop input-icon"></i>
+                    <div *ngIf="isFieldInvalid('Name')" class="text-danger">Business Name is required.</div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <input type="text" class="form-control" formControlName="Username" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Username')">
+                        <label class="floating-label">Username *</label>
+                        <i class="bi bi-at input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Username')" class="text-danger">Username (min 4 chars) is required.
+                        </div>
+                    </div>
+                    <div class="input-group-premium">
+                        <input type="email" class="form-control" formControlName="Email" placeholder=" "
+                            [class.is-invalid]="isFieldInvalid('Email')">
+                        <label class="floating-label">Business Email *</label>
+                        <i class="bi bi-envelope input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Email')" class="text-danger">A valid email is required.</div>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <input type="password" class="form-control" formControlName="Password" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('Password')">
+                    <label class="floating-label">Secure Password *</label>
+                    <i class="bi bi-lock input-icon"></i>
+                    <div *ngIf="isFieldInvalid('Password')" class="text-danger">Password must be 6+ chars with numbers.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Classification -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-tags-fill me-2"></i>Classification</h4>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="Industry"
+                            [class.is-invalid]="isFieldInvalid('Industry')">
+                            <option [ngValue]="null">Select Industry *</option>
+                            <option *ngFor="let ind of industries" [ngValue]="ind.value">{{ ind.label }}</option>
+                        </select>
+                        <label class="floating-label">Industry *</label>
+                        <i class="bi bi-briefcase input-icon"></i>
+                        <div *ngIf="isFieldInvalid('Industry')" class="text-danger">Please select an industry.</div>
+                    </div>
+
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="BusinessSize"
+                            [class.is-invalid]="isFieldInvalid('BusinessSize')">
+                            <option [ngValue]="null">Select Size *</option>
+                            <option *ngFor="let size of businessSizes" [ngValue]="size.value">{{ size.label }}</option>
+                        </select>
+                        <label class="floating-label">Business Size *</label>
+                        <i class="bi bi-people input-icon"></i>
+                        <div *ngIf="isFieldInvalid('BusinessSize')" class="text-danger">Please select business size.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="ServiceArea">
+                            <option *ngFor="let area of serviceAreas" [ngValue]="area.value">{{ area.label }}</option>
+                        </select>
+                        <label class="floating-label">Primary Service Area</label>
+                        <i class="bi bi-geo input-icon"></i>
+                    </div>
+                    <div class="input-group-premium">
+                        <select class="form-control" formControlName="Services">
+                            <option *ngFor="let srv of servicesOptions" [ngValue]="srv.value">{{ srv.label }}</option>
+                        </select>
+                        <label class="floating-label">Primary Service Type</label>
+                        <i class="bi bi-tools input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <input type="text" class="form-control" formControlName="Website" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('Website')">
+                    <label class="floating-label">Website URL (Optional)</label>
+                    <i class="bi bi-globe input-icon"></i>
+                    <div *ngIf="isFieldInvalid('Website')" class="text-danger">Enter a valid URL (if provided).</div>
+                </div>
+
+                <div class="input-group-premium">
+                    <textarea class="form-control" formControlName="Description" placeholder=" "></textarea>
+                    <label class="floating-label">Business Description</label>
+                    <i class="bi bi-file-text input-icon" style="top: 30px; transform: none;"></i>
+                </div>
+            </div>
+
+            <!-- Location & Contact -->
+            <div class="form-section" formGroupName="Address">
+                <h4 class="section-title"><i class="bi bi-geo-alt-fill me-2"></i>Location & Presence</h4>
+
+                <div class="row-group">
+                    <div class="input-group-premium" style="flex: 2;">
+                        <input type="text" class="form-control" #locationInput
+                            (input)="searchLocations(locationInput.value)" placeholder=" ">
+                        <label class="floating-label">Search NYC Neighborhood *</label>
+                        <i class="bi bi-search input-icon"></i>
+
+                        <div class="search-results" *ngIf="locations.length > 0">
+                            <div class="search-item" *ngFor="let loc of locations"
+                                (click)="selectLocation(loc, locationInput)">
+                                {{ loc.neighborhood }} ({{ loc.borough }}) <span *ngIf="loc.zipCode">- {{ loc.zipCode
+                                    }}</span>
+                            </div>
+                        </div>
+                        <div *ngIf="isAddressFieldInvalid('LocationId')" class="text-danger">Neighborhood selection is
+                            required.</div>
+                    </div>
+                    <div class="input-group-premium" style="flex: 1;">
+                        <input type="text" class="form-control" formControlName="ZipCode" placeholder=" ">
+                        <label class="floating-label">Zip Code</label>
+                        <i class="bi bi-postcard input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="input-group-premium" style="flex: 3;">
+                        <input type="text" class="form-control" formControlName="Street" placeholder=" "
+                            [class.is-invalid]="isAddressFieldInvalid('Street')">
+                        <label class="floating-label">Street Address *</label>
+                        <i class="bi bi-geo input-icon"></i>
+                    </div>
+                    <div class="input-group-premium" style="flex: 1;">
+                        <input type="text" class="form-control" formControlName="BuildingNumber" placeholder=" "
+                            [class.is-invalid]="isAddressFieldInvalid('BuildingNumber')">
+                        <label class="floating-label">Building/Unit *</label>
+                        <i class="bi bi-building input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="input-group-premium mt-2">
+                    <input type="tel" class="form-control" formControlName="PhoneNumber" placeholder=" "
+                        [class.is-invalid]="isFieldInvalid('PhoneNumber')">
+                    <label class="floating-label">Public Phone Number</label>
+                    <i class="bi bi-telephone input-icon"></i>
+                    <div *ngIf="isFieldInvalid('PhoneNumber')" class="text-danger">Enter a valid phone number (e.g. +1
+                        555-000-0000).</div>
+                </div>
+            </div>
+
+            <!-- Interests (Chips - NO ICONS) -->
+            <div class="form-section">
+                <label class="section-label">Business Interests & Focus Areas <span class="req">*</span></label>
+                <p class="text-muted small mb-3">Select categories that best describe your business focus.</p>
+                <div class="chips-grid">
+                    <div class="interest-chip" *ngFor="let interest of interestsList"
+                        [class.active]="isSelected(interest.id)" (click)="toggleInterest(interest.id)"
+                        [style.--chip-color]="interest.color">
+                        <span>{{ interest.name }}</span>
+                    </div>
+                </div>
+                <div *ngIf="form.touched && selectedInterestIds.length === 0" class="text-danger mt-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one interest focus area.
+                </div>
+            </div>
+
+            <!-- Verification & Social -->
+            <div class="form-section">
+                <h4 class="section-title"><i class="bi bi-shield-check me-2"></i>Verification & Social</h4>
+
+                <div class="input-group-premium">
+                    <select class="form-control" formControlName="OwnershipType"
+                        [class.is-invalid]="isFieldInvalid('OwnershipType')">
+                        <option [ngValue]="null">Select Ownership *</option>
+                        <option *ngFor="let type of ownershipTypes" [ngValue]="type.value">{{ type.label }}</option>
+                    </select>
+                    <label class="floating-label">Ownership Type *</label>
+                    <i class="bi bi-person-check input-icon"></i>
+                    <div *ngIf="isFieldInvalid('OwnershipType')" class="text-danger">Ownership type is required.</div>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Licensed in NYC</span>
+                        <span class="pref-desc">Valid NYC business license.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="IsLicensedInNyc">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="pref-item">
+                    <div class="pref-text">
+                        <span class="pref-title">Insured Business</span>
+                        <span class="pref-desc">Professional liability insurance coverage.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="IsInsured">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <label class="section-label mb-3">Social Media Links</label>
+                    <div formArrayName="SocialLinks">
+                        <div *ngFor="let link of socialLinks.controls; let i=index" [formGroupName]="i"
+                            class="social-link-row mb-3 d-flex gap-2 align-items-center">
+                            <div class="input-group-premium p-0 m-0" style="flex: 1;">
+                                <select class="form-control" formControlName="Platform" style="padding-left: 15px;">
+                                    <option [ngValue]="null">Platform</option>
+                                    <option *ngFor="let p of socialPlatforms" [ngValue]="p.value">{{ p.label }}</option>
+                                </select>
+                            </div>
+                            <div class="input-group-premium p-0 m-0" style="flex: 2;">
+                                <input type="text" class="form-control" formControlName="Url" placeholder=" ">
+                                <label class="floating-label">Full URL</label>
+                                <i class="bi bi-link input-icon"></i>
+                            </div>
+                            <button type="button" class="btn-remove" (click)="removeSocialLink(i)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add-social" (click)="addSocialLink()">
+                        <i class="bi bi-plus-lg"></i> Add Social Link
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="isLoading">
+                <span *ngIf="!isLoading">Register My Business <i class="bi bi-rocket-takeoff ms-2"></i></span>
+                <span *ngIf="isLoading"><i class="spinner-border spinner-border-sm"></i> Syncing with NYC360...</span>
+            </button>
+
+        </form>
+    </div>
+
+    <app-auth-success-modal [visible]="showModal" [title]="modalTitle" [message]="modalMessage" buttonText="Go to Login"
+        (closed)="onModalClose()">
+    </app-auth-success-modal>
+</div>

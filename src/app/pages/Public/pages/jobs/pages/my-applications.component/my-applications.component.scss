@@ -1,0 +1,71 @@
+$p-green: #00695C; 
+$p-light: #E0F2F1;
+$p-red: #d32f2f;
+$radius: 16px; // الـ Radius المطلوب
+$font-header: 'Merriweather', serif;
+$font-body: 'Inter', sans-serif;
+
+.my-apps-page {
+  background-color: #f8faf9; min-height: 100vh; font-family: $font-body; padding-bottom: 60px;
+}
+
+.apps-header {
+  background-color: $p-green; color: white; padding: 60px 20px; margin-bottom: 40px;
+  h1 { font-family: $font-header; font-size: 2.5rem; margin-bottom: 10px; }
+  p { opacity: 0.9; font-size: 1.1rem; }
+}
+
+.empty-state {
+  background: white; border-radius: $radius; padding: 60px; text-align: center;
+  i { color: #ccc; margin-bottom: 20px; }
+  h2 { font-family: $font-header; margin-bottom: 15px; }
+  p { color: #666; margin-bottom: 30px; }
+  .btn-primary { background: $p-green; color: white; border: none; padding: 12px 35px; border-radius: 50px; font-weight: 700; cursor: pointer; }
+}
+
+.apps-grid { display: flex; flex-direction: column; gap: 20px; }
+
+.app-card {
+  background: white; border-radius: $radius; overflow: hidden; border: 1px solid #eee; transition: 0.3s;
+  &:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; }
+
+  .app-card-body {
+    padding: 30px; display: flex; justify-content: space-between; align-items: center;
+    @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 20px; }
+  }
+
+  .company-name { color: $p-green; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+  .job-title { font-size: 1.5rem; margin: 5px 0 15px; color: #2c2c2c; }
+  
+  .job-meta {
+    display: flex; align-items: center; gap: 15px; color: #777; font-size: 0.9rem;
+    .sep { width: 4px; height: 4px; background: #ddd; border-radius: 50%; }
+    i { color: $p-green; }
+  }
+
+  .app-actions {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 15px;
+    @media (max-width: 768px) { align-items: flex-start; width: 100%; }
+  }
+
+  .status-badge {
+    padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 700;
+    &.status-pending { background: #fff8e1; color: #f57f17; }
+    &.status-accepted { background: #e8f5e9; color: #2e7d32; }
+    &.status-rejected { background: #ffebee; color: #c62828; }
+    &.status-withdrawn { background: #f5f5f5; color: #616161; }
+  }
+
+  .btns-row {
+    display: flex; gap: 10px;
+    button { 
+      padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;
+    }
+    .btn-view { background: white; border: 1.5px solid $p-green; color: $p-green; &:hover { background: $p-light; } }
+    .btn-withdraw { 
+      background: white; border: 1.5px solid #ddd; color: #888; 
+      &:hover:not(:disabled) { border-color: $p-red; color: $p-red; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+  }
+}

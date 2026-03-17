@@ -1,0 +1,465 @@
+<br>
+<div class="reading-progress-container" *ngIf="post" [style.background-color]="getCategoryColor(post.category) + '15'">
+  <div class="progress-bar" id="readingProgress" [style.background-color]="getCategoryColor(post.category)"></div>
+</div>
+
+<div class="page-container" *ngIf="post" [style.--cat-color]="getCategoryColor(post.category)">
+
+  <div *ngIf="errorMessage" class="state-container text-danger animate__animated animate__fadeIn">
+    <i class="bi bi-exclamation-circle me-3 fs-3"></i>
+    <span class="fw-bold">{{ errorMessage }}</span>
+
+
+
+  </div>
+
+  <div *ngIf="post" class="content-grid">
+
+    <!-- Main Column -->
+    <main class="main-column animate__animated animate__fadeInLeft"
+      [class.no-image-mode]="!((post.attachments && post.attachments.length > 0) || post.imageUrl)">
+
+      <!-- Image Section (Only if image exists) -->
+      <div class="featured-media animate__animated animate__zoomIn"
+        *ngIf="(post.attachments && post.attachments.length > 0) || post.imageUrl">
+        <img *ngIf="post.attachments && post.attachments.length > 0" [src]="resolveImageUrl(post.attachments[0].url)"
+          alt="Post Image" class="main-feat-img" [appImgFallback]="'post'">
+        <img *ngIf="(!post.attachments || post.attachments.length === 0) && post.imageUrl"
+          [src]="resolveImageUrl(post.imageUrl)" alt="Post Image" class="main-feat-img" [appImgFallback]="'post'">
+
+
+        <!-- Clean floating actions bar -->
+        <div class="media-overlay-actions">
+          <!-- 3rd Button: Housing Request (Specific for Housing posts) -->
+          <button class="action-btn-mini housing-btn-icon" *ngIf="isHousingPost && !isOwnPost"
+            (click)="navigateToHousingRequest()" title="Contact Agent">
+            <i class="bi bi-house-heart-fill"></i>
+          </button>
+
+          <button class="action-btn-mini" (click)="toggleSave()" [class.active]="post.isSaved" title="Save Post">
+            <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+          </button>
+
+          <div class="dropdown-wrapper">
+            <button class="action-btn-mini" (click)="toggleMenu($event)">
+              <i class="bi bi-three-dots"></i>
+            </button>
+          </div>
+        </div>
+
+
+
+
+      </div>
+
+      <!-- ✅ Housing Apply Button - Prominent Position Below Image -->
+      <div *ngIf="isHousingPost && !isOwnPost" class="apply-button-container animate__animated animate__fadeInUp">
+        <button class="apply-housing-btn-prominent" (click)="navigateToHousingRequest()">
+          <i class="bi bi-house-check-fill"></i>
+          <span>Apply for Housing</span>
+          <i class="bi bi-arrow-right-circle-fill"></i>
+        </button>
+      </div>
+
+      <div class="article-header animate__animated animate__fadeInUp">
+        <div class="tags-row"
+          [class.justify-center]="!((post.attachments && post.attachments.length > 0) || post.imageUrl)">
+          <span class="tag-link category-link" [style.background-color]="getCategoryColor(post.category)">
+            <img [src]="getCategoryIcon(post.category)" class="cat-pill-icon-mini" alt="icon">
+            {{ getCategoryName(post.category) }}
+          </span>
+          <a *ngFor="let tag of post.tags; let i = index" [routerLink]="['/public/posts/tags', tag]" class="tag-link">
+            #{{ tag }}
+          </a>
+        </div>
+
+
+
+
+        <div class="location-ribbon" *ngIf="post.location">
+          <i class="bi bi-geo-alt-fill"></i>
+          <span>{{ post.location.neighborhood }}, {{ post.location.borough }}</span>
+        </div>
+
+        <h1 class="article-title">{{ post.title }}</h1>
+
+        <div class="meta-row">
+          <div class="author-info" style="cursor: pointer;">
+            <!-- Avatar (Optional, if desired) -->
+            <div class="author-meta">
+              <span class="author-name">{{ getAuthorName(post.author) }}</span>
+              <span class="post-date">{{ post.createdAt | date:'longDate' }} • 5 min read</span>
+            </div>
+          </div>
+
+          <div class="more-options-wrapper">
+
+
+            <div class="dropdown-menu-custom animate__animated animate__fadeIn" *ngIf="showMenu">
+              <button class="menu-item-btn" *ngIf="canEdit" (click)="goToEdit()">
+                <div class="icon-box"><i class="bi bi-pencil-square"></i></div>
+                <span>Edit Post</span>
+              </button>
+
+              <button class="menu-item-btn danger" *ngIf="canEdit" (click)="onDelete()">
+                <div class="icon-box"><i class="bi bi-trash3"></i></div>
+                <span>Delete Post</span>
+              </button>
+
+              <div class="menu-divider"></div>
+
+              <button class="menu-item-btn" (click)="openReportModal()">
+                <div class="icon-box"><i class="bi bi-flag"></i></div>
+                <span>Report / Feedback</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="article-body animate__animated animate__fadeInUp">
+        <!-- Structured Extension Data (Specs Grid) -->
+        <div class="extension-specs" *ngIf="structuredExtension">
+          <div class="spec-item status-badge" *ngIf="structuredExtension.IsRenting !== undefined">
+            <i class="bi bi-info-circle-fill"></i>
+            <div class="spec-meta">
+              <span class="label">Status</span>
+              <span class="value">{{ structuredExtension.IsRenting ? 'FOR RENT' : 'FOR SALE' }}</span>
+            </div>
+          </div>
+          <div class="spec-item" *ngIf="structuredExtension.Price">
+            <i class="bi bi-tag-fill"></i>
+            <div class="spec-meta">
+              <span class="label">Price</span>
+              <span class="value">{{ structuredExtension.Price | currency:'USD':'symbol':'1.0-0' }}{{
+                structuredExtension.IsRenting ? '/mo' : '' }}</span>
+            </div>
+          </div>
+          <div class="spec-item" *ngIf="structuredExtension.Rooms">
+            <i class="bi bi-door-open-fill"></i>
+            <div class="spec-meta">
+              <span class="label">Rooms</span>
+              <span class="value">{{ structuredExtension.Rooms }} Bed</span>
+            </div>
+          </div>
+          <div class="spec-item" *ngIf="structuredExtension.Bathrooms">
+            <i class="bi bi-droplet-fill"></i>
+            <div class="spec-meta">
+              <span class="label">Bathrooms</span>
+              <span class="value">{{ structuredExtension.Bathrooms }} Bath</span>
+            </div>
+          </div>
+          <div class="spec-item" *ngIf="structuredExtension.SizeSqFt">
+            <i class="bi bi-arrows-fullscreen"></i>
+            <div class="spec-meta">
+              <span class="label">Total Area</span>
+              <span class="value">{{ structuredExtension.SizeSqFt }} Sq Ft</span>
+            </div>
+          </div>
+          <div class="spec-item" *ngIf="structuredExtension.Type">
+            <i class="bi bi-building-fill"></i>
+            <div class="spec-meta">
+              <span class="label">Type</span>
+              <span class="value">{{ structuredExtension.Type }}</span>
+            </div>
+          </div>
+
+          <!-- Generic items from extension -->
+          <ng-container *ngFor="let item of structuredExtension | keyvalue">
+            <div class="spec-item"
+              *ngIf="['Price', 'SizeSqFt', 'Bathrooms', 'Rooms', 'Type', 'IsRenting', 'Description', 'content'].indexOf($any(item.key)) === -1">
+              <i class="bi bi-info-circle-fill"></i>
+              <div class="spec-meta">
+                <span class="label">{{ item.key }}</span>
+                <span class="value">{{ item.value }}</span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="rich-content" [innerHTML]="sanitizedContent"></div>
+      </div>
+
+      <!-- Parent/Shared Post Section -->
+      <div class="shared-post-container animate__animated animate__fadeInUp" *ngIf="post.parentPost">
+        <div class="shared-post-card" [routerLink]="['/public/posts/details', post.parentPost.id]">
+
+          <div class="shared-header">
+            <img [src]="getAuthorAvatar(post.parentPost.author)" class="shared-avatar" alt="Avatar"
+              appImgFallback="avatar">
+            <div class="shared-meta">
+              <span class="shared-author">{{ getAuthorName(post.parentPost.author) }}</span>
+              <span class="shared-date">{{ post.parentPost.createdAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
+
+          <div class="shared-layout">
+            <div class="shared-text-col">
+              <h4 class="shared-title">{{ post.parentPost.title }}</h4>
+              <div class="shared-excerpt"
+                [innerHTML]="(post.parentPost.content | slice:0:280) + (post.parentPost.content.length > 280 ? '...' : '')">
+              </div>
+            </div>
+
+            <div class="shared-media-col"
+              *ngIf="(post.parentPost.attachments && post.parentPost.attachments.length > 0) || post.parentPost.imageUrl">
+              <div class="shared-img-wrapper">
+                <img *ngIf="post.parentPost.attachments && post.parentPost.attachments.length > 0"
+                  [src]="resolveImageUrl(post.parentPost.attachments[0].url)" alt="Shared Media" appImgFallback="post">
+                <img
+                  *ngIf="(!post.parentPost.attachments || post.parentPost.attachments.length === 0) && post.parentPost.imageUrl"
+                  [src]="resolveImageUrl(post.parentPost.imageUrl)" alt="Shared Media" appImgFallback="post">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Interaction Bar -->
+      <div class="interaction-card animate__animated animate__fadeInUp">
+        <button class="btn-action-premium" [class.active-like]="post.userInteraction === InteractionType.Like"
+          (click)="toggleInteraction(InteractionType.Like)">
+          <i class="bi"
+            [ngClass]="post.userInteraction === InteractionType.Like ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
+          <span>{{ post.stats?.likes || 0 }}</span>
+        </button>
+
+        <button class="btn-action-premium" [class.active-dislike]="post.userInteraction === InteractionType.Dislike"
+          (click)="toggleInteraction(InteractionType.Dislike)">
+          <i class="bi"
+            [ngClass]="post.userInteraction === InteractionType.Dislike ? 'bi-hand-thumbs-down-fill' : 'bi-hand-thumbs-down'"></i>
+          <span>{{ post.stats?.dislikes || 0 }}</span>
+        </button>
+
+        <button *ngIf="canEdit" class="btn-action-premium ms-2" (click)="goToEdit()">
+          <i class="bi bi-pencil-square"></i>
+          <span>Edit</span>
+        </button>
+
+        <button class="btn-action-premium" (click)="openReportModal()">
+          <i class="bi bi-flag"></i>
+          <span>Report</span>
+        </button>
+
+        <button *ngIf="isHousingPost && !isOwnPost" class="share-btn-accent me-2"
+          style="background: linear-gradient(135deg, #B59B62, #8E7947); border: none;"
+          (click)="navigateToHousingRequest()">
+          <i class="bi bi-house-check-fill"></i>
+          <span>APPLY NOW</span>
+        </button>
+
+        <button class="share-btn-accent" (click)="openShareModal()">
+          <i class="bi bi-send-fill"></i>
+          <span>SHARE POST</span>
+        </button>
+      </div>
+
+      <!-- Comments Section -->
+      <section class="premium-comments animate__animated animate__fadeInUp">
+        <h3 class="section-title">
+          <i class="bi bi-chat-left-dots text-accent"></i>
+          Talk to the community ({{ post.comments?.length || 0 }})
+        </h3>
+
+        <div class="comment-entry">
+          <input type="text" placeholder="Share your perspective..." [(ngModel)]="newCommentContent"
+            (keydown.enter)="submitComment()">
+          <button class="btn-submit-comment" (click)="submitComment()" [disabled]="!newCommentContent.trim()">
+            <i class="bi bi-arrow-right-short fs-2"></i>
+          </button>
+        </div>
+
+        <div class="comments-thread">
+          <div class="comment-node" *ngFor="let comment of post.comments">
+            <div class="comment-card">
+              <div class="comment-content-box">
+                <div class="header">
+                  <strong>{{ getAuthorName(comment.author) }}</strong>
+                  <time>{{ comment.createdAt | date:'shortTime' }}</time>
+                </div>
+                <div class="text">{{ comment.content }}</div>
+                <div class="footer">
+                  <button class="btn-reply-text" (click)="openReplyInput(comment.id)">REPLY</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reply Input -->
+            <div class="comment-entry mt-3 mx-5" *ngIf="activeReplyId === comment.id">
+              <input #replyIn type="text" placeholder="Replying to {{ getAuthorName(comment.author) }}..."
+                (keydown.enter)="submitReply(comment, replyIn.value)">
+              <button class="btn-submit-comment" (click)="submitReply(comment, replyIn.value)">
+                <i class="bi bi-arrow-return-right"></i>
+              </button>
+            </div>
+
+            <!-- Nested Replies -->
+            <div class="reply-indent" *ngIf="comment.replies?.length">
+              <div class="reply-node" *ngFor="let reply of comment.replies">
+                <div class="comment-card">
+                  <div class="comment-content-box">
+                    <div class="header">
+                      <strong>{{ getAuthorName(reply.author) }}</strong>
+                      <time>{{ reply.createdAt | date:'shortTime' }}</time>
+                    </div>
+                    <div class="text">{{ reply.content }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="post.comments?.length === 0" class="text-center py-5">
+            <i class="bi bi-chat-dots fs-1 text-muted opacity-25"></i>
+            <p class="text-muted mt-3 fw-bold">Be the first to share a thought.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Sidebar Column -->
+    <aside class="sidebar-column animate__animated animate__fadeInRight">
+
+      <div class="premium-sidebar-card author-card">
+        <div class="sidebar-avatar-wrapper">
+          <img [src]="getAuthorAvatar(post.author)" alt="Author" appImgFallback="avatar">
+        </div>
+        <h4>{{ getAuthorName(post.author) }}</h4>
+        <span class="author-role">Verified Contributor</span>
+        <p>Providing high-quality insights and local updates for the NYC360 community.</p>
+      </div>
+
+      <div class="premium-sidebar-card" *ngIf="relatedPosts.length > 0">
+        <h4 class="card-title">More Like This</h4>
+        <div class="related-list">
+          <div class="related-post-item" *ngFor="let item of relatedPosts" (click)="goToRelatedPost(item)">
+            <img *ngIf="item.imageUrl" [src]="resolveImageUrl(item.imageUrl)" class="rel-img" alt=""
+              appImgFallback="post">
+            <div class="rel-meta">
+              <h5 class="rel-title">{{ item.title }}</h5>
+              <span class="rel-stats">{{ item.commentsCount }} interactions</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- Housing Application Modal -->
+
+
+
+<!-- All your Modals (Share, Report) stay the same as they were already polished -->
+
+<!-- Share Modal -->
+<div class="modal-overlay animate__animated animate__fadeIn" *ngIf="showShareModal" (click)="closeShareModal()">
+  <div class="modal-card luxury-modal animate__animated animate__zoomIn" (click)="$event.stopPropagation()">
+    <div class="modal-header border-bottom">
+      <h3 class="merriweather-font"><i class="bi bi-share text-primary me-2"></i> Share Post</h3>
+      <button class="close-btn" (click)="closeShareModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body p-4">
+      <div class="post-preview-mini mb-3 p-2 bg-light rounded d-flex align-items-center gap-3">
+        <img *ngIf="post?.imageUrl" [src]="resolveImageUrl(post?.imageUrl)" class="mini-img" alt=""
+          appImgFallback="post">
+        <span class="small fw-bold text-truncate">{{ post?.title }}</span>
+      </div>
+      <p class="modal-desc small text-muted mb-3">Add a comment to your shared post:</p>
+      <div class="form-group">
+        <textarea name="shareCommentary" class="luxury-textarea form-control" rows="3"
+          placeholder="What's on your mind?..." [(ngModel)]="shareCommentary"
+          (input)="shareCommentary = $any($event.target).value"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer border-top p-3 d-flex gap-2">
+      <button class="btn-cancel-luxury" (click)="closeShareModal()">CANCEL</button>
+      <button class="btn-submit-luxury primary ms-auto" (click)="submitShare()" [disabled]="isSharing">
+        <span *ngIf="isSharing" class="spinner-border spinner-border-sm me-2"></span>
+        <i class="bi bi-send me-2" *ngIf="!isSharing"></i> SHARE NOW
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal-overlay animate__animated animate__fadeIn" *ngIf="showReportModal" (click)="closeReportModal()">
+  <div class="modal-card luxury-modal animate__animated animate__slideInUp" (click)="$event.stopPropagation()">
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay-modal" *ngIf="isReporting">
+      <div class="spinner-premium"></div>
+      <p class="mt-3 fw-bold">Submitting Report...</p>
+    </div>
+
+    <ng-container *ngIf="!reportSuccess">
+      <div class="modal-header border-bottom">
+        <h3 class="merriweather-font text-danger"><i class="bi bi-flag-fill me-2"></i> Feedback & Report</h3>
+        <button class="close-btn" (click)="closeReportModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="modal-desc fw-bold text-dark mb-3">Help us understand the issue. What represents this post?</p>
+
+        <div class="report-reasons-grid mb-1">
+          <label *ngFor="let r of reportReasonsList" class="report-reason-item" [class.active]="reportReason === r.id">
+            <input type="radio" name="reportReason" [value]="r.id" [(ngModel)]="reportReason" class="d-none">
+            <i [class]="'bi ' + r.icon + ' reason-icon'"></i>
+            <span class="reason-label">{{ r.label }}</span>
+          </label>
+        </div>
+        <div class="error-hint mb-3" *ngIf="!reportReason && isReportingAttempted">
+          <i class="bi bi-exclamation-circle-fill"></i> Please select a reason for reporting.
+        </div>
+
+        <div class="form-group mb-2">
+          <label class="small fw-bold text-muted uppercase mb-2 d-flex justify-content-between">
+            <span>Additional Details</span>
+            <span class="text-lowercase fw-normal" *ngIf="reportDetails.length < 10 && isReportingAttempted">(Min 10
+              chars)</span>
+          </label>
+          <div class="luxury-textarea-wrapper">
+            <textarea class="luxury-textarea form-control" rows="4" maxlength="500"
+              placeholder="Please provide more information to help our moderation team..."
+              [(ngModel)]="reportDetails"></textarea>
+            <div class="char-counter" [class.limit-near]="reportDetails.length > 450">
+              {{ reportDetails.length }}/500
+            </div>
+          </div>
+          <div class="error-hint mt-2" *ngIf="reportDetails.length > 0 && reportDetails.length < 10">
+            <i class="bi bi-info-circle"></i> Please provide at least 10 characters.
+          </div>
+        </div>
+
+        <div class="audit-info-box p-3 rounded d-flex gap-3 align-items-center bg-light">
+          <i class="bi bi-shield-lock-fill"></i>
+          <p class="mb-0 x-small text-muted">Your report is anonymous. Our safety team will review this content against
+            our community guidelines.</p>
+        </div>
+      </div>
+      <div class="modal-footer border-top p-3 d-flex gap-2">
+        <button class="btn-cancel-luxury" (click)="closeReportModal()">CANCEL</button>
+        <button class="btn-submit-luxury danger ms-auto" (click)="submitReport()" [disabled]="isReporting">
+          <span *ngIf="isReporting" class="spinner-border spinner-border-sm me-2"></span>
+          <i class="bi bi-exclamation-triangle me-2" *ngIf="!isReporting"></i> SUBMIT REPORT
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Success View -->
+    <ng-container *ngIf="reportSuccess">
+      <div class="modal-body p-5 text-center animate__animated animate__jackInTheBox">
+        <div class="success-checkmark-wrapper mb-4">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+        </div>
+        <h2 class="fw-800 mb-2">REPORT RECEIVED</h2>
+        <p class="text-muted">Thank you for making NYC360 a safer place. Our team will review this post shortly.</p>
+        <div class="mt-4">
+          <button class="btn-submit-luxury primary w-100" (click)="closeReportModal()">DONE</button>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

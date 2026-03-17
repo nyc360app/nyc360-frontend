@@ -1,0 +1,598 @@
+$primary-green: #00695C;
+$bg-mint: #E0F2F1;
+$radius: 16px;
+$font-header: 'Merriweather', serif;
+
+.profession-feed-page {
+  background: #fcfdfd;
+  min-height: 100vh;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+.merriweather-font {
+  font-family: $font-header;
+  color: #2c2c2c;
+}
+
+.page-header {
+  background: linear-gradient(135deg, $bg-mint 0%, #B2DFDB 100%);
+  padding: 100px 20px;
+  border-bottom: 1px solid rgba(0, 105, 92, 0.1);
+
+  h1 {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    color: #004D40;
+    font-weight: 900;
+  }
+
+  p {
+    color: #5a8a7d;
+    font-size: 1.2rem;
+  }
+
+  .breadcrumbs-overlay {
+    margin-top: 20px;
+    z-index: 10;
+    position: relative;
+    display: flex;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      margin-top: 15px;
+    }
+  }
+}
+
+.header-nav-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+
+  .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba($primary-green, 0.4);
+    border-radius: 50px;
+    color: $primary-green;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(5px);
+
+    &:hover {
+      background: $primary-green;
+      color: #ffffff;
+      border-color: $primary-green;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba($primary-green, 0.2);
+    }
+  }
+}
+
+.btn-view-all {
+  font-weight: 700;
+  color: #5a8a7d;
+  text-decoration: none;
+  border: 1.5px solid #ddd;
+  padding: 8px 24px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  transition: 0.3s;
+
+  &:hover {
+    border-color: $primary-green;
+    color: $primary-green;
+  }
+
+  &.text-white {
+    border-color: rgba(255, 255, 255, 0.4);
+
+    &:hover {
+      border-color: #fff;
+    }
+  }
+}
+
+// --- Classic Professional Hiring Spotlight ---
+.hiring-premium-section {
+  background: linear-gradient(135deg, #f1f8f6 0%, #e8f5f3 100%); // Very calm, soft green background
+  border-radius: 40px;
+  padding: 100px 60px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d9e9e5;
+  box-shadow: 0 20px 60px rgba(0, 77, 64, 0.04);
+
+  .section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 80px;
+    position: relative;
+    z-index: 3;
+
+    .title-group {
+      .premium-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background: #00695c;
+        border-radius: 50px;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 10px rgba(0, 105, 92, 0.1);
+      }
+
+      h2 {
+        color: #004d40; // Dark emerald for high visibility
+        font-weight: 850;
+        font-size: clamp(2.2rem, 4vw, 3rem);
+        line-height: 1.1;
+        letter-spacing: -1.5px;
+        margin-bottom: 12px;
+      }
+
+      p {
+        color: #455a64; // Readable slate gray
+        font-size: 1.2rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .luxury-btn-primary {
+    background: #00695c;
+    color: #ffffff;
+    padding: 18px 40px;
+    border-radius: 100px;
+    font-weight: 800;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 10px 30px rgba(0, 105, 92, 0.15);
+    font-size: 0.95rem;
+
+    &:hover {
+      background: #004d40;
+      transform: translateY(-4px);
+      box-shadow: 0 20px 45px rgba(0, 105, 92, 0.25);
+      color: #fff;
+    }
+  }
+
+  @media (max-width: 992px) {
+    padding: 60px 30px;
+
+    .section-header-row {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 50px;
+    }
+  }
+}
+
+.premium-job-card {
+  background: #ffffff;
+  border: 1px solid #ebf2f0;
+  border-radius: 35px; // Slightly rounder for luxury feel
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 77, 64, 0.03);
+
+  .card-inner {
+    padding: 45px; // Increased padding for duo layout
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  // Balanced Duo Hover
+  &:hover {
+    background: #ffffff;
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 105, 92, 0.12);
+    border-color: #00695c;
+
+    .job-title {
+      color: #00695c;
+      transform: translateX(5px);
+    }
+
+    .brand-logo {
+      border-color: #00695c;
+      box-shadow: 0 12px 25px rgba(0, 105, 92, 0.15);
+    }
+
+    .btn-apply-small {
+      background: #00695c;
+      color: #ffffff;
+      padding: 12px 30px;
+    }
+
+    .detail-item i {
+      transform: scale(1.1);
+      background: #e0f2f1;
+    }
+  }
+
+  .job-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+
+    .company-brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      .brand-logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: #f8f9fa;
+        object-fit: contain;
+        padding: 8px;
+        border: 1.5px solid #eee;
+        transition: all 0.3s ease;
+      }
+
+      .brand-info {
+        .company-name {
+          font-weight: 800;
+          color: #1a1a1a;
+          font-size: 1.1rem;
+          margin-bottom: 2px;
+        }
+
+        .post-date {
+          font-size: 0.8rem;
+          color: #999;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .arrangement-tag {
+      padding: 8px 16px;
+      background: #f1f5f4;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &[data-type="Remote"] {
+        color: #2e7d32;
+        background: #e8f5e9;
+      }
+
+      &[data-type="Hybrid"] {
+        color: #0277bd;
+        background: #e1f5fe;
+      }
+    }
+  }
+
+  .job-title {
+    font-family: inherit;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 25px;
+    line-height: 1.3;
+    transition: all 0.3s;
+  }
+
+  .job-details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 30px;
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: #555;
+      font-weight: 600;
+
+      i {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f8f7;
+        border-radius: 8px;
+        font-size: 1rem;
+        color: #00695c;
+        transition: all 0.3s;
+      }
+    }
+  }
+
+  .card-action-bar {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 25px;
+    border-top: 1px solid #f0f0f0;
+
+    .applicants-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #999;
+      font-weight: 700;
+    }
+
+    .btn-apply-small {
+      padding: 10px 22px;
+      background: #f0f4f3;
+      border-radius: 12px;
+      color: #00695c;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: none;
+      transition: all 0.3s;
+
+      i {
+        font-size: 0.8rem;
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+@keyframes pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(38, 166, 154, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(38, 166, 154, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(38, 166, 154, 0);
+  }
+}
+
+// --- Universal Card Designs (Shared across sections) ---
+.text-card-design {
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 40px);
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-left: 6px solid $primary-green;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  overflow: hidden; // Critical to prevent image breakout
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: $primary-green;
+  }
+
+  .card-top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .pill-tag {
+      background-color: #e0f2f1;
+      color: $primary-green;
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .post-time {
+      font-size: 0.8rem;
+      color: #777;
+      font-weight: 500;
+    }
+  }
+
+  .text-title {
+    font-family: $font-header;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 800;
+    color: #111;
+    line-height: 1.25;
+    margin-bottom: 15px;
+  }
+
+  .text-excerpt {
+    font-size: 1.05rem;
+    color: #444;
+    margin-bottom: 25px;
+    line-height: 1.6;
+  }
+
+  .card-footer-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: auto;
+
+    .author-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .mini-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .read-more-link {
+      color: $primary-green;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: gap 0.2s;
+
+      &:hover {
+        gap: 10px;
+      }
+    }
+  }
+}
+
+// --- Shared Post (LinkedIn Style) ---
+.shared-post-box {
+  margin-top: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fdfdfd;
+  transition: all 0.2s;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    background: #f8f9f9;
+    border-color: #ccc;
+  }
+
+  .shared-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+
+    .shared-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+
+      .author-name {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #222;
+        line-height: 1.2;
+      }
+
+      .post-date {
+        font-size: 0.75rem;
+        color: #888;
+      }
+    }
+  }
+
+  .shared-img-wrapper {
+    width: 100%;
+    max-height: 350px;
+    overflow: hidden;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: 100%;
+      height: auto;
+      max-height: 350px;
+      object-fit: cover;
+    }
+  }
+
+  .shared-content {
+    padding: 15px;
+
+    h4 {
+      font-family: $font-header;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #111;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #555;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5;
+    }
+  }
+}
+
+// --- Specific Section Wrappers ---
+.text-only-section {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+// Support for grid spacing
+.row.g-4 {
+  --bs-gutter-x: 2rem;
+  --bs-gutter-y: 2rem;
+}

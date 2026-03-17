@@ -1,0 +1,147 @@
+<div class="page-container luxury-theme">
+
+  <div class="page-header fade-in-down">
+    <div class="title-section">
+      <h2 class="gold-text">{{ isEditMode ? 'EDIT POST' : 'CREATE NEW POST' }}</h2>
+      <p class="subtitle">Share your story with the world.</p>
+    </div>
+    <button (click)="goBack()" class="btn-back">
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+  </div>
+
+  <div class="form-card glass-panel fade-in-up">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- Title & Type Row -->
+      <div class="form-row">
+        <div class="form-group col-md-8">
+          <label>POST TITLE <span class="req">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-type-h1"></i>
+            <input type="text" formControlName="title" placeholder="Enter a captivating headline...">
+          </div>
+          <small class="error-msg" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+            Title is required (min 5 chars).
+          </small>
+        </div>
+
+        <div class="form-group col-md-4">
+          <label>POST TYPE <span class="req">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-layers-fill"></i>
+            <select formControlName="type">
+              <option *ngFor="let type of postTypes" [value]="type.id">{{ type.name }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category & Location Search Row -->
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>CATEGORY <span class="req">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-collection-fill"></i>
+            <select formControlName="category">
+              <option [ngValue]="null" disabled>Select Category</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.label }}</option>
+            </select>
+          </div>
+          <small class="error-msg" *ngIf="form.get('category')?.invalid && form.get('category')?.touched">
+            Please select a category.
+          </small>
+        </div>
+
+        <div class="form-group col-md-6 position-relative">
+          <label>LOCATION <span class="req">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-geo-alt-fill"></i>
+            <input type="text" formControlName="locationSearch" placeholder="Search Neighborhood (e.g. Bronx)"
+              (input)="onLocationInput($event)" autocomplete="off">
+          </div>
+          <!-- Location Dropdown -->
+          <ul class="dropdown-results" *ngIf="showLocationDropdown">
+            <li *ngFor="let loc of locationResults" (click)="selectLocation(loc)">
+              <strong>{{ loc.neighborhoodNet }}</strong>
+              <small>{{ loc.borough }} - {{ loc.zipCode }}</small>
+            </li>
+          </ul>
+          <small class="error-msg" *ngIf="!selectedLocation && form.get('locationSearch')?.touched">
+            Please select a valid location from the list.
+          </small>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="form-group">
+        <label>CONTENT <span class="req">*</span></label>
+        <div class="textarea-wrapper">
+          <textarea formControlName="content" rows="10" placeholder="Write your article content here..."></textarea>
+        </div>
+        <small class="error-msg" *ngIf="form.get('content')?.invalid && form.get('content')?.touched">
+          Content is required (min 20 chars).
+        </small>
+      </div>
+
+      <!-- Tags Search -->
+      <div class="form-group position-relative">
+        <label>TAGS <small class="text-muted">– Search & Select</small></label>
+        <div class="input-wrapper">
+          <i class="bi bi-tags-fill"></i>
+          <input type="text" placeholder="Search tags..." (input)="onTagInput($event)" autocomplete="off">
+        </div>
+
+        <!-- Tag Dropdown -->
+        <ul class="dropdown-results" *ngIf="showTagDropdown">
+          <li *ngFor="let tag of tagResults" (click)="selectTag(tag)">
+            #{{ tag.name }}
+          </li>
+        </ul>
+
+        <div class="tags-list mt-3" *ngIf="selectedTags.length > 0">
+          <span class="tag-badge" *ngFor="let tag of selectedTags; let i = index">
+            #{{ tag.name }}
+            <i class="bi bi-x-circle-fill remove-tag" (click)="removeTag(i)"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Attachments -->
+      <div class="form-group">
+        <label>ATTACHMENTS</label>
+        <div class="file-upload-zone">
+          <input type="file" (change)="onFileSelect($event)" multiple id="fileInput" class="hidden-input">
+          <label for="fileInput" class="upload-label">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+            <span>Drag images here or click to upload</span>
+          </label>
+        </div>
+
+        <div class="attachments-preview" *ngIf="imagePreviews.length > 0">
+          <div class="preview-item" *ngFor="let img of imagePreviews; let i = index">
+            <img [src]="img" alt="Preview">
+            <button type="button" class="btn-remove" (click)="removeFile(i)">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions border-top pt-4 mt-4">
+        <button type="button" (click)="goBack()" class="btn-ghost">CANCEL</button>
+
+        <button type="submit" class="btn-luxury" [disabled]="isLoading">
+          <span *ngIf="!isSubmitting">
+            <i class="bi bi-send-check-fill"></i> {{ isEditMode ? 'SAVE CHANGES' : 'PUBLISH POST' }}
+          </span>
+          <span *ngIf="isSubmitting" class="d-flex align-items-center gap-2">
+            <span class="spinner-border spinner-border-sm"></span> PROCESSING...
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

@@ -1,0 +1,214 @@
+@import "../../../../../styles.scss";
+
+.footer-section {
+  background: linear-gradient(180deg, #003876 0%, #001F42 100%);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  padding: 40px 0 20px;
+
+  // Reset standard box model behavior
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.custom-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+// Main Grid Layout
+.footer-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap; // Allows wrapping on small screens
+  margin-bottom: 40px;
+}
+
+// Brand Column (Left Side)
+.brand-column {
+  flex: 0 0 35%; // Takes 35% of width
+  padding-right: 40px;
+
+  .brand-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .logo-img {
+      height: 32px;
+      width: auto;
+      margin-right: 10px;
+    }
+
+    .brand-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+  }
+
+  .tagline {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+    max-width: 250px;
+  }
+}
+
+// Follow Section
+.follow-block {
+  .follow-heading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+  }
+
+  .social-row {
+    display: flex;
+    gap: 10px;
+
+    a {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-decoration: none;
+      transition: 0.2s;
+
+      &:hover {
+        background: white;
+        color: #003876;
+      }
+    }
+  }
+}
+
+// Link Columns Wrapper (Right Side)
+.links-columns {
+  flex: 0 0 65%; // Takes remaining 65% width
+  display: flex;
+  justify-content: space-between; // Spread columns evenly
+}
+
+.link-col {
+  flex: 1; // Equal width columns
+
+  .col-heading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: 12px;
+
+      a {
+        color: rgba(255, 255, 255, 0.65);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+
+        &:hover {
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// Divider
+.footer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 25px;
+}
+
+// Bottom Bar
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+
+  .legal-links {
+    a {
+      color: rgba(255, 255, 255, 0.5);
+      text-decoration: none;
+      margin-left: 20px;
+
+      &:hover {
+        color: white;
+      }
+    }
+  }
+}
+
+// --- Responsive Breakpoints ---
+
+// Tablet (Below 992px)
+@media (max-width: 991px) {
+  .brand-column {
+    flex: 0 0 100%; // Stack brand on top
+    margin-bottom: 40px;
+    padding-right: 0;
+    text-align: center;
+  }
+
+  .brand-header {
+    justify-content: center;
+  }
+
+  .tagline {
+    margin: 0 auto 30px;
+  }
+
+  .social-row {
+    justify-content: center;
+  }
+
+  .links-columns {
+    flex: 0 0 100%; // Links take full width below
+  }
+}
+
+// Mobile (Below 576px)
+@media (max-width: 576px) {
+  .links-columns {
+    flex-direction: column; // Stack listing columns vertically or keep 2-col wrap
+    flex-wrap: wrap;
+    flex-direction: row; // Let's keep grid like
+  }
+
+  .link-col {
+    flex: 0 0 50%; // 2 columns per row
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+
+    .legal-links {
+      a {
+        margin: 0 10px;
+      }
+    }
+  }
+}

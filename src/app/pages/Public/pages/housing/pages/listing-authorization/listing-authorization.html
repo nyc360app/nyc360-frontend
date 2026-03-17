@@ -1,0 +1,325 @@
+<div class="authorization-container">
+    <h2 class="page-title">Post Listing Authorization</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Section 1: Your Information -->
+        <div class="auth-section bg-yellow animate-in delay-1" [class.section-completed]="isStep1Valid">
+            <div class="section-header">
+                <div class="step-badge badge-yellow">
+                    <i class="bi bi-check-lg" *ngIf="isStep1Valid"></i>
+                    <span *ngIf="!isStep1Valid">1</span>
+                </div>
+                <h3>Your Information</h3>
+            </div>
+
+            <div class="row">
+                <div class="col-12 form-group-row">
+                    <label>Full Name *</label>
+                    <input type="text" class="form-control-custom" formControlName="FullName"
+                        [class.is-invalid]="(form.get('FullName')?.invalid && form.get('FullName')?.touched) || (triedToSubmit && form.get('FullName')?.invalid)"
+                        placeholder="Jane Doe">
+                </div>
+                <div class="col-12 form-group-row">
+                    <label>Business/Organization Name</label>
+                    <input type="text" class="form-control-custom" formControlName="OrganizationName"
+                        placeholder="Jane Doe">
+                </div>
+                <div class="col-md-6 form-group-row">
+                    <label>Email Address *</label>
+                    <input type="email" class="form-control-custom" formControlName="Email"
+                        [class.is-invalid]="(form.get('Email')?.invalid && form.get('Email')?.touched) || (triedToSubmit && form.get('Email')?.invalid)"
+                        placeholder="Jane@gmail.com">
+                </div>
+                <div class="col-md-6 form-group-row">
+                    <label>Phone Number *</label>
+                    <input type="tel" class="form-control-custom" formControlName="PhoneNumber"
+                        [class.is-invalid]="(form.get('PhoneNumber')?.invalid && form.get('PhoneNumber')?.touched) || (triedToSubmit && form.get('PhoneNumber')?.invalid)"
+                        placeholder="(555) 000 - 0000">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Preferred Availability Details -->
+        <div class="auth-section bg-purple animate-in delay-2" [class.section-completed]="isStep2Valid">
+            <div class="section-header">
+                <div class="step-badge badge-purple">
+                    <i class="bi bi-check-lg" *ngIf="isStep2Valid"></i>
+                    <span *ngIf="!isStep2Valid">2</span>
+                </div>
+                <h3>Preferred Availability Details <span
+                        style="font-size: 0.6em; font-weight: 500; margin-left: 5px;">(Add Multiple Schedules)</span>
+                </h3>
+            </div>
+
+            <div class="availability-grid">
+                <!-- Contact Details Column -->
+                <div class="type-column">
+                    <div class="column-header">
+                        <i class="bi bi-telephone-inbound-fill text-gold me-2"></i>
+                        <h5>Contact</h5>
+                    </div>
+                    <div class="schedules-list" formArrayName="Availabilities">
+                        <ng-container *ngFor="let i of getIndexesByType(1)">
+                            <div [formGroupName]="i" class="schedule-card contact">
+                                <button type="button" class="btn-remove" (click)="removeAvailability(i)">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <div class="form-group-row mb-2">
+                                    <label>Dates</label>
+                                    <div class="d-flex flex-wrap gap-1 mb-1"
+                                        *ngIf="availabilities.at(i).get('Dates')?.value?.length > 0">
+                                        <span class="date-chip"
+                                            *ngFor="let date of availabilities.at(i).get('Dates')?.value; let dIndex = index">
+                                            {{ date | date:'MM/dd' }}
+                                            <i class="bi bi-x ms-1" (click)="removeDate(i, dIndex)"></i>
+                                        </span>
+                                    </div>
+                                    <input type="date" class="form-control-custom sm" formControlName="_dateInput"
+                                        (change)="addDate(i, $event)">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="small-label">From</label>
+                                        <input type="time" class="form-control-custom sm" formControlName="TimeFrom">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small-label">To</label>
+                                        <input type="time" class="form-control-custom sm" formControlName="TimeTo">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <button type="button" class="btn-add-schedule" (click)="addAvailability(1)">+ Add Schedule</button>
+                </div>
+
+                <!-- Virtual Tour Column -->
+                <div class="type-column">
+                    <div class="column-header">
+                        <i class="bi bi-camera-video-fill text-gold me-2"></i>
+                        <h5>Virtual Tour</h5>
+                    </div>
+                    <div class="schedules-list" formArrayName="Availabilities">
+                        <ng-container *ngFor="let i of getIndexesByType(2)">
+                            <div [formGroupName]="i" class="schedule-card virtual">
+                                <button type="button" class="btn-remove" (click)="removeAvailability(i)">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <div class="form-group-row mb-2">
+                                    <label>Dates</label>
+                                    <div class="d-flex flex-wrap gap-1 mb-1"
+                                        *ngIf="availabilities.at(i).get('Dates')?.value?.length > 0">
+                                        <span class="date-chip"
+                                            *ngFor="let date of availabilities.at(i).get('Dates')?.value; let dIndex = index">
+                                            {{ date | date:'MM/dd' }}
+                                            <i class="bi bi-x ms-1" (click)="removeDate(i, dIndex)"></i>
+                                        </span>
+                                    </div>
+                                    <input type="date" class="form-control-custom sm" formControlName="_dateInput"
+                                        (change)="addDate(i, $event)">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="small-label">From</label>
+                                        <input type="time" class="form-control-custom sm" formControlName="TimeFrom">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small-label">To</label>
+                                        <input type="time" class="form-control-custom sm" formControlName="TimeTo">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <button type="button" class="btn-add-schedule" (click)="addAvailability(2)">+ Add Schedule</button>
+                </div>
+
+                <!-- In-Person Tour Column -->
+                <div class="type-column">
+                    <div class="column-header">
+                        <i class="bi bi-person-walking text-gold me-2"></i>
+                        <h5>In-Person</h5>
+                    </div>
+                    <div class="schedules-list" formArrayName="Availabilities">
+                        <ng-container *ngFor="let i of getIndexesByType(3)">
+                            <div [formGroupName]="i" class="schedule-card person">
+                                <button type="button" class="btn-remove" (click)="removeAvailability(i)">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <div class="form-group-row mb-2">
+                                    <label>Dates</label>
+                                    <div class="d-flex flex-wrap gap-1 mb-1"
+                                        *ngIf="availabilities.at(i).get('Dates')?.value?.length > 0">
+                                        <span class="date-chip"
+                                            *ngFor="let date of availabilities.at(i).get('Dates')?.value; let dIndex = index">
+                                            {{ date | date:'MM/dd' }}
+                                            <i class="bi bi-x ms-1" (click)="removeDate(i, dIndex)"></i>
+                                        </span>
+                                    </div>
+                                    <input type="date" class="form-control-custom sm" formControlName="_dateInput"
+                                        (change)="addDate(i, $event)">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="small-label">Start</label>
+                                        <input type="time" class="form-control-custom sm" formControlName="TimeFrom">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small-label">End</label>
+                                        <input type="time" class="form-control-custom sm" formControlName="TimeTo">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <button type="button" class="btn-add-schedule" (click)="addAvailability(3)">+ Add Schedule</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Upload Documents -->
+        <div class="auth-section bg-blue animate-in delay-3" [class.section-completed]="isStep3Valid">
+            <div class="section-header">
+                <div class="step-badge badge-blue">
+                    <i class="bi bi-check-lg" *ngIf="isStep2Valid && isStep1Valid"></i>
+                    <span *ngIf="!isStep2Valid || !isStep1Valid">3</span>
+                </div>
+                <h3>Upload One-time Authorization Documents</h3>
+            </div>
+
+            <!-- Top Row: Auth Type & File Upload -->
+            <div class="row align-items-start mb-4">
+                <div class="col-md-7">
+                    <div class="form-group-row">
+                        <label>Authorization Type *</label>
+                        <select class="form-control-custom bg-white" formControlName="AuthorizationType"
+                            [class.is-invalid]="(form.get('AuthorizationType')?.invalid && form.get('AuthorizationType')?.touched) || (triedToSubmit && form.get('AuthorizationType')?.invalid)">
+                            <option [ngValue]="null">Select Authorization Type</option>
+                            <option *ngFor="let type of authorizationTypes" [ngValue]="type.id">{{type.name}}</option>
+                        </select>
+                        <div class="helper-text">Who is authorized to post this listing?</div>
+                    </div>
+
+                    <div class="descriptions-group mt-3">
+                        <div class="desc-item">
+                            <h5>Individual Authorization</h5>
+                            <p>For people acting in their own name (property owners, individual agents, or lease
+                                holders). A person acting in their own name.</p>
+                        </div>
+                        <div class="desc-item">
+                            <h5>Business Authorization</h5>
+                            <p>For licensed real estate businesses such as agencies, brokerages, or property management
+                                companies. A licensed commercial entity.</p>
+                        </div>
+                        <div class="desc-item">
+                            <h5>Organization Authorization</h5>
+                            <p>For housing organizations, nonprofits, or mission-driven entities. A registered
+                                non-commercial entity.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="max-docs-badge-static">
+                        Max 1 Documents recommended
+                    </div>
+                    <!-- Dropzone -->
+                    <div class="upload-wrapper bg-white shadow-sm" (click)="fileInput.click()"
+                        [class.is-invalid]="triedToSubmit && selectedFiles.length === 0">
+                        <div class="upload-icon-circle">
+                            <i class="bi bi-file-earmark-plus"></i>
+                        </div>
+                        <h4 *ngIf="selectedFiles.length === 0">Drag and drop Documents</h4>
+                        <h4 *ngIf="selectedFiles.length > 0">{{selectedFiles.length}} Files Selected</h4>
+
+                        <p>Supports Doc, Pdf, Max file<br>size 10MB per doc.</p>
+
+                        <button type="button" class="btn-select-files">Select Files</button>
+                        <input type="file" #fileInput multiple (change)="onFileSelect($event)" style="display: none;">
+                    </div>
+                    <div *ngIf="selectedFiles.length > 0" class="file-list mt-2">
+                        <div *ngFor="let file of selectedFiles; let i = index"
+                            class="d-flex justify-content-between align-items-center p-2 bg-white rounded mb-1 border">
+                            <span class="text-truncate small" style="max-width: 85%;">{{file.name}}</span>
+                            <i class="bi bi-x text-danger cursor-pointer"
+                                (click)="removeFile(i); $event.stopPropagation()"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Golden Divider -->
+            <div class="golden-divider my-4"></div>
+
+            <!-- Bottom Row: Accepted Docs & Footer Details -->
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="fw-bold mb-3">Accepted Documents *</h5>
+                    <ul class="accepted-docs-list">
+                        <li *ngFor="let doc of documentTypes">{{doc.name}}</li>
+                    </ul>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="row mb-4">
+                        <div class="col-md-7">
+                            <label class="fw-bold small mb-2">Authorization Document *</label>
+                            <select class="form-control-custom bg-white" formControlName="ListingAuthorizationDocument"
+                                [class.is-invalid]="(form.get('ListingAuthorizationDocument')?.invalid && form.get('ListingAuthorizationDocument')?.touched) || (triedToSubmit && form.get('ListingAuthorizationDocument')?.invalid)">
+                                <option [ngValue]="null">Select Authorization Doc.</option>
+                                <option *ngFor="let doc of documentTypes" [ngValue]="doc.id">{{doc.name}}</option>
+                            </select>
+                            <div class="helper-text">Which document confirms this authorization?</div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="fw-bold small mb-2">Authorization Validation</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control-custom bg-white"
+                                    formControlName="AuthorizationValidationDate">
+
+                            </div>
+                            <div class="helper-text">Validation until</div>
+                        </div>
+                    </div>
+
+                    <div class="info-block mb-4">
+                        <h5 class="fw-bold small">Why we ask for this information</h5>
+                        <p class="small text-muted">We request authorization documents to confirm that listings are
+                            posted by individuals or entities with the legal right to do so. This helps maintain trust,
+                            prevent fraud, and protect all users on the platform. Documents are used for verification
+                            only and are never shown publicly.</p>
+                    </div>
+
+                    <div
+                        class="save-auth-block p-3 rounded bg-white-50 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold small mb-1">Save this authorization for future use</h5>
+                            <p class="small text-muted mb-0">Recommended for agents, brokers, and organizations.</p>
+                            <p class="tiny text-muted mt-1 mb-0">When enabled, this authorization may be reused only for
+                                eligible roles supported by the attached verification documents.</p>
+                        </div>
+                        <div class="form-check form-switch ms-3">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                formControlName="SaveThisAuthorizationForFutureListings">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4 (Event) REMOVED as requested -->
+
+        <!-- Footer -->
+        <div class="footer-action">
+            <div class="terms">
+                Terms and conditions<br>
+                <span>By clicking 'Post Listing', you agree to our Terms and Conditions and all applicable
+                    Regulations.</span>
+            </div>
+            <button type="submit" class="btn-post-listing" [disabled]="isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                Post Listing
+            </button>
+        </div>
+    </form>
+</div>

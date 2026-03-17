@@ -1,0 +1,339 @@
+<div class="create-housing-container">
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header text-center mb-5">
+            <h1 class="fw-bold">Edit Your Renting Listing</h1>
+            <p class="text-muted">Update the details of your property to keep the community informed.</p>
+        </header>
+
+        <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-gold" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Fetching listing details...</p>
+        </div>
+
+        <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmit()" class="housing-form-premium">
+
+            <!-- 1. Rent / Sale Choice Cards (Visual only in edit) -->
+            <section class="form-section no-bg mb-5 text-center">
+                <div class="listing-type-group justify-content-center">
+                    <div class="type-card-lg active">
+                        <img src="assets/images/housing-rent-bg.jpg" alt="Rent" class="bg-img"
+                            onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                        <div class="content">
+                            <h3>For Rent</h3>
+                            <p>Editing Long-Term or Short-Term lease</p>
+                        </div>
+                        <div class="check-mark"><i class="bi bi-check-lg"></i></div>
+                    </div>
+                </div>
+
+                <!-- Property Icons -->
+                <div class="property-icons-row mt-5">
+                    <div class="prop-icon-card" *ngFor="let type of houseTypes"
+                        [class.selected]="f['HouseType'].value === type.id" (click)="f['HouseType'].setValue(type.id)">
+                        <i class="bi" [ngClass]="type.icon"></i>
+                        <span>{{ type.name }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Availability -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">
+                    Availability
+                    <i class="bi bi-check-circle-fill completion-check"
+                        [class.is-complete]="isSectionValid('availability')"></i>
+                </h3>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <label class="form-label-premium">Move-in Date *</label>
+                        <div class="input-with-icon">
+                            <input type="date" class="form-control-premium" formControlName="MoveInDate"
+                                [class.is-invalid]="f['MoveInDate'].invalid && f['MoveInDate'].touched">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-premium">Move-out Date</label>
+                        <div class="input-with-icon">
+                            <input type="date" class="form-control-premium" formControlName="MoveOutDate">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-premium">Property Type *</label>
+                        <select class="form-select-premium" formControlName="PropertyType"
+                            [class.is-invalid]="f['PropertyType'].invalid && f['PropertyType'].touched">
+                            <option [ngValue]="null">Select Property Type</option>
+                            <option *ngFor="let p of propertyTypes" [ngValue]="p.id">{{ p.name }}</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Location -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">
+                    Location
+                    <i class="bi bi-check-circle-fill completion-check"
+                        [class.is-complete]="isSectionValid('location')"></i>
+                </h3>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <label class="form-label-premium">Borough *</label>
+                        <select class="form-select-premium" formControlName="Borough"
+                            [class.is-invalid]="f['Borough'].invalid && f['Borough'].touched">
+                            <option value="">Select Borough</option>
+                            <option *ngFor="let b of boroughs" [value]="b">{{ b }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-premium">ZIP Code *</label>
+                        <input type="text" class="form-control-premium" formControlName="ZipCode"
+                            [class.is-invalid]="f['ZipCode'].invalid && f['ZipCode'].touched"
+                            placeholder="Enter ZIP Code">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-premium">Max Occupants</label>
+                        <input type="number" class="form-control-premium" formControlName="MaxOccupants"
+                            placeholder="Add Max Occupants #">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Address -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">Address</h3>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label-premium">Neighborhood *</label>
+                        <div class="position-relative">
+                            <input type="text" class="form-select-premium" placeholder="Select Neighborhood"
+                                [class.is-invalid]="f['locationInput'].invalid && f['locationInput'].touched"
+                                (input)="onLocationInput($event)" formControlName="locationInput">
+                            <div class="dropdown-results shadow-lg" *ngIf="showLocationDropdown">
+                                <div class="result-item" *ngFor="let loc of locationResults"
+                                    (click)="selectLocation(loc)">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-600">{{ loc.neighborhood }}</span>
+                                        <span class="text-muted small">#{{ loc.zipCode }}</span>
+                                    </div>
+                                    <div class="text-muted smaller">{{ loc.borough }}</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-6" formGroupName="Address">
+                        <label class="form-label-premium">Full Address (optional)</label>
+                        <input type="text" class="form-control-premium" formControlName="FullAddress"
+                            placeholder="Enter Full Address">
+                    </div>
+                </div>
+                <div class="row g-4 mb-4" formGroupName="Address">
+                    <div class="col-md-6">
+                        <label class="form-label-premium">Unit Number (optional)</label>
+                        <input type="text" class="form-control-premium" formControlName="UnitNumber"
+                            placeholder="Enter Unit Number">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-premium">Google Map (optional)</label>
+                        <input type="text" class="form-control-premium" formControlName="GoogleMap"
+                            placeholder="Add Google Map Share Link">
+                    </div>
+                </div>
+                <div class="row g-4 pt-4">
+                    <div class="col-12">
+                        <label class="form-label-premium mb-4">Nearby Transportation</label>
+                        <div class="transport-categories-wrap">
+                            <div class="transport-group-box mb-4" *ngFor="let group of transportationGroups">
+                                <h6 class="group-title mb-3">
+                                    <i class="bi" [ngClass]="group.icon"></i> {{group.category}}
+                                </h6>
+                                <div class="circle-check-group-grid">
+                                    <label class="circle-check mb-3" *ngFor="let opt of group.options">
+                                        <input type="checkbox" (change)="toggleTransport(opt.id)"
+                                            [checked]="f['NearbyTransportation'].value?.includes(opt.id)">
+                                        <span class="custom-card-check"></span>
+                                        <span class="check-label">{{opt.name}}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Financials -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">
+                    Financials
+                    <i class="bi bi-check-circle-fill completion-check"
+                        [class.is-complete]="isSectionValid('financials')"></i>
+                </h3>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Monthly Rent($) *</label>
+                        <input type="number" class="form-control-premium" formControlName="MonthlyRent"
+                            [class.is-invalid]="f['MonthlyRent'].invalid && f['MonthlyRent'].touched">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Security Deposit($)</label>
+                        <input type="number" class="form-control-premium" formControlName="SecurityDeposit">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Broker Fee</label>
+                        <input type="number" class="form-control-premium" formControlName="BrokerFee">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Monthly Cost Range</label>
+                        <input type="number" class="form-control-premium" formControlName="MonthlyCostRange">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key Details -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">
+                    Key Details
+                    <i class="bi bi-check-circle-fill completion-check"
+                        [class.is-complete]="isSectionValid('details')"></i>
+                </h3>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label-premium mb-3">Bedrooms *</label>
+                        <div class="pill-group">
+                            <button type="button" class="pill-btn" *ngFor="let n of [1,2,3,4,5]"
+                                [class.active]="f['Bedrooms'].value === n" (click)="f['Bedrooms'].setValue(n)">{{ n
+                                }}</button>
+                            <button type="button" class="pill-btn" [class.active]="f['Bedrooms'].value >= 6"
+                                (click)="f['Bedrooms'].setValue(6)">6+</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-premium mb-3">Bathrooms *</label>
+                        <div class="pill-group">
+                            <button type="button" class="pill-btn" *ngFor="let n of [1,2,3,4,5]"
+                                [class.active]="f['Bathrooms'].value === n" (click)="f['Bathrooms'].setValue(n)">{{ n
+                                }}</button>
+                            <button type="button" class="pill-btn" [class.active]="f['Bathrooms'].value >= 6"
+                                (click)="f['Bathrooms'].setValue(6)">6+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label-premium mb-4">Building Type *</label>
+                    <div class="circle-radio-group">
+                        <label class="circle-radio" *ngFor="let t of buildingTypes">
+                            <input type="radio" formControlName="BuildingType" [value]="t.id">
+                            <span class="custom-radio"></span>
+                            <span class="radio-label">{{t.name}}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Square Footage, Heating etc -->
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Sqft</label>
+                        <input type="number" class="form-control-premium" formControlName="Sqft">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Floor Level</label>
+                        <select class="form-select-premium" formControlName="FloorLevel">
+                            <option [ngValue]="null">Select Floor</option>
+                            <option *ngFor="let fl of floors" [value]="fl">{{ fl }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-premium">Heating *</label>
+                        <select class="form-select-premium" formControlName="Heating">
+                            <option [ngValue]="null">Select System</option>
+                            <option *ngFor="let h of heatingSystems" [ngValue]="h.id">{{ h.name }}</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Description -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">Description</h3>
+                <textarea class="form-control-premium" style="min-height: 120px;"
+                    [class.is-invalid]="f['Description'].invalid && f['Description'].touched"
+                    formControlName="Description" placeholder="Update description..."></textarea>
+            </section>
+
+            <!-- Direct Apply Link -->
+            <section class="form-card mb-4">
+                <h3 class="section-title">Direct Apply Link</h3>
+                <div class="input-group-premium mt-3">
+                    <input type="text" class="form-control-premium" formControlName="DirectApplyLink"
+                        placeholder="Add Direct Apply Link">
+                    <label class="switch-premium-sm">
+                        <input type="checkbox" formControlName="AddDirectApplyLink">
+                        <span class="slider-premium round"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Photos -->
+            <section class="form-card mb-4 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title m-0">Photos & Media</h3>
+                </div>
+
+                <div class="photo-upload-zone-premium" (click)="fileInput.click()">
+                    <input type="file" multiple (change)="onFileSelect($event)"
+                        accept="image/*,video/*,.pdf,.doc,.docx,.txt" class="d-none" #fileInput>
+                    <div class="upload-icon-circle">
+                        <i class="bi bi-camera-fill"></i>
+                        <div class="plus-icon">+</div>
+                    </div>
+                    <h4 class="fw-bold mt-3">Add New Media</h4>
+                    <p class="text-muted small">Select additional photos, videos, or documents to upload</p>
+                </div>
+
+                <!-- Unified Previews -->
+                <div class="photo-previews-grid mt-4" *ngIf="imagePreviews.length > 0">
+                    <div class="preview-card" *ngFor="let item of imagePreviews; let i = index">
+                        <!-- Image -->
+                        <img *ngIf="item.type === 'image'" [src]="item.url" alt="Preview">
+
+                        <!-- Video -->
+                        <video *ngIf="item.type === 'video'" [src]="item.url" controls
+                            class="w-100 h-100 object-fit-cover"></video>
+
+                        <!-- File -->
+                        <div *ngIf="item.type === 'file'"
+                            class="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-light text-muted">
+                            <i class="bi bi-file-earmark-text fs-1"></i>
+                            <small class="text-truncate px-2">{{item.name || 'File'}}</small>
+                        </div>
+
+                        <button type="button" class="btn-remove-photo" (click)="removeFile(i)">
+                            <i class="bi" [ngClass]="item.isExisting ? 'bi-trash' : 'bi-x'"></i>
+                        </button>
+                        <span *ngIf="item.isExisting" class="existing-badge">Existing</span>
+                        <span *ngIf="!item.isExisting" class="new-badge">New</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <section class="finish-draft-card mb-5 text-center">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="button" class="btn-draft-luxury" routerLink="/public/housing/home">Cancel</button>
+                    <button type="submit" class="btn-post-luxury" [disabled]="isSubmitting">
+                        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                        Update Listing
+                    </button>
+                </div>
+            </section>
+
+        </form>
+    </div>
+</div>

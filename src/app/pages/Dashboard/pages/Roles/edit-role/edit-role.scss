@@ -1,0 +1,103 @@
+// --- Theme Variables ---
+:host {
+  --primary-color: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --text-color-dark: #212529;
+  --text-color: #6c757d;
+  --bg-color-light: #ffffff;
+  --bg-color: #f8f9fa;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --danger-color: #dc3545;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// --- Header ---
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  
+  h1 { font-size: 1.8rem; margin: 0; color: var(--text-color-dark); strong { color: var(--primary-color); } }
+  .subtitle { color: var(--text-color); margin: 5px 0 0; font-size: 0.95rem; }
+}
+
+// --- Form Container ---
+.permissions-container {
+  background-color: var(--bg-color-light);
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px var(--shadow-color);
+  border: 1px solid var(--border-color);
+}
+
+.section-title {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  h3 { margin: 0 0 5px; color: var(--text-color-dark); }
+  p { margin: 0; color: var(--text-color); font-size: 0.9rem; }
+}
+
+// --- Grid ---
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+// --- Checkbox Cards ---
+.permission-item label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary-color);
+    background-color: #eef5ff;
+    transform: translateY(-2px);
+  }
+
+  input[type="checkbox"] {
+    width: 1.4rem; height: 1.4rem; flex-shrink: 0; accent-color: var(--primary-color); cursor: pointer;
+  }
+
+  .permission-text {
+    display: flex; flex-direction: column;
+    .permission-name { font-weight: 700; color: var(--text-color-dark); font-size: 1rem; }
+    .permission-group { font-size: 0.8rem; color: var(--text-color); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+  }
+}
+
+// --- Actions & States ---
+.form-actions {
+  text-align: right; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);
+}
+
+.btn {
+  padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; text-decoration: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+}
+.btn-primary { background-color: var(--primary-color); color: #fff; &:hover { background-color: var(--primary-hover); } }
+.btn-secondary { background-color: #fff; color: var(--text-color-dark); border-color: var(--border-color); &:hover { background-color: #f8f9fa; } }
+.btn-ghost { background: transparent; color: var(--text-color); margin-right: 10px; &:hover { color: var(--danger-color); } }
+
+.state-message { text-align: center; padding: 50px; color: var(--text-color); p { margin-top: 10px; } }
+.error-message { background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #f5c6cb; }
+
+// --- Animation ---
+.page-fade-in { animation: fadeIn 0.4s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

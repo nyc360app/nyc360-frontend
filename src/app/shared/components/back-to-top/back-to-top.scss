@@ -1,0 +1,41 @@
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007aff;
+    /* الاحترافي الأزرق */
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    /* حدود بيضاء لتبرز الزر */
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
+    z-index: 1000000;
+    /* تأكد إنه فوق كل حاجة */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInUp 0.4s ease-out;
+
+    &:hover {
+        transform: translateY(-5px) scale(1.1);
+        background-color: #0062cc;
+        box-shadow: 0 10px 25px rgba(0, 122, 255, 0.5);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

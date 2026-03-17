@@ -1,0 +1,13 @@
+<div
+  class="avatar-root"
+  [style.--avatar-bg]="avatarTone.bg"
+  [style.--avatar-fg]="avatarTone.fg">
+  <img
+    *ngIf="resolvedSrc"
+    [src]="resolvedSrc"
+    [alt]="altText"
+    class="avatar-image"
+    (error)="onImageError()">
+
+  <span *ngIf="!resolvedSrc" class="avatar-initials">{{ initials }}</span>
+</div>

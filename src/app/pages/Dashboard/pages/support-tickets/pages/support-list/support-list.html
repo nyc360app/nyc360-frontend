@@ -1,0 +1,154 @@
+<div class="support-dashboard-container animate__animated animate__fadeIn">
+
+    <div class="header-section">
+        <div class="title-area">
+            <h2><i class="bi bi-headset-vr"></i> Support Dashboard</h2>
+            <p>Manage and respond to user inquiries with ease.</p>
+        </div>
+
+        <div class="search-filter-area">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
+                    placeholder="Search by ID, Subject, or Name...">
+                <i class="bi bi-keyboard input-icon-end"></i>
+            </div>
+            <div class="filter-box">
+                <i class="bi bi-funnel-fill filter-icon"></i>
+                <select [(ngModel)]="statusFilter" (change)="onSearch()">
+                    <option value="all">All Tickets</option>
+                    <option value="active">🟢 Active Only</option>
+                    <option value="closed">🔴 Closed Only</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="tickets-container">
+        <!-- Dashboard Desktop View (Table) -->
+        <div class="desktop-view" *ngIf="!isLoading && filteredTickets.length > 0">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-hash"></i> ID</th>
+                        <th><i class="bi bi-card-text"></i> Subject</th>
+                        <th><i class="bi bi-person-badge"></i> Sender</th>
+                        <th><i class="bi bi-envelope-paper"></i> Email</th>
+                        <th><i class="bi bi-calendar-event"></i> Date</th>
+                        <th><i class="bi bi-info-circle"></i> Status</th>
+                        <th class="actions-th"><i class="bi bi-lightning-charge"></i> Quick Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let ticket of filteredTickets">
+                        <td class="id-cell">#{{ ticket.id }}</td>
+                        <td class="subject-cell">{{ ticket.subject }}</td>
+                        <td class="sender-cell">{{ ticket.creatorName }}</td>
+                        <td class="email-cell">{{ ticket.creatorEmail }}</td>
+                        <td class="date-cell">{{ ticket.createdAt | date:'shortDate' }}</td>
+                        <td>
+                            <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
+                                <i class="bi"
+                                    [ngClass]="ticket.status === 1 ? 'bi-patch-exclamation' : 'bi-patch-check'"></i>
+                                {{ getStatusName(ticket.status) }}
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="actions-group">
+                                <button class="btn-action-sm btn-reply" (click)="openReply(ticket.id)"
+                                    title="Send Reply">
+                                    <i class="bi bi-reply-all-fill"></i>
+                                </button>
+                                <button class="btn-action-sm btn-close" *ngIf="ticket.status === 1"
+                                    (click)="closeTicket(ticket.id)" title="Finalize/Close Ticket">
+                                    <i class="bi bi-check2-all"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile View (Cards) -->
+        <div class="mobile-view" *ngIf="!isLoading && filteredTickets.length > 0">
+            <div class="ticket-card" *ngFor="let ticket of filteredTickets">
+                <div class="card-top">
+                    <span class="ticket-id"><i class="bi bi-hash"></i>{{ ticket.id }}</span>
+                    <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
+                        <i class="bi" [ngClass]="ticket.status === 1 ? 'bi-clock' : 'bi-check-circle'"></i>
+                        {{ getStatusName(ticket.status) }}
+                    </span>
+                </div>
+                <div class="card-mid">
+                    <h3>{{ ticket.subject }}</h3>
+                    <div class="user-meta">
+                        <div class="meta-row">
+                            <i class="bi bi-person"></i>
+                            <strong>{{ ticket.creatorName }}</strong>
+                        </div>
+                        <div class="meta-row">
+                            <i class="bi bi-envelope"></i>
+                            <span>{{ ticket.creatorEmail }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-bottom">
+                    <span class="date"><i class="bi bi-calendar3"></i> {{ ticket.createdAt | date:'MMM d' }}</span>
+                    <div class="actions">
+                        <button class="btn-card-action" (click)="openReply(ticket.id)">
+                            <i class="bi bi-reply"></i> Reply
+                        </button>
+                        <button class="btn-card-action close" *ngIf="ticket.status === 1"
+                            (click)="closeTicket(ticket.id)">
+                            <i class="bi bi-x-circle"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state-card" *ngIf="!isLoading && filteredTickets.length === 0">
+            <div class="empty-icon-wrapper">
+                <i class="bi bi-search-heart"></i>
+            </div>
+            <h3>No results found</h3>
+            <p>We couldn't find any tickets matching your search terms. Try different keywords or check the status
+                filter.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-grid" *ngIf="isLoading">
+            <div class="skeleton-card" *ngFor="let i of [1,2,3,4]">
+                <div class="skeleton-line header"></div>
+                <div class="skeleton-line body"></div>
+                <div class="skeleton-line footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reply Modal Overlay -->
+    <div class="modal-overlay" *ngIf="showReplyModal">
+        <div class="modal-card animate__animated animate__zoomIn">
+            <div class="modal-header">
+                <h3><i class="bi bi-chat-left-dots-fill"></i> Reply to Ticket #{{ selectedTicketId }}</h3>
+                <button class="btn-close-modal" (click)="closeReply()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="reply-hint">
+                    <i class="bi bi-info-circle"></i> Your reply will be sent directly to the user's email.
+                </div>
+                <textarea [(ngModel)]="replyMessage" placeholder="Type your professional response here..."
+                    rows="6"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="closeReply()">Cancel</button>
+                <button class="btn btn-primary" (click)="submitReply()" [disabled]="!replyMessage.trim()">
+                    <i class="bi bi-send-check-fill"></i> Send Response
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

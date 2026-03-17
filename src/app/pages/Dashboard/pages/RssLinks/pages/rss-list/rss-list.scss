@@ -1,0 +1,248 @@
+.luxury-dashboard {
+  background-color: var(--luxury-bg);
+  min-height: 100vh;
+}
+
+.stat-card {
+  padding: 1.5rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  .icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    z-index: 2;
+  }
+
+  .info-box {
+    z-index: 2;
+
+    .count {
+      font-weight: 800;
+      font-size: 1.8rem;
+      margin: 0;
+      color: var(--luxury-navy);
+    }
+
+    .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--luxury-slate);
+      letter-spacing: 1px;
+    }
+  }
+
+  &.gold .icon-box {
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--luxury-gold);
+  }
+
+  &.green .icon-box {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--luxury-green);
+  }
+
+  &.blue .icon-box {
+    background: rgba(52, 152, 219, 0.15);
+    color: var(--luxury-blue);
+  }
+}
+
+.table-card {
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.source-logo-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: white;
+  padding: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.source-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.source-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--luxury-navy);
+  margin-bottom: 2px;
+}
+
+.source-link {
+  font-size: 0.75rem;
+  color: var(--luxury-slate);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--luxury-blue);
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: var(--luxury-slate);
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+  }
+
+  &.active {
+    background: rgba(46, 204, 113, 0.1);
+    color: var(--luxury-green);
+
+    .dot {
+      background: var(--luxury-green);
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 10px;
+  color: var(--luxury-slate);
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--luxury-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  &.edit:hover {
+    border-color: var(--luxury-gold);
+    color: var(--luxury-gold);
+  }
+
+  &.delete:hover {
+    border-color: #e74c3c;
+
+    color: #e74c3c;
+  }
+}
+
+@media (max-width: 991px) {
+  .header-section {
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .d-flex.gap-2 {
+      width: 100%;
+      justify-content: space-between;
+
+      button,
+      a {
+        flex: 1;
+        text-align: center;
+      }
+    }
+  }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+
+  /* Reset outer padding that causes shifts */
+  .luxury-dashboard {
+    padding: 10px !important;
+  }
+
+  .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Center the container content */
+  .d-md-none.p-3 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 !important;
+    width: 100%;
+  }
+
+  .rss-card-mobile {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin: 0 auto 1.25rem auto;
+    width: 88%;
+    /* Narrower for "small shape" look */
+    max-width: 360px;
+    overflow: hidden;
+
+    .source-logo-wrapper {
+      width: 45px;
+      height: 45px;
+    }
+
+    .source-name {
+      font-size: 0.95rem;
+    }
+
+    .status-badge.small {
+      font-size: 0.70rem;
+      padding: 3px 10px;
+    }
+
+    .btn {
+      border-radius: 10px;
+      font-weight: 600;
+      padding: 8px;
+    }
+  }
+}

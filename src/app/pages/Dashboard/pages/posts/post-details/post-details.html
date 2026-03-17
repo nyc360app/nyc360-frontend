@@ -1,0 +1,158 @@
+<div class="page-container" (click)="isMenuOpen = false">
+  
+  <div *ngIf="isLoading" class="state-container"><div class="spinner-border text-primary" role="status"></div></div>
+  <div *ngIf="errorMessage" class="state-container text-danger">{{ errorMessage }}</div>
+
+  <div *ngIf="!isLoading && post" class="post-details-wrapper post-card">
+    
+    <div class="card-top">
+      <a routerLink="/admin/posts" class="icon-btn"><i class="bi bi-arrow-left"></i></a>
+      <img [src]="getAvatar(post.author)" class="user-avatar">
+      <div class="meta">
+        <h4 class="username">{{ $any(post.author)?.fullName || post.author }}</h4>
+        <span class="timestamp">
+          {{ post.createdAt | date:'mediumDate' }} • <span class="cat">{{ getCategoryName(post.category) }}</span>
+        </span>
+      </div>
+      
+      <div class="post-menu-container">
+        <button class="icon-btn" (click)="toggleMenu($event)">
+          <i class="bi bi-three-dots"></i>
+        </button>
+        
+        <div class="menu-dropdown" *ngIf="isMenuOpen" (click)="$event.stopPropagation()">
+          <ng-container *ngIf="isOwnerOrAdmin">
+            <button class="menu-item" [routerLink]="['/admin/posts/edit', post.id]">
+              <i class="bi bi-pencil"></i> Edit Post
+            </button>
+            <button class="menu-item text-danger" (click)="onDelete()">
+              <i class="bi bi-trash"></i> Delete Post
+            </button>
+          </ng-container>
+
+          <button class="menu-item" (click)="openReportModal()">
+            <i class="bi bi-flag"></i> Report Post
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <h3 class="post-title">{{ post.title }}</h3>
+      <p class="post-text" [innerHTML]="post.content"></p>
+    </div>
+
+    <div class="card-media" *ngIf="post.imageUrl || (post.attachments && post.attachments.length > 0)">
+      <img *ngIf="post.attachments && post.attachments.length > 0" [src]="resolveImageUrl(post.attachments[0].url)">
+      <img *ngIf="(!post.attachments || post.attachments.length === 0) && post.imageUrl" [src]="resolveImageUrl(post.imageUrl)">
+    </div>
+
+    <div class="card-stats">
+      <span><i class="bi bi-hand-thumbs-up-fill text-primary"></i> {{ post.stats?.likes }}</span>
+      <span>{{ post.stats?.comments }} Comments</span>
+    </div>
+
+    <div class="card-actions">
+      <button class="action-btn" 
+              [class.active]="post.currentUserInteraction === InteractionType.Like" 
+              (click)="toggleInteraction(InteractionType.Like)">
+        <i class="bi" [class.bi-hand-thumbs-up-fill]="post.currentUserInteraction === InteractionType.Like" 
+           [class.bi-hand-thumbs-up]="post.currentUserInteraction !== InteractionType.Like"></i> Like
+      </button>
+      
+      <button class="action-btn" onclick="document.getElementById('commentInput').focus()">
+        <i class="bi bi-chat-bubble"></i> Comment
+      </button>
+    </div>
+
+    <div class="comments-area" id="comments-section">
+      
+      <div class="comment-input-wrapper">
+        <div class="input-box">
+          <input id="commentInput" type="text" placeholder="Write a comment..." 
+                 [(ngModel)]="newCommentContent" (keydown.enter)="submitComment()">
+          <button (click)="submitComment()" 
+                  [disabled]="!newCommentContent.trim()" 
+                  [class.active]="newCommentContent.trim()">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="comments-stream">
+        <div class="comment-thread" *ngFor="let comment of post.comments">
+          
+          <div class="comment-row">
+            <div class="bubble-container">
+              <div class="comment-bubble">
+                <span class="author">{{ $any(comment.author)?.fullName || 'User' }}</span>
+                <p>{{ comment.content }}</p>
+              </div>
+              <div class="comment-actions-text">
+                <span (click)="openReplyInput(comment.id)">Reply</span>
+                <span class="time">{{ comment.createdAt | date:'shortTime' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="nested-replies" *ngIf="comment.replies?.length">
+            <div class="comment-row reply" *ngFor="let reply of comment.replies">
+              <div class="bubble-container">
+                <div class="comment-bubble">
+                  <span class="author">{{ $any(reply.author)?.fullName || 'User' }}</span>
+                  <p>{{ reply.content }}</p>
+                </div>
+                <div class="comment-actions-text">
+                  <span class="time">{{ reply.createdAt | date:'shortTime' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="reply-input-wrapper" *ngIf="activeReplyId === comment.id">
+            <div class="input-box small">
+              <input #replyIn type="text" placeholder="Write a reply..." 
+                     [(ngModel)]="replyInputs[comment.id]" 
+                     (keydown.enter)="submitReply(comment)" autoFocus>
+              <button (click)="submitReply(comment)" 
+                      [disabled]="!replyInputs[comment.id]?.trim()" 
+                      [class.active]="replyInputs[comment.id]?.trim()">
+                <i class="bi bi-send-fill"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-backdrop" *ngIf="isReportModalOpen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Report Post</h3>
+        <button class="btn-close" (click)="closeReportModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="instruction">Select problem:</p>
+        <div class="form-group">
+          <select [(ngModel)]="reportReason">
+            <option [ngValue]="null" disabled>Select reason</option>
+            <option *ngFor="let r of reportReasonsList" [ngValue]="r.id">{{ r.label }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <textarea [(ngModel)]="reportDetails" rows="3" placeholder="Additional details..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeReportModal()">Cancel</button>
+        <button class="btn-submit" (click)="submitReport()" [disabled]="!reportReason || isReporting">
+          {{ isReporting ? 'Submitting...' : 'Submit' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

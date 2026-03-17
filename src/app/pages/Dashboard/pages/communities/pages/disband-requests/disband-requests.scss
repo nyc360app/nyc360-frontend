@@ -1,0 +1,160 @@
+// .dashboard-container is handled by admin-layout
+
+.header-section {
+    margin-bottom: 2.5rem;
+
+    .page-title {
+        font-weight: 850;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+    }
+}
+
+.filters-card {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+}
+
+.data-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.custom-table {
+    margin-bottom: 0;
+
+    thead th {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1rem 1.5rem;
+        border-bottom: 0;
+    }
+
+    tbody td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        border-color: #f1f5f9;
+    }
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: white;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #f1f5f9;
+        transform: translateX(-2px);
+    }
+}
+
+.italic {
+    font-style: italic;
+}
+
+@media (max-width: 991px) {
+    .sticky-top {
+        position: static !important;
+        margin-top: 2rem;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .header-section {
+        margin-bottom: 1.5rem;
+
+        .title-group {
+            flex-wrap: wrap;
+        }
+    }
+
+    .request-card-mobile {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        cursor: pointer;
+        transition: all 0.2s;
+        margin: 0 auto 1.5rem auto;
+        /* Center */
+        width: 95%;
+        max-width: 400px;
+
+        &:active {
+            background: #f8fafc;
+            transform: scale(0.99);
+        }
+
+        &.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+    }
+
+    /* Center the mobile container */
+    .d-md-none.p-3 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Overlay the Processing Panel on Mobile */
+    .col-lg-4[ng-if*="selectedRequest"],
+    .col-lg-4:has(.card) {
+        /* Note: :has support is wide now but fallback logic usually handled by layout changes. 
+        Since we can't easily change the HTML structure without larger re-write, we use fixed positioning 
+        triggered by the presence of the card. 
+     */
+        position: fixed;
+        inset: 0;
+        z-index: 1050;
+        padding: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: flex-end;
+        /* Sheet style */
+
+        .card {
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 20px 20px 0 0 !important;
+            animation: slideUp 0.3s ease-out;
+        }
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

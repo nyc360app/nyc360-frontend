@@ -1,0 +1,91 @@
+<nav class="nav-bar-container">
+
+  <div class="nav-left">
+    <button class="mobile-toggle" (click)="toggleMenu()">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <a routerLink="/" class="logo-area">
+      <img src="image_0_0.jpg" alt="NYC360" class="logo-img">
+    </a>
+
+    <a routerLink="/about" class="nav-link-item d-none d-md-block">About Us</a>
+    <a *ngIf="isLoggedIn" routerLink="/public/home" class="nav-link-item d-none d-md-block">Home </a>
+  </div>
+
+  <div class="nav-right">
+
+    <ng-container *ngIf="isLoggedIn; else loginTemplate">
+      <div class="user-actions d-none d-md-flex">
+        <span class="welcome-text">Hi, {{currentUsername}}</span>
+        <button (click)="logout()" class="btn-logout">Logout</button>
+      </div>
+    </ng-container>
+
+    <ng-template #loginTemplate>
+      <a routerLink="/auth/register-selection" class="btn-join-custom d-none d-md-block">
+        Join NYC360
+      </a>
+    </ng-template>
+
+    <a *ngIf="isLoggedIn" [routerLink]="['/public/profile', currentUsername]" class="mobile-profile-icon d-md-none">
+      <i class="bi bi-person-circle"></i>
+    </a>
+
+  </div>
+</nav>
+
+<div class="sidebar-overlay" [class.show]="isMenuOpen" (click)="toggleMenu()"></div>
+
+<div class="sidebar-menu" [class.open]="isMenuOpen">
+
+  <div class="sidebar-header">
+    <span class="sidebar-logo">NYC<span>360</span></span>
+    <button class="close-btn" (click)="toggleMenu()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="sidebar-content">
+
+    <div class="mobile-links">
+      <a *ngIf="isLoggedIn" routerLink="/public/home" (click)="toggleMenu()" class="mobile-link">
+        <i class="bi bi-house"></i> Home
+      </a>
+      <a routerLink="/about" (click)="toggleMenu()" class="mobile-link">
+        <i class="bi bi-info-circle"></i> About Us
+      </a>
+    </div>
+
+    <hr>
+
+    <ng-container *ngIf="isLoggedIn; else mobileAuthTemplate">
+      <div class="mobile-user-section">
+        <div class="user-info">
+          <div class="avatar"><i class="bi bi-person-fill"></i></div>
+          <div class="details">
+            <span class="username">{{ currentUsername }}</span>
+            <a [routerLink]="['/public/profile', currentUsername]" (click)="toggleMenu()" class="view-profile">View
+              Profile</a>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #mobileAuthTemplate>
+      <div class="mobile-auth-section">
+        <p>Join our community today.</p>
+        <a routerLink="/auth/register-selection" (click)="toggleMenu()" class="btn-join-mobile">
+          Join NYC360
+        </a>
+        <a routerLink="/auth/login" (click)="toggleMenu()" class="btn-login-mobile">
+          Login
+        </a>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="sidebar-footer" *ngIf="isLoggedIn">
+    <button (click)="logout()" class="mobile-logout-btn">
+      <i class="bi bi-box-arrow-left"></i> Logout
+    </button>
+  </div>
+</div>

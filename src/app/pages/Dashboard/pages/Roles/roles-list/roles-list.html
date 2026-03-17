@@ -1,0 +1,92 @@
+<div class="roles-page animate__animated animate__fadeIn">
+
+  <!-- Header Section -->
+  <div class="header-section mb-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h1 class="gold-title mb-1">ROLES & GOVERNANCE</h1>
+      <p class="text-muted small mb-0">Define access tiers, content limitations and system permissions</p>
+    </div>
+
+    <a routerLink="/admin/roles/create" class="btn-luxury-gold pt-2 pb-2">
+      <i class="bi bi-shield-plus me-2"></i> CREATE NEW ROLE
+    </a>
+  </div>
+
+  <!-- Subtle Loading Indicator -->
+  <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+    <div class="progress" style="height: 3px; border-radius: 0;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%;"></div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage" class="glass-panel p-4 text-center border-danger">
+    <i class="bi bi-exclamation-octagon text-danger h1"></i>
+    <p class="text-danger fw-bold mt-2">{{ errorMessage }}</p>
+    <button class="btn-luxury-outline btn-sm mt-3" (click)="loadRoles()">RETRY CONNECTION</button>
+  </div>
+
+  <!-- Roles Grid -->
+  <div *ngIf="roles.length > 0" class="row g-4">
+    <div class="col-xl-4 col-md-6" *ngFor="let role of roles; let i = index">
+      <div class="glass-panel role-card-luxury h-100">
+
+        <div class="card-top p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="role-icon-box" [class.master]="role.name.includes('Admin')">
+              <i class="bi" [ngClass]="role.name.includes('Admin') ? 'bi-shield-fill-check' : 'bi-shield-shaded'"></i>
+            </div>
+
+            <div class="role-actions">
+              <button class="btn-action-luxury edit" [routerLink]="['/admin/roles/edit', role.id]">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="btn-action-luxury delete" (click)="onDelete(role)">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          </div>
+
+          <h3 class="role-name h4 mb-1">{{ role.name }}</h3>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-count">{{ role.permissions.length }} PERMISSIONS</span>
+            <span class="badge-limit">{{ role.contentLimit | number }} KB LIMIT</span>
+          </div>
+        </div>
+
+        <div class="permissions-preview px-4 pb-4">
+          <div class="section-label small mb-2">SYSTEM CAPABILITIES</div>
+          <div class="permissions-flow">
+            <div class="luxury-chip" *ngFor="let perm of role.permissions.slice(0, 6)">
+              {{ perm.split('.')[1] || '' }}
+            </div>
+            <div class="luxury-chip more" *ngIf="role.permissions.length > 6">
+              +{{ role.permissions.length - 6 }} MORE
+            </div>
+            <div *ngIf="role.permissions.length === 0" class="text-muted small italic">
+              No specific permissions defined
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer-luxury p-3">
+          <button class="btn btn-luxury-outline w-100 py-1" [routerLink]="['/admin/roles/edit', role.id]">
+            CONFIGURE SECURITY
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && roles.length === 0 && !errorMessage" class="text-center py-5">
+    <div class="glass-panel d-inline-block p-5 text-center">
+      <i class="bi bi-shield-slash-fill h1 text-muted mb-3 d-block"></i>
+      <h4 class="fw-bold">No Governance Roles Defined</h4>
+      <p class="text-muted">Start by creating your first system access tier.</p>
+      <a routerLink="/admin/roles/create" class="btn-luxury-gold mt-3">CREATE FIRST ROLE</a>
+    </div>
+  </div>
+
+</div>

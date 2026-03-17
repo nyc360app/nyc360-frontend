@@ -1,0 +1,212 @@
+<div class="dashboard-container animate__animated animate__fadeIn">
+
+  <!-- Header Section -->
+  <div
+    class="header-luxury d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5 gap-3">
+    <div>
+      <h1 class="gold-title mb-1">SYSTEM OVERVIEW</h1>
+      <p class="text-muted small">Real-time metrics and platform lifecycle analytics</p>
+    </div>
+    <div class="glass-panel date-pill py-2 px-4 d-flex align-items-center gap-2 align-self-start align-self-md-auto">
+      <i class="bi bi-calendar3 text-gold"></i>
+      <span class="fw-bold">{{ today | date:'MMMM d, y' }}</span>
+    </div>
+  </div>
+
+  <div>
+    <!-- Subtle Loading Indicator -->
+    <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+      <div class="progress" style="height: 3px; border-radius: 0;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%;"></div>
+      </div>
+    </div>
+    <!-- Premium Stats Grid -->
+    <div class="row g-4 mb-5">
+      <!-- Skeleton Loaders -->
+      <ng-container *ngIf="isLoading">
+        <div class="col-12 col-md-6 col-lg-3" *ngFor="let i of [1,2,3,4]">
+          <div class="glass-panel p-4">
+            <div class="skeleton-text short mb-2"></div>
+            <div class="skeleton-text medium mb-3" style="height: 40px;"></div>
+            <div class="skeleton-text long"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Real Content -->
+      <div class="col-12 col-md-6 col-lg-3" *ngFor="let card of statCards" [hidden]="isLoading">
+        <div class="glass-panel stat-card-luxury">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="stat-label text-muted">{{ card.label }}</div>
+              <div class="stat-number h2 fw-bold mt-1">{{ card.value | number }}</div>
+            </div>
+            <div class="stat-icon-wrapper" [style.background]="card.bg">
+              <i class="bi" [ngClass]="card.icon"></i>
+            </div>
+          </div>
+          <div class="stat-footer mt-3 d-flex align-items-center gap-2">
+            <span class="trend-badge" [class.positive]="card.trend > 0">
+              <i class="bi" [ngClass]="card.trend > 0 ? 'bi-graph-up' : 'bi-graph-down'"></i>
+              {{ card.trend }}%
+            </span>
+            <span class="text-muted small">Than last month</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics & Activity -->
+    <div class="row g-4">
+      <div class="col-xl-4">
+        <div class="glass-panel p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0">USER DISTRIBUTION</h5>
+            <i class="bi bi-pie-chart-fill text-gold"></i>
+          </div>
+
+          <div class="analytics-bars">
+            <div class="bar-item mb-4">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="small fw-bold">VERIFICATION STATUS</span>
+                <span class="small gold-text">{{ verificationRate | number:'1.0-0' }}%</span>
+              </div>
+              <div class="luxury-progress">
+                <div class="progress-fill gold" [style.width.%]="verificationRate"></div>
+              </div>
+            </div>
+
+            <div class="bar-item mb-4">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="small fw-bold">ADMIN RATIO</span>
+                <span class="small text-primary">{{ adminRatio | number:'1.0-0' }}%</span>
+              </div>
+              <div class="luxury-progress">
+                <div class="progress-fill blue" [style.width.%]="adminRatio"></div>
+              </div>
+            </div>
+
+            <div class="bar-item">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="small fw-bold">LOCAL BUSINESSES</span>
+                <span class="small text-success">{{ (stats.totalOrganizations / stats.totalUsers * 100) | number:'1.0-0'
+                  }}%</span>
+              </div>
+              <div class="luxury-progress">
+                <div class="progress-fill green" [style.width.%]="(stats.totalOrganizations / stats.totalUsers * 100)">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert area -->
+          <div class="luxury-alert mt-5" *ngIf="stats.pendingAccounts > 0">
+            <div class="icon-pulse">
+              <i class="bi bi-shield-exclamation"></i>
+            </div>
+            <div>
+              <div class="fw-bold">ACTION REQUIRED</div>
+              <div class="small text-muted">{{ stats.pendingAccounts }} Users waiting for approval</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-8">
+        <div class="glass-panel p-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <h5 class="fw-bold mb-0">RECENT REGISTRATIONS</h5>
+            <button class="btn btn-luxury-outline btn-sm py-1 align-self-stretch align-self-md-auto"
+              routerLink="/admin/User">VIEW ALL USERS</button>
+          </div>
+
+          <!-- Desktop Table View -->
+          <div class="table-responsive d-none d-md-block">
+            <table class="luxury-table">
+              <thead>
+                <tr>
+                  <th>USER DETAILS</th>
+                  <th>ASSIGNED ROLE</th>
+                  <th>VERIFICATION</th>
+                  <th class="text-end">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of recentUsers; let i = index">
+                  <td>
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="luxury-avatar">
+                        <img *ngIf="user.avatarUrl" [src]="environment.apiBaseUrl2 + '/avatars/' + user.avatarUrl"
+                          onerror="this.src='assets/placeholder.jpg'">
+                        <div *ngIf="!user.avatarUrl" class="avatar-initials">
+                          {{ getInitials(user.firstName, user.lastName) }}
+                        </div>
+                      </div>
+                      <div>
+                        <div class="fw-bold">{{ user.firstName }} {{ user.lastName }}</div>
+                        <div class="small text-muted">{{ user.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="role-pill" [attr.data-role]="user.role">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="bi"
+                        [ngClass]="user.emailConfirmed ? 'bi-check-circle-fill text-success' : 'bi-clock-history text-warning'"></i>
+                      <span class="small fw-bold">{{ user.emailConfirmed ? 'Verified' : 'Pending' }}</span>
+                    </div>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn-icon-luxury" [routerLink]="['/admin/User']">
+                      <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="d-md-none">
+            <div class="user-card-mobile p-3 mb-3" *ngFor="let user of recentUsers">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="luxury-avatar">
+                  <img *ngIf="user.avatarUrl" [src]="environment.apiBaseUrl2 + '/avatars/' + user.avatarUrl"
+                    onerror="this.src='assets/placeholder.jpg'">
+                  <div *ngIf="!user.avatarUrl" class="avatar-initials">
+                    {{ getInitials(user.firstName, user.lastName) }}
+                  </div>
+                </div>
+                <div>
+                  <div class="fw-bold">{{ user.firstName }} {{ user.lastName }}</div>
+                  <div class="small text-muted">{{ user.email }}</div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="role-pill" [attr.data-role]="user.role">
+                  {{ user.role }}
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi"
+                    [ngClass]="user.emailConfirmed ? 'bi-check-circle-fill text-success' : 'bi-clock-history text-warning'"></i>
+                  <span class="small fw-bold">{{ user.emailConfirmed ? 'Verified' : 'Pending' }}</span>
+                </div>
+              </div>
+
+              <button class="btn btn-luxury-outline w-100" [routerLink]="['/admin/User']">
+                View Details
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

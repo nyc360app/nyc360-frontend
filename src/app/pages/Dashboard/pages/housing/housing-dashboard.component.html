@@ -1,0 +1,193 @@
+<div class="housing-dashboard">
+    <div class="dashboard-header">
+        <h2><i class="bi bi-houses"></i> Housing Listings</h2>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-container">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search by neighborhood, type..." [(ngModel)]="filters.search"
+                (keyup.enter)="onSearch()">
+        </div>
+
+        <div class="status-filter">
+            <select [(ngModel)]="filters.isPublished" (change)="onFilterChange()">
+                <option value="null">All Statuses</option>
+                <option value="true">Published</option>
+                <option value="false">Unpublished</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="onSearch()">
+            Search
+        </button>
+    </div>
+
+    <!-- Listings List -->
+    <div class="listings-list">
+        <div class="listing-item" *ngFor="let item of listings" [class.expanded]="item.isExpanded">
+
+            <!-- Item Summary Row (Compact) -->
+            <div class="item-summary">
+
+                <!-- Thumb & Status -->
+                <div class="summary-left">
+                    <div class="thumb-wrapper">
+                        <img [src]="imageService.resolveImageUrl(item.imageUrl, 'housing')" appImgFallback
+                            loading="lazy">
+                        <div class="mini-badge" [ngClass]="item.isPublished ? 'published' : 'unpublished'">
+                            {{ item.isPublished ? 'Live' : 'Hidden' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Info -->
+                <div class="summary-center">
+                    <div class="primary-info">
+                        <span class="price">${{item.price | number}}</span>
+                        <span class="dot">&middot;</span>
+                        <span class="type">{{item.houseType}}</span>
+                        <span class="dot">&middot;</span>
+                        <span class="loc"><i class="bi bi-geo-alt"></i> {{item.neighborhood}}</span>
+                    </div>
+                    <div class="secondary-info">
+                        <span>ID: #{{item.id}}</span>
+                        <span class="dot">&middot;</span>
+                        <span>{{item.bedrooms}} Bed</span>
+                        <span class="dot">&middot;</span>
+                        <span>{{item.bathrooms}} Bath</span>
+                        <span class="dot">&middot;</span>
+                        <span>{{item.createdAt | date:'shortDate'}}</span>
+                        <span class="dot">&middot;</span>
+                        <span class="inquiries" [class.has-inq]="item.totalInquiries > 0">
+                            {{item.totalInquiries}} Inquiries
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="summary-right">
+                    <button class="action-btn" [class.active-publish]="item.isPublished"
+                        (click)="togglePublish(item); $event.stopPropagation()"
+                        [title]="item.isPublished ? 'Unpublish' : 'Publish'">
+                        <i class="bi" [ngClass]="item.isPublished ? 'bi-eye' : 'bi-eye-slash'"></i>
+                    </button>
+                    <button class="action-btn" [routerLink]="['/public/housing/details', item.id]"
+                        title="View Public Page">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </button>
+                    <button class="expand-btn" (click)="toggleExpand(item)"
+                        [title]="item.isExpanded ? 'Collapse' : 'Expand'">
+                        <i class="bi" [ngClass]="item.isExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Expanded Full Details -->
+            <div class="item-details" *ngIf="item.isExpanded">
+                <div class="details-wrapper">
+
+                    <!-- Section 1: Basic Data -->
+                    <div class="detail-group">
+                        <h5>Listing Data</h5>
+                        <div class="data-row"><span>Record ID:</span> <strong>{{item.id}}</strong></div>
+                        <div class="data-row"><span>Created At:</span> <strong>{{item.createdAt |
+                                date:'medium'}}</strong></div>
+                        <div class="data-row"><span>Status:</span> <strong>{{item.isPublished ? 'Published' :
+                                'Unpublished'}}</strong></div>
+                        <div class="data-row"><span>Price:</span> <strong>${{item.price | number}}</strong></div>
+                        <div class="data-row"><span>Type:</span> <strong>{{item.houseType}}</strong></div>
+                        <div class="data-row"><span>Bed / Bath:</span> <strong>{{item.bedrooms}} /
+                                {{item.bathrooms}}</strong></div>
+                        <div class="data-row"><span>Neighborhood:</span> <strong>{{item.neighborhood}}</strong></div>
+                        <div class="data-row"><span>Total Inquiries:</span> <strong>{{item.totalInquiries}}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Authorization Data -->
+                    <div class="detail-group" *ngIf="item.authorization; else noAuth">
+                        <h5>Authorization</h5>
+                        <div class="data-row"><span>Auth ID:</span> <strong>{{item.authorization.id}}</strong></div>
+                        <div class="data-row"><span>Organization:</span>
+                            <strong>{{item.authorization.organizationName}}</strong></div>
+                        <div class="data-row"><span>Full Name:</span> <strong>{{item.authorization.fullName}}</strong>
+                        </div>
+                        <div class="data-row"><span>Email:</span> <strong>{{item.authorization.email}}</strong></div>
+                        <div class="data-row"><span>Phone:</span> <strong>{{item.authorization.phoneNumber}}</strong>
+                        </div>
+                        <div class="data-row"><span>Auth Type:</span>
+                            <strong>{{item.authorization.authorizationType}}</strong></div>
+                        <div class="data-row"><span>Doc Type:</span>
+                            <strong>{{item.authorization.listingAuthorizationDocument}}</strong></div>
+                        <div class="data-row"><span>Valid Until:</span>
+                            <strong>{{item.authorization.authorizationValidationDate | date}}</strong></div>
+                        <div class="data-row"><span>Future Save:</span>
+                            <strong>{{item.authorization.saveThisAuthorizationForFutureListings ? 'Yes' :
+                                'No'}}</strong></div>
+                    </div>
+                    <ng-template #noAuth>
+                        <div class="detail-group">
+                            <h5>Authorization</h5>
+                            <p class="text-muted">No authorization linked.</p>
+                        </div>
+                    </ng-template>
+
+                    <!-- Section 3: Attachments & Availability -->
+                    <div class="detail-group">
+                        <h5>Attachments & Availability</h5>
+
+                        <!-- Attachments -->
+                        <div class="sub-group">
+                            <h6>Attachments ({{item.authorization?.attachments?.length || 0}})</h6>
+                            <div class="attachments-grid" *ngIf="item.authorization?.attachments?.length; else noAtt">
+                                <a *ngFor="let att of item.authorization!.attachments"
+                                    [href]="imageService.resolveImageUrl(att.url, 'housing')" target="_blank"
+                                    class="att-badges">
+                                    <i class="bi bi-paperclip"></i> File #{{att.id}}
+                                </a>
+                            </div>
+                            <ng-template #noAtt><span class="text-muted text-xs">No attachments</span></ng-template>
+                        </div>
+
+                        <!-- Availabilities -->
+                        <div class="sub-group mt-2">
+                            <h6>Availabilities ({{item.authorization?.availabilities?.length || 0}})</h6>
+                            <div *ngIf="item.authorization?.availabilities?.length; else noAvail">
+                                <div *ngFor="let avail of item.authorization!.availabilities" class="avail-tag">
+                                    <span>Type: {{avail.availabilityType}}</span>
+                                    <span>Time: {{avail.timeFrom}} - {{avail.timeTo}}</span>
+                                    <span>Dates: {{avail.dates.join(', ')}}</span>
+                                </div>
+                            </div>
+                            <ng-template #noAvail><span class="text-muted text-xs">No specific
+                                    availabilities</span></ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="no-results" *ngIf="listings.length === 0 && !isLoading">
+        <i class="bi bi-house-slash"></i>
+        <p>No listings found matching your criteria.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="pagination.totalPages > 1">
+        <div class="page-info">
+            Page {{filters.pageNumber}} of {{pagination.totalPages}}
+        </div>
+        <div class="pagination-controls">
+            <button [disabled]="!pagination.hasPrev" (click)="changePage(filters.pageNumber - 1)">
+                <i class="bi bi-chevron-left"></i> Previous
+            </button>
+            <button [disabled]="!pagination.hasNext" (click)="changePage(filters.pageNumber + 1)">
+                Next <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>

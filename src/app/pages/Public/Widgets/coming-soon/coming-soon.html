@@ -1,0 +1,62 @@
+<div class="coming-soon-wrapper">
+  
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="content-card">
+    <div class="brand-area">
+      <div class="logo-icon"><i class="bi bi-rocket-takeoff-fill"></i></div>
+      <span>NYC360</span>
+    </div>
+
+    <div class="text-content">
+      <h1 class="gradient-text">We Are Launching Soon!</h1>
+      <p>We're building something extraordinary for the NYC community. Stay tuned for the big reveal.</p>
+    </div>
+
+    <div class="countdown-container">
+      <div class="time-box">
+        <span class="number">{{ days }}</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="separator">:</div>
+      <div class="time-box">
+        <span class="number">{{ hours }}</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="separator">:</div>
+      <div class="time-box">
+        <span class="number">{{ minutes }}</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="separator">:</div>
+      <div class="time-box">
+        <span class="number">{{ seconds }}</span>
+        <span class="label">Seconds</span>
+      </div>
+    </div>
+
+    <div class="notify-section">
+      <p>Be the first to know when we go live:</p>
+      
+      <!-- <div class="input-group" *ngIf="!isSubscribed; else successMsg">
+        <input type="email" placeholder="Enter your email address" [(ngModel)]="email">
+        <button (click)="onNotify()">Notify Me</button>
+      </div> -->
+
+      <ng-template #successMsg>
+        <div class="success-message">
+          <i class="bi bi-check-circle-fill"></i> You're on the list!
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="social-footer">
+      <a href="#"><i class="bi bi-facebook"></i></a>
+      <a href="#"><i class="bi bi-twitter-x"></i></a>
+      <a href="#"><i class="bi bi-instagram"></i></a>
+      <a href="#"><i class="bi bi-linkedin"></i></a>
+    </div>
+  </div>
+</div>

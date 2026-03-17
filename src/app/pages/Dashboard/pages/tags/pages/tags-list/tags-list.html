@@ -1,0 +1,171 @@
+<div class="luxury-dashboard animate__animated animate__fadeIn">
+  <div class="container-fluid py-4 px-md-5">
+
+    <!-- Header -->
+    <div class="header-section d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+      <div class="title-area">
+        <h1 class="gold-title merriweather-font mb-0">TAGS MANAGER</h1>
+        <p class="text-muted small mb-0">Manage system classifications and hierarchy</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn-luxury-outline shadow-sm position-relative" routerLink="verifications">
+          <i class="bi bi-shield-check me-2"></i> VERIFICATIONS
+          <span *ngIf="pendingCount > 0"
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-lg">
+            {{ pendingCount }}
+            <span class="visually-hidden">unread verifications</span>
+          </span>
+        </button>
+        <button class="btn-luxury-gold shadow-sm" routerLink="create">
+          <i class="bi bi-plus-lg me-2"></i> NEW TAG
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Row (Dynamic) -->
+    <div class="row g-4 mb-5">
+      <div class="col-md-4" *ngFor="let stat of stats; let i = index">
+        <div class="stat-card glass-panel" [ngClass]="['gold', 'blue', 'green'][i]">
+          <div class="icon-box">
+            <i class="bi" [ngClass]="stat.icon"></i>
+          </div>
+          <div class="info-box">
+            <h3 class="count">{{ stat.value }}</h3>
+            <span class="label">{{ stat.title }}</span>
+          </div>
+          <div class="bg-shape"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel glass-panel mb-4">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-lg-5">
+          <div class="search-box">
+            <i class="bi bi-search text-gold"></i>
+            <input type="text" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search active tags...">
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <select class="luxury-select" [(ngModel)]="selectedType" (change)="onFilterChange()">
+            <option [value]="-1">All Types</option>
+            <option [value]="1">Identity</option>
+            <option [value]="2">Professional</option>
+            <option [value]="3">Interest</option>
+            <option [value]="4">Location</option>
+          </select>
+        </div>
+        <div class="col-6 col-lg-3">
+          <select class="luxury-select" [(ngModel)]="selectedDiv" (change)="onFilterChange()">
+            <option [value]="-1">All Divisions</option>
+            <option *ngFor="let c of categories" [value]="c.id">{{c.label}}</option>
+          </select>
+        </div>
+        <!-- Subtle Loading Indicator -->
+        <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+          <div class="progress" style="height: 3px; border-radius: 0;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="table-card glass-panel">
+          <div class="table-responsive d-none d-md-block">
+            <table class="luxury-table">
+              <thead>
+                <tr>
+                  <th width="80">ID</th>
+                  <th>TAG NAME</th>
+                  <th>TYPE</th>
+                  <th>DIVISION</th>
+                  <th class="text-end">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let t of tags; let i = index" class="table-row">
+                  <td class="id-cell">
+                    <span class="id-badge" (click)="copyId(t.id)" title="Click to Copy">
+                      #{{t.id}} <i class="bi bi-files ms-1"></i>
+                    </span>
+                  </td>
+                  <td class="name-cell">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="avatar-initials" [style.background-color]="getAvatarColor(t.name)">
+                        {{ t.name.charAt(0) | uppercase }}
+                      </div>
+                      <div class="d-flex flex-column">
+                        <strong class="text-dark">{{t.name}}</strong>
+                        <small class="text-muted" style="font-size: 10px;">{{ getTypeName(t.type) }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge-custom type" [attr.data-type]="t.type">{{getTypeName(t.type)}}</span></td>
+                  <td><span class="badge-custom div">{{getCatName(t.division)}}</span></td>
+                  <td class="text-end">
+                    <div class="action-btns">
+                      <button [routerLink]="['update', t.id]" class="btn-icon edit" title="Edit"><i
+                          class="bi bi-pencil-fill"></i></button>
+                      <button (click)="onDelete(t.id)" class="btn-icon delete" title="Delete"><i
+                          class="bi bi-trash3-fill"></i></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="d-md-none p-3">
+            <div class="tag-card-mobile p-3 mb-3" *ngFor="let t of tags">
+              <div class="d-flex align-items-center gap-3 mb-3 border-bottom pb-3">
+                <div class="avatar-initials" [style.background-color]="getAvatarColor(t.name)">
+                  {{ t.name.charAt(0) | uppercase }}
+                </div>
+                <div>
+                  <strong class="d-block text-dark">{{t.name}}</strong>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="id-badge small py-0" (click)="copyId(t.id)">#{{t.id}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mb-3">
+                <span class="badge-custom type" [attr.data-type]="t.type">{{getTypeName(t.type)}}</span>
+                <span class="badge-custom div">{{getCatName(t.division)}}</span>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm flex-grow-1" [routerLink]="['update', t.id]">
+                  <i class="bi bi-pencil-fill me-1"></i> Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm flex-grow-1" (click)="onDelete(t.id)">
+                  <i class="bi bi-trash3-fill me-1"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            class="pagination-footer d-flex justify-content-between align-items-center p-4 border-top flex-wrap gap-3">
+            <div class="info text-muted small">
+              Showing <b>{{tags.length}}</b> of <b>{{totalCount}}</b> tags
+            </div>
+
+            <div class="pagination-controls d-flex align-items-center gap-2">
+              <button class="btn-circle" [disabled]="currentPage === 1" (click)="loadData(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+
+              <span class="page-indicator">{{currentPage}} / {{totalPages}}</span>
+
+              <button class="btn-circle" [disabled]="currentPage === totalPages" (click)="loadData(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>

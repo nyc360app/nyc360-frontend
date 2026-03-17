@@ -1,0 +1,170 @@
+<nav class="nav-bar-container animate__animated animate__fadeInDown">
+
+  <!-- Date Display -->
+  <div class="date-section">
+    {{ currentDate | date:'EEE, MMM d, y' | uppercase }}
+  </div>
+
+  <!-- Top Main Header -->
+  <div class="top-header">
+
+    <!-- Mobile Toggle -->
+    <button class="mobile-toggle" (click)="toggleMenu()">
+      <i class="bi" [ngClass]="isMenuOpen ? 'bi-x-lg' : 'bi-list'"></i>
+    </button>
+
+    <!-- Brand / Logo -->
+    <div class="brand-area" [routerLink]="['/admin/dashboard']" style="cursor: pointer;">
+      <div class="logo-text">NYC<span>360</span></div>
+    </div>
+
+    <!-- Desktop Controls (Right Side) -->
+    <div class="desktop-controls">
+      <app-navigation-controls></app-navigation-controls>
+    </div>
+
+  </div>
+
+  <!-- Desktop Navigation Bar -->
+  <div class="sub-links-bar d-none d-lg-block">
+    <div class="container">
+      <ul class="sub-links">
+        <li>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="bi bi-house-door"></i> Home
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+
+        <li *ngIf="canViewUsers">
+          <a routerLink="/admin/User" routerLinkActive="active">
+            <i class="bi bi-people"></i> Users
+          </a>
+        </li>
+
+        <li *ngIf="canViewRoles">
+          <a routerLink="/admin/Role" routerLinkActive="active">
+            <i class="bi bi-shield-lock"></i> Roles
+          </a>
+        </li>
+
+        <li *ngIf="canViewRSS">
+          <a routerLink="/admin/rss" routerLinkActive="active">
+            <i class="bi bi-rss"></i> RSS Feeds
+          </a>
+        </li>
+
+        <li *ngIf="canViewRSS">
+          <a routerLink="/admin/posts" routerLinkActive="active">
+            <i class="bi bi-file-text"></i> Posts
+          </a>
+        </li>
+
+        <li *ngIf="canViewRSS">
+          <a routerLink="/admin/trending" routerLinkActive="active">
+            <i class="bi bi-graph-up-arrow"></i> Trending
+          </a>
+        </li>
+
+        <li *ngIf="canViewRSS">
+          <a routerLink="/admin/flags" routerLinkActive="active">
+            <i class="bi bi-flag"></i> Reports
+          </a>
+        </li>
+
+        <li *ngIf="canViewRSS">
+          <a routerLink="/admin/tags" routerLinkActive="active">
+            <i class="bi bi-tags"></i> Tags
+          </a>
+        </li>
+        <li *ngIf="canViewRSS">
+          <a routerLink="/admin/locations" routerLinkActive="active">
+            <i class="bi bi-geo-alt"></i> Locations
+          </a>
+        </li>
+        <li *ngIf="canViewSupport">
+          <a routerLink="/admin/support" routerLinkActive="active">
+            <i class="bi bi-headset"></i> Support Tickets
+          </a>
+        </li>
+        <li *ngIf="canViewCommunities">
+          <a routerLink="/admin/communities/list" routerLinkActive="active">
+            <i class="bi bi-people-fill"></i> Communities
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu" [class.open]="isMenuOpen">
+    <ul class="mobile-links">
+      <li>
+        <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Dashboard</span> <i class="bi bi-speedometer2"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/User" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Users</span> <i class="bi bi-people"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/Role" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Roles</span> <i class="bi bi-shield-lock"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/rss" routerLinkActive="active" (click)="toggleMenu()">
+          <span>RSS Links</span> <i class="bi bi-rss"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/posts" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Posts Manager</span> <i class="bi bi-file-text"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/trending" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Trending Content</span> <i class="bi bi-graph-up-arrow"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/flags" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Reports / Flags</span> <i class="bi bi-flag"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/tags" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Tags & Categories</span> <i class="bi bi-tags"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/locations" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Locations</span> <i class="bi bi-geo-alt"></i>
+        </a>
+      </li>
+      <li *ngIf="canViewSupport">
+        <a routerLink="/admin/support" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Support Tickets</span> <i class="bi bi-headset"></i>
+        </a>
+      </li>
+      <li *ngIf="canViewCommunities">
+        <a routerLink="/admin/communities/list" routerLinkActive="active" (click)="toggleMenu()">
+          <span>Communities</span> <i class="bi bi-people-fill"></i>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/" (click)="toggleMenu()"
+          style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #aaa;">
+          <span style="font-size: 0.9rem;">Back to Website</span> <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+</nav>

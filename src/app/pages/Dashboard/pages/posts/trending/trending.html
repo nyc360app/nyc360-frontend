@@ -1,0 +1,82 @@
+<div class="timeline-container">
+
+  <div class="trending-header">
+    <div class="header-icon"><i class="bi bi-graph-up-arrow"></i></div>
+    <div class="header-content">
+      <h1>Trending Now <span class="live-dot"></span></h1>
+      <p>Top stories making waves across the platform.</p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading && posts.length === 0" class="loading-state">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="feed-wrapper" *ngIf="posts.length > 0">
+
+    <article class="feed-card fade-up" *ngFor="let post of posts; let i = index"
+      [style.animation-delay]="i * 0.1 + 's'">
+
+      <div class="card-meta-header">
+        <div class="author-info">
+          <img [src]="getAuthorImage(post.author.imageUrl)" class="avatar"
+            (error)="$event.target['src'] = 'assets/images/avatar-placeholder.png'">
+          <div class="meta-text">
+            <span class="author-name">{{ getAuthorName(post.author) }}</span>
+            <span class="post-time">{{ post.createdAt | date:'mediumDate' }} • <span class="cat">{{
+                getCategoryName(post.category) }}</span></span>
+          </div>
+        </div>
+        <span class="trending-badge"><i class="bi bi-fire"></i> Hot</span>
+      </div>
+
+      <div class="card-content-body" (click)="goToDetails(post.id)">
+        <h2 class="post-title">{{ post.title }}</h2>
+        <p class="post-text">{{ post.content | slice:0:180 }}{{ post.content.length > 180 ? '...' : '' }}</p>
+      </div>
+
+      <div class="card-media" (click)="goToDetails(post.id)">
+        <img [src]="getPostImage(post)" loading="lazy"
+          (error)="$event.target['src'] = 'assets/images/news-placeholder.jpg'">
+      </div>
+
+      <div class="card-stats">
+        <div class="stat-left"><i class="bi bi-hand-thumbs-up-fill text-primary"></i> {{ post.stats.likes || 0 }}</div>
+        <div class="stat-right" (click)="goToDetails(post.id, 'comments-section')">{{ post.stats.comments || 0 }}
+          Comments</div>
+      </div>
+
+      <div class="card-actions">
+        <button class="action-btn" [class.active]="post.currentUserInteraction === InteractionType.Like"
+          (click)="toggleLike(post)">
+          <i class="bi" [class.bi-hand-thumbs-up-fill]="post.currentUserInteraction === InteractionType.Like"
+            [class.bi-hand-thumbs-up]="post.currentUserInteraction !== InteractionType.Like"></i> Like
+        </button>
+
+        <button class="action-btn" (click)="goToDetails(post.id, 'comments-section')">
+          <i class="bi bi-chat-bubble"></i> Comment
+        </button>
+
+        <button class="action-btn" (click)="goToDetails(post.id)">
+          <i class="bi bi-share"></i> View
+        </button>
+      </div>
+
+    </article>
+
+  </div>
+
+  <div class="pagination-wrapper" *ngIf="hasMore && !isLoading && posts.length > 0">
+    <button class="btn-load-more" (click)="loadMore()">Show Older Trends</button>
+  </div>
+
+  <div *ngIf="isLoading && posts.length > 0" class="loading-more">
+    <div class="spinner-sm"></div> <span>Loading...</span>
+  </div>
+
+  <div *ngIf="!isLoading && posts.length === 0" class="no-data">
+    <i class="bi bi-clock-history"></i>
+    <p>No trending stories yet.</p>
+  </div>
+
+</div>

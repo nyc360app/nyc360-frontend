@@ -1,0 +1,204 @@
+<div class="luxury-dashboard animate__animated animate__fadeIn">
+  <div class="container-fluid py-4 px-md-5">
+
+    <!-- Header -->
+    <div class="header-section d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+      <div class="title-area">
+        <h1 class="gold-title mb-0">TRENDING INSIGTS</h1>
+        <p class="text-muted small mb-0">Real-time content performance analysis</p>
+      </div>
+      <button class="btn-luxury-gold shadow-sm" (click)="loadPosts()">
+        <i class="bi bi-arrow-clockwise me-2"></i> UPDATE DATA
+      </button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+      <!-- Total Active -->
+      <div class="col-md-4">
+        <div class="stat-card glass-panel gold">
+          <div class="icon-box"><i class="bi bi-fire"></i></div>
+          <div class="info-box">
+            <h3 class="count">{{ stats.totalTrending }}</h3>
+            <span class="label">Viral Posts</span>
+          </div>
+          <div class="bg-shape"></div>
+        </div>
+      </div>
+
+      <!-- Top Category -->
+      <div class="col-md-4">
+        <div class="stat-card glass-panel blue">
+          <div class="icon-box"><i class="bi bi-pie-chart-fill"></i></div>
+          <div class="info-box">
+            <h3 class="count text-truncate" style="font-size: 1.5rem;">{{ stats.topCategory }}</h3>
+            <span class="label">Top Category</span>
+          </div>
+          <div class="bg-shape"></div>
+        </div>
+      </div>
+
+      <!-- Engagement -->
+      <div class="col-md-4">
+        <div class="stat-card glass-panel green">
+          <div class="icon-box"><i class="bi bi-activity"></i></div>
+          <div class="info-box">
+            <h3 class="count">{{ stats.avgEngagement }}</h3>
+            <span class="label">Total Interactions</span>
+          </div>
+          <div class="bg-shape"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Grid/Table -->
+    <div class="table-card glass-panel animate__animated animate__fadeInUp">
+
+      <div *ngIf="!isLoading && posts.length === 0" class="text-center py-5">
+        <i class="bi bi-bar-chart text-muted display-4"></i>
+        <p class="mt-3 text-muted">No trending data available right now.</p>
+      </div>
+
+      <div class="table-responsive d-none d-md-block" *ngIf="posts.length > 0">
+        <table class="luxury-table">
+          <thead>
+            <tr>
+              <th width="50">RANK</th>
+              <th width="40%">POST CONTENT</th>
+              <th>METRICS</th>
+              <th>AUTHOR</th>
+              <th class="text-end">MANAGEMENT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let post of posts; let i = index" class="animate__animated animate__fadeInRight table-row">
+
+              <!-- Rank -->
+              <td>
+                <div class="rank-circle" [class.top-3]="i < 3">{{ i + 1 }}</div>
+              </td>
+
+              <!-- Content -->
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="post-thumb-wrapper">
+                    <img [src]="getPostImage(post) || 'assets/images/placeholder-news.jpg'" class="post-thumb"
+                      loading="lazy">
+                  </div>
+                  <div class="post-info">
+                    <h5 class="post-title text-truncate-2" (click)="goToDetails(post.id)">{{ post.title }}</h5>
+                    <span class="category-badge" [style.background-color]="getCategoryTheme(post.category).color + '20'"
+                      [style.color]="getCategoryTheme(post.category).color">
+                      <i class="bi bi-circle-fill" style="font-size: 6px; margin-right: 4px;"></i>
+                      {{ getCategoryTheme(post.category).label }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Metrics -->
+              <td>
+                <div class="metrics-grid">
+                  <div class="metric" title="Likes">
+                    <i class="bi bi-heart-fill text-danger"></i> {{ post.stats.likes }}
+                  </div>
+                  <div class="metric" title="Comments">
+                    <i class="bi bi-chat-dots-fill text-primary"></i> {{ post.stats.comments }}
+                  </div>
+                  <div class="metric" title="Views">
+                    <i class="bi bi-eye-fill text-success"></i> {{ post.stats.views | number }}
+                  </div>
+                </div>
+              </td>
+
+              <!-- Author -->
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <img [src]="getAuthorImage(post.author ? post.author.imageUrl : null)" class="author-avatar">
+                  <span class="fw-bold text-dark small">{{ getAuthorName(post.author) }}</span>
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="text-end">
+                <div class="action-btns">
+                  <button class="btn-icon boost" title="Boost Visibility" (click)="boostPost(post.id)">
+                    <i class="bi bi-rocket-takeoff-fill"></i>
+                  </button>
+                  <button class="btn-icon view" title="View Details" (click)="goToDetails(post.id)">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                  <button class="btn-icon remove" title="Remove from Trending" (click)="removeFromTrending(post.id)">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="d-md-none p-3" *ngIf="posts.length > 0">
+        <div class="trending-card-mobile p-3 mb-3" *ngFor="let post of posts; let i=index">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <div class="rank-circle" [class.top-3]="i < 3">{{ i + 1 }}</div>
+              <span class="category-badge" [style.background-color]="getCategoryTheme(post.category).color + '20'"
+                [style.color]="getCategoryTheme(post.category).color">
+                <i class="bi bi-circle-fill" style="font-size: 6px; margin-right: 4px;"></i>
+                {{ getCategoryTheme(post.category).label }}
+              </span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <img [src]="getAuthorImage(post.author ? post.author.imageUrl : null)" class="author-avatar"
+                style="width: 24px; height: 24px;">
+              <span class="small fw-bold">{{ getAuthorName(post.author) }}</span>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mb-3">
+            <div class="post-thumb-wrapper" style="width: 80px; height: 80px; flex-shrink: 0;">
+              <img [src]="getPostImage(post) || 'assets/images/placeholder-news.jpg'" class="post-thumb" loading="lazy">
+            </div>
+            <div>
+              <h5 class="post-title" (click)="goToDetails(post.id)" style="font-size: 1rem;">{{ post.title }}</h5>
+              <div class="metrics-grid mt-2">
+                <div class="metric small">
+                  <i class="bi bi-heart-fill text-danger"></i> {{ post.stats.likes }}
+                </div>
+                <div class="metric small">
+                  <i class="bi bi-chat-dots-fill text-primary"></i> {{ post.stats.comments }}
+                </div>
+                <div class="metric small">
+                  <i class="bi bi-eye-fill text-success"></i> {{ post.stats.views | number }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-warning btn-sm flex-grow-1" (click)="boostPost(post.id)">
+              <i class="bi bi-rocket-takeoff-fill me-1"></i> Boost
+            </button>
+            <button class="btn btn-outline-primary btn-sm flex-grow-1" (click)="goToDetails(post.id)">
+              <i class="bi bi-eye-fill me-1"></i> View
+            </button>
+            <button class="btn btn-outline-danger btn-sm flex-grow-1" (click)="removeFromTrending(post.id)">
+              <i class="bi bi-x-lg me-1"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Load More -->
+      <div class="text-center p-4 border-top" *ngIf="hasMore">
+        <button class="btn btn-link text-gold text-decoration-none fw-bold" (click)="loadMore()" [disabled]="isLoading">
+          {{ isLoading ? 'ANALYZING DATA...' : 'LOAD MORE TRENDS' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
