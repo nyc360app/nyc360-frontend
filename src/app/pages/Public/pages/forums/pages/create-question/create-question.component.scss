@@ -1,8 +1,32 @@
 :host {
     display: block;
     min-height: 100vh;
-    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
     padding-bottom: 4rem;
+}
+
+.create-question-page {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+
+    &.news-theme {
+        background: #f3f4f6;
+    }
+
+    &.community-theme {
+        background: #f8f9fa;
+    }
+
+    &.education-theme {
+        background: #f8fbff;
+    }
+
+    &.health-theme {
+        background: #f5fcff;
+    }
+
+    &.housing-theme {
+        background: #fcfaf4;
+    }
 }
 
 .create-question-container {
@@ -19,6 +43,22 @@
 .header {
     margin-bottom: 2.5rem;
 
+    .back-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #1f2937;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 1px solid rgba(17, 24, 39, 0.08);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
     h1 {
         font-size: 2.25rem;
         font-weight: 700;
@@ -30,6 +70,80 @@
         color: #cbd5e1;
         margin: 0;
         font-size: 1.05rem;
+    }
+}
+
+.header.news-theme {
+    h1 {
+        color: #111827;
+    }
+
+    p {
+        color: #6b7280;
+        max-width: 720px;
+    }
+}
+
+.header.community-theme {
+    h1 {
+        color: #1f2937;
+    }
+
+    p {
+        color: #6b7280;
+        max-width: 720px;
+    }
+
+    .back-pill {
+        border-color: rgba(188, 94, 61, 0.14);
+    }
+}
+
+.header.education-theme {
+    h1 {
+        color: #0f172a;
+    }
+
+    p {
+        color: #64748b;
+        max-width: 720px;
+    }
+
+    .back-pill {
+        color: #1d4ed8;
+        border-color: rgba(29, 78, 216, 0.14);
+    }
+}
+
+.header.health-theme {
+    h1 {
+        color: #0f172a;
+    }
+
+    p {
+        color: #4b5563;
+        max-width: 720px;
+    }
+
+    .back-pill {
+        color: #0891b2;
+        border-color: rgba(8, 145, 178, 0.14);
+    }
+}
+
+.header.housing-theme {
+    h1 {
+        color: #3d3d3d;
+    }
+
+    p {
+        color: #6b7280;
+        max-width: 720px;
+    }
+
+    .back-pill {
+        color: #a3854a;
+        border-color: rgba(181, 155, 98, 0.18);
     }
 }
 
@@ -388,6 +502,527 @@
             color: #94a3b8;
             font-size: 0.9375rem;
             line-height: 1.6;
+        }
+    }
+}
+
+.create-question-page.news-theme {
+    .form-card,
+    .tips-card {
+        background: #ffffff;
+        border-color: #e5e7eb;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+    }
+
+    .form-group {
+        label {
+            color: #111827;
+        }
+
+        input,
+        textarea {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            color: #111827;
+
+            &:focus {
+                background: #ffffff;
+                border-color: #333333;
+                box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+            }
+
+            &::placeholder {
+                color: #9ca3af;
+            }
+        }
+
+        .char-count {
+            color: #6b7280;
+        }
+    }
+
+    .preview-section {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+
+        .preview-header {
+            color: #4b5563;
+
+            i {
+                color: #333333;
+            }
+        }
+
+        .preview-content {
+            .preview-title {
+                color: #111827;
+            }
+
+            .preview-description {
+                color: #4b5563;
+            }
+
+            .preview-empty {
+                color: #9ca3af;
+            }
+        }
+    }
+
+    .form-actions {
+        border-top-color: #e5e7eb;
+
+        .btn-cancel {
+            color: #4b5563;
+            border-color: #d1d5db;
+
+            &:hover:not(:disabled) {
+                background: #f3f4f6;
+                border-color: #9ca3af;
+                color: #111827;
+            }
+        }
+
+        .btn-submit {
+            background: #333333;
+            box-shadow: 0 10px 22px rgba(17, 24, 39, 0.12);
+
+            &:hover:not(:disabled) {
+                background: #111827;
+                box-shadow: 0 14px 28px rgba(17, 24, 39, 0.18);
+            }
+        }
+    }
+
+    .tips-header {
+        i {
+            color: #333333;
+        }
+
+        h3 {
+            color: #111827;
+        }
+    }
+
+    .tip-item {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+
+        .tip-icon i {
+            color: #9ca3af;
+        }
+
+        .tip-text {
+            strong {
+                color: #111827;
+            }
+
+            p {
+                color: #6b7280;
+            }
+        }
+
+        &.completed {
+            background: rgba(34, 197, 94, 0.08);
+            border-color: rgba(34, 197, 94, 0.24);
+        }
+    }
+
+    .community-stats {
+        border-top-color: #e5e7eb;
+
+        .stat-badge {
+            background: color-mix(in srgb, #333333, white 92%);
+            border-color: rgba(17, 24, 39, 0.08);
+            color: #333333;
+        }
+
+        .stat-description {
+            color: #6b7280;
+        }
+    }
+}
+
+.create-question-page.community-theme {
+    .form-card,
+    .tips-card {
+        background: #ffffff;
+        border-color: #f0d7cc;
+        box-shadow: 0 16px 34px rgba(188, 94, 61, 0.08);
+    }
+
+    .form-group {
+        label {
+            color: #1f2937;
+        }
+
+        input,
+        textarea {
+            background: #fffaf7;
+            border-color: #ead6cc;
+            color: #1f2937;
+
+            &:focus {
+                background: #ffffff;
+                border-color: #bc5e3d;
+                box-shadow: 0 0 0 3px rgba(188, 94, 61, 0.12);
+            }
+
+            &::placeholder {
+                color: #9ca3af;
+            }
+        }
+
+        .char-count {
+            color: #6b7280;
+        }
+    }
+
+    .preview-section {
+        background: #fffaf7;
+        border-color: #f0d7cc;
+
+        .preview-header {
+            color: #8c5a47;
+
+            i {
+                color: #bc5e3d;
+            }
+        }
+
+        .preview-content {
+            .preview-title {
+                color: #1f2937;
+            }
+
+            .preview-description {
+                color: #5f6b7a;
+            }
+
+            .preview-empty {
+                color: #9ca3af;
+            }
+        }
+    }
+
+    .form-actions {
+        border-top-color: #f0d7cc;
+
+        .btn-cancel {
+            color: #7a5b4a;
+            border-color: #e7cfc3;
+
+            &:hover:not(:disabled) {
+                background: #fff3ec;
+                border-color: #d9b6a5;
+                color: #1f2937;
+            }
+        }
+
+        .btn-submit {
+            background: #bc5e3d;
+            box-shadow: 0 10px 22px rgba(188, 94, 61, 0.18);
+
+            &:hover:not(:disabled) {
+                background: #a04a2e;
+                box-shadow: 0 14px 28px rgba(188, 94, 61, 0.24);
+            }
+        }
+    }
+
+    .tips-header {
+        i {
+            color: #bc5e3d;
+        }
+
+        h3 {
+            color: #1f2937;
+        }
+    }
+
+    .tip-item {
+        background: #fffaf7;
+        border-color: #f0d7cc;
+
+        .tip-icon i {
+            color: #c7a69a;
+        }
+
+        .tip-text {
+            strong {
+                color: #1f2937;
+            }
+
+            p {
+                color: #6b7280;
+            }
+        }
+    }
+
+    .community-stats {
+        border-top-color: #f0d7cc;
+
+        .stat-badge {
+            background: rgba(188, 94, 61, 0.1);
+            border-color: rgba(188, 94, 61, 0.18);
+            color: #bc5e3d;
+        }
+
+        .stat-description {
+            color: #6b7280;
+        }
+    }
+}
+
+.create-question-page.health-theme {
+    .form-card,
+    .tips-card {
+        background: #ffffff;
+        border-color: rgba(6, 182, 212, 0.14);
+        box-shadow: 0 16px 34px rgba(8, 145, 178, 0.08);
+    }
+
+    .form-group {
+        label {
+            color: #0f172a;
+        }
+
+        input,
+        textarea {
+            background: #f5fdff;
+            border-color: #cfeef6;
+            color: #0f172a;
+
+            &:focus {
+                background: #ffffff;
+                border-color: #0891b2;
+                box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12);
+            }
+        }
+
+        .char-count {
+            color: #64748b;
+        }
+    }
+
+    .preview-section {
+        background: #f5fdff;
+        border-color: #cfeef6;
+
+        .preview-header {
+            color: #0f766e;
+
+            i {
+                color: #0891b2;
+            }
+        }
+
+        .preview-content {
+            .preview-title {
+                color: #0f172a;
+            }
+
+            .preview-description {
+                color: #475569;
+            }
+
+            .preview-empty {
+                color: #94a3b8;
+            }
+        }
+    }
+
+    .form-actions {
+        border-top-color: #d9f0f6;
+
+        .btn-cancel {
+            color: #0f766e;
+            border-color: #bfe6ee;
+
+            &:hover:not(:disabled) {
+                background: #edfafe;
+                border-color: #7dd3df;
+                color: #0f172a;
+            }
+        }
+
+        .btn-submit {
+            background: #0891b2;
+            box-shadow: 0 10px 22px rgba(8, 145, 178, 0.18);
+
+            &:hover:not(:disabled) {
+                background: #0e7490;
+                box-shadow: 0 14px 28px rgba(8, 145, 178, 0.24);
+            }
+        }
+    }
+
+    .tips-header {
+        i {
+            color: #0891b2;
+        }
+
+        h3 {
+            color: #0f172a;
+        }
+    }
+
+    .tip-item {
+        background: #f5fdff;
+        border-color: #d9f0f6;
+
+        .tip-icon i {
+            color: #94a3b8;
+        }
+
+        .tip-text {
+            strong {
+                color: #0f172a;
+            }
+
+            p {
+                color: #64748b;
+            }
+        }
+    }
+
+    .community-stats {
+        border-top-color: #d9f0f6;
+
+        .stat-badge {
+            background: rgba(8, 145, 178, 0.1);
+            border-color: rgba(8, 145, 178, 0.16);
+            color: #0891b2;
+        }
+
+        .stat-description {
+            color: #64748b;
+        }
+    }
+}
+
+.create-question-page.housing-theme {
+    .form-card,
+    .tips-card {
+        background: #ffffff;
+        border-color: rgba(181, 155, 98, 0.18);
+        box-shadow: 0 16px 34px rgba(181, 155, 98, 0.1);
+    }
+
+    .form-group {
+        label {
+            color: #3d3d3d;
+        }
+
+        input,
+        textarea {
+            background: #fffdf7;
+            border-color: #eadfbe;
+            color: #3d3d3d;
+
+            &:focus {
+                background: #ffffff;
+                border-color: #b59b62;
+                box-shadow: 0 0 0 3px rgba(181, 155, 98, 0.14);
+            }
+        }
+
+        .char-count {
+            color: #6b7280;
+        }
+    }
+
+    .preview-section {
+        background: #fffdf7;
+        border-color: #eadfbe;
+
+        .preview-header {
+            color: #8a6f38;
+
+            i {
+                color: #b59b62;
+            }
+        }
+
+        .preview-content {
+            .preview-title {
+                color: #3d3d3d;
+            }
+
+            .preview-description {
+                color: #6b7280;
+            }
+
+            .preview-empty {
+                color: #9ca3af;
+            }
+        }
+    }
+
+    .form-actions {
+        border-top-color: #eadfbe;
+
+        .btn-cancel {
+            color: #8a6f38;
+            border-color: #ddcfaa;
+
+            &:hover:not(:disabled) {
+                background: #f9f3e4;
+                border-color: #c7b076;
+                color: #3d3d3d;
+            }
+        }
+
+        .btn-submit {
+            background: #b59b62;
+            box-shadow: 0 10px 22px rgba(181, 155, 98, 0.18);
+
+            &:hover:not(:disabled) {
+                background: #a3854a;
+                box-shadow: 0 14px 28px rgba(181, 155, 98, 0.24);
+            }
+        }
+    }
+
+    .tips-header {
+        i {
+            color: #b59b62;
+        }
+
+        h3 {
+            color: #3d3d3d;
+        }
+    }
+
+    .tip-item {
+        background: #fffdf7;
+        border-color: #eadfbe;
+
+        .tip-icon i {
+            color: #b7ad8b;
+        }
+
+        .tip-text {
+            strong {
+                color: #3d3d3d;
+            }
+
+            p {
+                color: #6b7280;
+            }
+        }
+    }
+
+    .community-stats {
+        border-top-color: #eadfbe;
+
+        .stat-badge {
+            background: rgba(181, 155, 98, 0.12);
+            border-color: rgba(181, 155, 98, 0.2);
+            color: #a3854a;
+        }
+
+        .stat-description {
+            color: #6b7280;
         }
     }
 }

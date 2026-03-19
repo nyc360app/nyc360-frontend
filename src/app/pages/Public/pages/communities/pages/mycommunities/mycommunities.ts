@@ -7,11 +7,12 @@ import { MyCommunitiesService } from '../../services/mycommunities';
 import { MyCommunity } from '../../models/mycommuinties';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
+import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 
 @Component({
   selector: 'app-mycommunities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, CommunityDepartmentHeroComponent],
   templateUrl: './mycommunities.html',
   styleUrls: ['./mycommunities.scss']
 })

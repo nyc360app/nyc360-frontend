@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { HousingViewService } from '../../service/housing-view.service';
 import { ImageService } from '../../../../../../shared/services/image.service';
 import { ImgFallbackDirective } from '../../../../../../shared/directives/img-fallback.directive';
+import { HousingDepartmentHeroComponent } from '../../../../Widgets/housing-department-hero/housing-department-hero.component';
 
 @Component({
     selector: 'app-housing-feed',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, ImgFallbackDirective],
+    imports: [CommonModule, RouterModule, FormsModule, ImgFallbackDirective, HousingDepartmentHeroComponent],
     templateUrl: './housing-feed.html',
     styleUrls: ['./housing-feed.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,11 +41,19 @@ export class HousingFeedComponent implements OnInit {
 
     ngOnInit(): void {
         this.route.queryParams.subscribe(params => {
-            if (params['type']) {
-                this.filters.IsRenting = params['type'] === 'rent' ? 'true' : 'false';
-            }
+            this.filters.IsRenting = params['type'] ? (params['type'] === 'rent' ? 'true' : 'false') : '';
+            this.filters.Search = (params['search'] || '').trim();
+            this.filters.Page = 1;
             this.loadFeed();
         });
+    }
+
+    get housingHeroTitle(): string {
+        return 'Explore Housing';
+    }
+
+    get housingHeroDescription(): string {
+        return 'Search listings, compare options, and browse housing programs across NYC360.';
     }
 
     loadFeed(): void {

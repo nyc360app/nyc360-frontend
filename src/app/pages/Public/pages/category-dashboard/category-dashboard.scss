@@ -7,6 +7,40 @@
     --dashboard-sticky-top: 174px;
 }
 
+.category-dashboard-page {
+    min-height: 100vh;
+    background-color: var(--bg-light);
+
+    &.news-theme,
+    &.community-theme,
+    &.education-theme,
+    &.health-theme,
+    &.housing-theme {
+        --dashboard-top-clearance: 32px;
+        --dashboard-sticky-top: 118px;
+    }
+
+    &.news-theme {
+        background: #f3f4f6;
+    }
+
+    &.community-theme {
+        background: #f8f9fa;
+    }
+
+    &.education-theme {
+        background: #f8fbff;
+    }
+
+    &.health-theme {
+        background: #f5fcff;
+    }
+
+    &.housing-theme {
+        background: #fcfaf4;
+    }
+}
+
 .category-dashboard-wrapper {
     display: flex;
     align-items: flex-start;

@@ -1,11 +1,7 @@
 <div class="create-page">
-  <header class="create-header">
-    <div class="container">
-      <small>NYC360 NETWORK</small>
-      <h1>Create Community</h1>
-      <p>Start a new hub for discussions, events, and local support.</p>
-    </div>
-  </header>
+  <app-community-department-hero title="Create Community"
+    description="Start a new hub for discussions, events, and local support inside the Community network.">
+  </app-community-department-hero>
 
   <div class="community-create-wrap" style="width:min(calc(100% - 28px), 700px); max-width:700px; margin:28px auto 0;">
     <form [formGroup]="form" (ngSubmit)="submit()" class="community-create-form">

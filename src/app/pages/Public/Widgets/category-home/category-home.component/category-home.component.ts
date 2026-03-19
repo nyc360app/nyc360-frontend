@@ -33,12 +33,14 @@ export interface HeaderButton {
 
 import { VerificationModalComponent } from '../../../../../shared/components/verification-modal/verification-modal';
 import { ArticleHeroComponent } from '../../article-hero.component/article-hero.component';
+import { NewsDepartmentHeroComponent } from '../../news-department-hero/news-department-hero.component';
+import { CategoryDepartmentHeroComponent } from '../../category-department-hero/category-department-hero.component';
 
 
 @Component({
   selector: 'app-category-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, ImgFallbackDirective, VerificationModalComponent, ArticleHeroComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, ImgFallbackDirective, VerificationModalComponent, ArticleHeroComponent, NewsDepartmentHeroComponent, CategoryDepartmentHeroComponent],
   templateUrl: './category-home.component.html',
   styleUrls: ['./category-home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -314,15 +316,51 @@ export class CategoryHomeComponent implements OnInit {
     this.router.navigate(['/public/feed', this.activeTheme?.path || 'news'], { queryParams });
   }
 
-  onSearch(event: any) {
-    const query = event.target.value;
-    if (query && query.length > 2) {
-      this.navigateToFeed({ search: query });
+  onSearch(query: string) {
+    const normalizedQuery = query.trim();
+    if (normalizedQuery) {
+      this.navigateToFeed({ search: normalizedQuery });
     }
   }
 
   get dynamicDescription(): string {
     return `Discover the latest updates, opportunities, and insights in ${this.activeTheme?.label || 'NYC'}.`;
+  }
+
+  get educationHeroTitle(): string {
+    return 'Education';
+  }
+
+  get educationHeroDescription(): string {
+    return 'Updates, resources, and opportunities for students, families, and educators.';
+  }
+
+  get healthHeroTitle(): string {
+    return 'Health';
+  }
+
+  get healthHeroDescription(): string {
+    return 'Health updates, trusted resources, and practical support for New Yorkers.';
+  }
+
+  get searchPlaceholder(): string {
+    return `Search in ${this.activeTheme?.label || 'NYC360'}...`;
+  }
+
+  get isNewsCategory(): boolean {
+    return this.activeCategoryId === 7;
+  }
+
+  get isEducationCategory(): boolean {
+    return this.activeTheme?.path === 'education';
+  }
+
+  get isCultureCategory(): boolean {
+    return this.activeTheme?.path === 'culture';
+  }
+
+  get isHealthCategory(): boolean {
+    return this.activeTheme?.path === 'health';
   }
 
   getAuthorImg(author: any): string {

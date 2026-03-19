@@ -89,6 +89,78 @@ a {
     }
   }
 
+  .category-header-search {
+    width: min(100%, 740px);
+    margin: 0 auto 28px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: $white;
+    border: 1px solid color-mix(in srgb, var(--theme-color), white 70%);
+    border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+
+    @media (max-width: 768px) {
+      width: calc(100% - 24px);
+      gap: 10px;
+      padding: 5px;
+      margin-bottom: 24px;
+    }
+
+    .search-icon {
+      margin-left: 14px;
+      color: color-mix(in srgb, var(--theme-color), white 35%);
+      font-size: 1rem;
+
+      @media (max-width: 768px) {
+        margin-left: 12px;
+      }
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: $text-dark;
+      font-size: 1rem;
+      padding: 10px 0;
+
+      &::placeholder {
+        color: color-mix(in srgb, var(--theme-color), white 45%);
+      }
+
+      @media (max-width: 768px) {
+        font-size: 0.95rem;
+        padding: 9px 0;
+      }
+    }
+
+    .search-btn {
+      border: none;
+      border-radius: 999px;
+      background: var(--theme-color);
+      color: $white;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 12px 24px;
+      line-height: 1;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      }
+
+      @media (max-width: 768px) {
+        padding: 11px 18px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
   // --- Nav Buttons Styles ---
   .header-nav-buttons {
     display: flex;

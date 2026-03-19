@@ -1,3 +1,29 @@
+<div class="category-dashboard-page" [class.news-theme]="isNewsCategory" [class.community-theme]="isCommunityCategory"
+    [class.education-theme]="isEducationCategory" [class.health-theme]="isHealthCategory"
+    [class.housing-theme]="isHousingCategory">
+    <app-news-department-hero *ngIf="isNewsCategory" [title]="newsHeroTitle" [description]="newsHeroDescription">
+    </app-news-department-hero>
+
+    <app-community-department-hero *ngIf="isCommunityCategory" [title]="communityHeroTitle"
+        [description]="communityHeroDescription">
+    </app-community-department-hero>
+
+    <app-category-department-hero *ngIf="isCultureCategory" categoryPath="culture" [title]="cultureHeroTitle"
+        [description]="cultureHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isEducationCategory" categoryPath="education" [title]="educationHeroTitle"
+        [description]="educationHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isHealthCategory" categoryPath="health" [title]="healthHeroTitle"
+        [description]="healthHeroDescription">
+    </app-category-department-hero>
+
+    <app-housing-department-hero *ngIf="isHousingCategory" [title]="housingHeroTitle"
+        [description]="housingHeroDescription">
+    </app-housing-department-hero>
+
 <div class="category-dashboard-wrapper" [style.--cat-color]="fallbackColor">
 
     <!-- Sidebar / Bottom Nav on Mobile -->
@@ -22,7 +48,7 @@
 
             <div class="nav-divider"></div>
 
-            <a class="nav-item" [routerLink]="['/public/feed', categoryTheme?.path]">
+            <a class="nav-item" [routerLink]="backHomeLink">
                 <i class="bi bi-arrow-left-circle"></i>
                 <span>Back Home</span>
             </a>
@@ -177,4 +203,5 @@
 
         </div>
     </main>
+</div>
 </div>

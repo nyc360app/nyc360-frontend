@@ -39,11 +39,34 @@
   </div>
 
   <div class="content-wrapper" *ngIf="!isLoading">
-    <header class="category-header">
+    <app-news-department-hero *ngIf="isNewsCategory" [title]="activeTheme?.label || 'News'"
+      [description]="dynamicDescription">
+    </app-news-department-hero>
+
+    <app-category-department-hero *ngIf="isCultureCategory" [categoryPath]="activeTheme?.path || 'culture'"
+      [title]="activeTheme?.label || 'Culture'" [description]="dynamicDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isEducationCategory" [categoryPath]="activeTheme?.path || 'education'"
+      [title]="educationHeroTitle" [description]="educationHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isHealthCategory" [categoryPath]="activeTheme?.path || 'health'"
+      [title]="healthHeroTitle" [description]="healthHeroDescription">
+    </app-category-department-hero>
+
+    <header class="category-header" *ngIf="!isNewsCategory && !isCultureCategory && !isEducationCategory && !isHealthCategory">
       <div class="container text-center header-inner">
         <p class="top-meta">Welcome at NYC360</p>
         <h1 class="main-title">{{ activeTheme?.label || 'News' }}</h1>
         <p class="sub-meta">{{ dynamicDescription }}</p>
+
+        <form class="category-header-search" *ngIf="activeTheme"
+          (submit)="onSearch(searchInput.value); $event.preventDefault()">
+          <i class="bi bi-search search-icon" aria-hidden="true"></i>
+          <input #searchInput type="text" class="search-input" [placeholder]="searchPlaceholder" autocomplete="off">
+          <button type="submit" class="search-btn">Search</button>
+        </form>
 
         <div class="header-nav-buttons" *ngIf="activeTheme">
           <ng-container *ngFor="let btn of headerButtons">
@@ -340,7 +363,8 @@
   </div>
 
   <!-- 🔐 Verification Modal -->
-  <app-verification-modal *ngIf="showVerificationModal" [categoryName]="activeTheme?.label || 'General'"
+  <app-verification-modal *ngIf="showVerificationModal && !isNewsCategory && !isCultureCategory && !isEducationCategory"
+    [categoryName]="activeTheme?.label || 'General'"
     [categoryId]="activeCategoryId" [extraOccupations]="categoryTags" (close)="closeModal()" (verified)="onVerified()">
   </app-verification-modal>
 </div>

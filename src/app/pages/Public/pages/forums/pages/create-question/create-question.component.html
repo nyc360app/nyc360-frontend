@@ -1,5 +1,38 @@
+<div class="create-question-page" [class.news-theme]="isNewsForum" [class.community-theme]="isCommunityForum"
+    [class.education-theme]="isEducationForum" [class.health-theme]="isHealthForum"
+    [class.housing-theme]="isHousingForum">
+    <app-news-department-hero *ngIf="isNewsForum" [title]="newsHeroTitle" [description]="newsHeroDescription">
+    </app-news-department-hero>
+
+    <app-community-department-hero *ngIf="isCommunityForum" [title]="communityHeroTitle"
+        [description]="communityHeroDescription">
+    </app-community-department-hero>
+
+    <app-category-department-hero *ngIf="isCultureForum" categoryPath="culture" [title]="cultureHeroTitle"
+        [description]="cultureHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isEducationForum" categoryPath="education" [title]="educationHeroTitle"
+        [description]="educationHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isHealthForum" categoryPath="health" [title]="healthHeroTitle"
+        [description]="healthHeroDescription">
+    </app-category-department-hero>
+
+    <app-housing-department-hero *ngIf="isHousingForum" [title]="housingHeroTitle"
+        [description]="housingHeroDescription">
+    </app-housing-department-hero>
+
 <div class="create-question-container">
-    <div class="header">
+    <div class="header" [class.news-theme]="isNewsForum" [class.community-theme]="isCommunityForum"
+        [class.education-theme]="isEducationForum" [class.health-theme]="isHealthForum"
+        [class.housing-theme]="isHousingForum">
+        <a class="back-pill" *ngIf="isNewsForum || isCommunityForum || isCultureForum || isEducationForum || isHealthForum || isHousingForum"
+            [routerLink]="['/public/forums', slug]">
+            <i class="bi bi-arrow-left"></i>
+            Back to Discussions
+        </a>
         <h1>Ask a Question</h1>
         <p>Get help from the {{ forum?.title || 'community' }}. Be clear and specific for the best answers.</p>
     </div>
@@ -15,7 +48,7 @@
                         <span class="required">*</span>
                     </label>
                     <input type="text" id="title" name="title" #titleInput="ngModel" [(ngModel)]="title" required
-                        minlength="10" placeholder="e.g., How do I apply for affordable housing in Brooklyn?"
+                        minlength="10" [placeholder]="titlePlaceholder"
                         maxlength="150" [disabled]="isSubmitting" (input)="onTitleChange()">
                     <div class="field-footer">
                         <div class="validation-message" *ngIf="titleInput.invalid && titleInput.touched">
@@ -141,4 +174,5 @@
             </div>
         </div>
     </div>
+</div>
 </div>

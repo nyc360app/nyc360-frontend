@@ -1,23 +1,16 @@
-import { Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HousingViewService } from '../../service/housing-view.service';
-import { environment } from '../../../../../../environments/environment';
 import { ImageService } from '../../../../../../shared/services/image.service';
 import { ImgFallbackDirective } from '../../../../../../shared/directives/img-fallback.directive';
-import { AuthService } from '../../../../../Authentication/Service/auth';
-import { VerificationService } from '../../../settings/services/verification.service';
-import { ToastService } from '../../../../../../shared/services/toast.service';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CategoryContextService } from '../../../../../../shared/services/category-context.service';
-
-
+import { HousingDepartmentHeroComponent } from '../../../../Widgets/housing-department-hero/housing-department-hero.component';
 
 @Component({
     selector: 'app-housing-home',
     standalone: true,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule, ImgFallbackDirective],
+    imports: [CommonModule, RouterModule, ImgFallbackDirective, HousingDepartmentHeroComponent],
     templateUrl: './housing-home.html',
     styleUrls: ['./housing-home.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,13 +18,8 @@ import { CategoryContextService } from '../../../../../../shared/services/catego
 export class HousingHomeComponent implements OnInit {
     private housingService = inject(HousingViewService);
     private cdr = inject(ChangeDetectorRef);
-    protected readonly environment = environment;
     protected imageService = inject(ImageService);
-    protected authService = inject(AuthService);
-    private verificationService = inject(VerificationService);
-    private toastService = inject(ToastService);
-    private fb = inject(FormBuilder);
-    private destroyRef = inject(DestroyRef);
+    private categoryContext = inject(CategoryContextService);
 
     // --- Data ---
     heroPost: any = null;
@@ -42,116 +30,10 @@ export class HousingHomeComponent implements OnInit {
     discussionPosts: any[] = [];
     allPosts: any[] = [];
     isLoading = true;
-    selectedTab: string = 'explore';
-
-    // --- Permissions & Verification ---
-    showVerificationModal = false;
-    isSubmittingVerification = false;
-    verificationForm!: FormGroup;
-    selectedDocFile: File | null = null;
-
-    occupations = [
-        { id: 1854, name: 'Housing Advisor' },
-        { id: 1855, name: 'Housing Organization' },
-        { id: 1856, name: 'Licensed Agent' }
-    ];
-
-    documentTypes = [
-        { id: 1, name: 'Government ID' },
-        { id: 2, name: 'Utility Bill' },
-        { id: 5, name: 'Professional License' },
-        { id: 6, name: 'Employee ID Card' },
-        { id: 11, name: 'Contract Agreement' },
-        { id: 12, name: 'Letter of Recommendation' },
-        { id: 99, name: 'Other' }
-    ];
-
-    private categoryContext = inject(CategoryContextService);
 
     ngOnInit(): void {
         this.categoryContext.setCategory(4); // 4 = Housing
-        this.initVerificationForm();
         this.loadData();
-        this.setupAuthSubscription();
-    }
-
-    private setupAuthSubscription() {
-        this.authService.fullUserInfo$
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(() => {
-                this.cdr.markForCheck();
-            });
-    }
-
-    private initVerificationForm() {
-        this.verificationForm = this.fb.group({
-            occupationId: [1856, Validators.required], // Default to Licensed Agent
-            reason: ['', [Validators.required, Validators.minLength(10)]],
-            documentType: [1, Validators.required],
-            file: [null, Validators.required]
-        });
-    }
-
-
-    handleContributorAction(event: Event) {
-        if (!this.authService.hasHousingPermission()) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this.showVerificationModal = true;
-            this.cdr.markForCheck();
-        }
-    }
-
-    onFileSelected(event: any) {
-        if (event.target.files.length > 0) {
-            this.selectedDocFile = event.target.files[0];
-            this.verificationForm.patchValue({ file: this.selectedDocFile });
-        }
-    }
-
-    submitVerification() {
-        if (this.verificationForm.invalid || !this.selectedDocFile) {
-            this.verificationForm.markAllAsTouched();
-            return;
-        }
-
-        this.isSubmittingVerification = true;
-        const data = {
-            TagId: this.verificationForm.value.occupationId,
-            Reason: this.verificationForm.value.reason,
-            DocumentType: this.verificationForm.value.documentType,
-            File: this.selectedDocFile
-        };
-
-        this.verificationService.submitVerification(data).subscribe({
-            next: (res: any) => {
-                this.isSubmittingVerification = false;
-                if (res.isSuccess || res.IsSuccess) {
-                    this.toastService.success('Verification request submitted successfully!');
-                    this.showVerificationModal = false;
-                    this.verificationForm.reset({
-                        occupationId: 1856,
-                        documentType: 1
-                    });
-                    this.selectedDocFile = null;
-                } else {
-                    const errorMessage = res.error?.message || res.Error?.Message || 'Submission failed';
-                    this.toastService.error(errorMessage);
-                }
-                this.cdr.markForCheck();
-            },
-            error: () => {
-                this.isSubmittingVerification = false;
-                this.toastService.error('Network error. Please try again.');
-                this.cdr.markForCheck();
-            }
-        });
-    }
-
-    closeModal() {
-        this.showVerificationModal = false;
-        this.cdr.markForCheck();
     }
 
     loadData(): void {

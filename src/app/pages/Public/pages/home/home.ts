@@ -260,11 +260,14 @@ export class Home implements OnInit {
     }
 
     // 3. Interest Groups Logic
-    this.interestGroups = (data.interestGroups || []).map(group => {
+    const mappedGroups: InterestGroup[] = (data.interestGroups || []).map(group => {
       const validGroupPosts: Post[] = [];
+      const normalizedGroupPosts: Post[] = [];
 
       group.posts.forEach(p => {
         const post = this.normalizePost(p);
+        normalizedGroupPosts.push(post);
+
         if (this.hasValidImage(post)) {
           validGroupPosts.push(post);
         } else {
@@ -272,8 +275,24 @@ export class Home implements OnInit {
         }
       });
 
-      return { ...group, posts: validGroupPosts };
+      // Keep a category row if posts exist, even when posts are text-only.
+      return { ...group, posts: validGroupPosts.length > 0 ? validGroupPosts : normalizedGroupPosts };
     }).filter(g => g.posts.length > 0);
+
+    // Ensure Legal and Transportation rows are present even when API omits them.
+    const existingCategoryIds = new Set(mappedGroups.map(g => Number(g.category)));
+    const requiredCategoryIds = this.categories
+      .filter(c => c.name === 'Legal' || c.name === 'Transportation')
+      .map(c => Number(c.id))
+      .filter(id => id >= 0);
+
+    requiredCategoryIds.forEach(categoryId => {
+      if (!existingCategoryIds.has(categoryId)) {
+        mappedGroups.push({ category: categoryId, posts: [] });
+      }
+    });
+
+    this.interestGroups = mappedGroups.sort((a, b) => Number(a.category) - Number(b.category));
 
     // Highlights Logic (remains mostly same, picks from interest groups which are now only-images)
     this.highlightedPosts = [];
@@ -386,12 +405,19 @@ export class Home implements OnInit {
   }
 
   getCategoryName(id: number): string {
-    const cat = this.categories.find(c => c.id === id);
+    const normalizedId = Number(id);
+    const cat = this.categories.find(c => c.id === normalizedId);
     return cat ? cat.name : 'General';
   }
 
   getCategoryColor(id: number): string {
-    const theme = (CATEGORY_THEMES as any)[id];
+    const normalizedId = Number(id);
+    const category = this.categories.find(c => c.id === normalizedId);
+    if (category?.color) {
+      return category.color;
+    }
+
+    const theme = (CATEGORY_THEMES as any)[normalizedId];
     return theme ? theme.color : '#d4af37'; // Default gold
   }
 

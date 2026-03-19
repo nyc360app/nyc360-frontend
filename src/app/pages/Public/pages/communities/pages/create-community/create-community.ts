@@ -6,11 +6,12 @@ import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/oper
 import { CreateCommunityService } from '../../services/createcommunty';
 import { COMMUNITY_TYPES_LIST, LocationSearchResult } from '../../models/createcommunty';
 import { ToastService } from '../../../../../../shared/services/toast.service';
+import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 
 @Component({
   selector: 'app-create-community',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CommunityDepartmentHeroComponent],
   templateUrl: './create-community.html',
   styleUrls: ['./create-community.scss']
 })

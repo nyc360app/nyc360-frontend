@@ -6,11 +6,15 @@ import { ForumService } from '../../services/forum.service';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { Forum } from '../../models/forum';
+import { NewsDepartmentHeroComponent } from '../../../../Widgets/news-department-hero/news-department-hero.component';
+import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
+import { CategoryDepartmentHeroComponent } from '../../../../Widgets/category-department-hero/category-department-hero.component';
+import { HousingDepartmentHeroComponent } from '../../../../Widgets/housing-department-hero/housing-department-hero.component';
 
 @Component({
     selector: 'app-create-question',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, NewsDepartmentHeroComponent, CommunityDepartmentHeroComponent, CategoryDepartmentHeroComponent, HousingDepartmentHeroComponent],
     templateUrl: './create-question.component.html',
     styleUrls: ['./create-question.component.scss']
 })
@@ -98,5 +102,90 @@ export class CreateQuestionComponent implements OnInit {
     onTitleChange() {
         // This method is called on input to trigger change detection
         // Can be used for future enhancements like auto-suggestions
+    }
+
+    get isNewsForum(): boolean {
+        return this.slug === 'news';
+    }
+
+    get isCommunityForum(): boolean {
+        return this.slug === 'community';
+    }
+
+    get isCultureForum(): boolean {
+        return this.slug === 'culture';
+    }
+
+    get isEducationForum(): boolean {
+        return this.slug === 'education';
+    }
+
+    get isHealthForum(): boolean {
+        return this.slug === 'health';
+    }
+
+    get isHousingForum(): boolean {
+        return this.slug === 'housing';
+    }
+
+    get newsHeroTitle(): string {
+        return 'Ask in News';
+    }
+
+    get newsHeroDescription(): string {
+        return `Start a focused discussion in ${this.forum?.title || 'News'} and give readers enough context to answer clearly.`;
+    }
+
+    get communityHeroTitle(): string {
+        return 'Ask in Community';
+    }
+
+    get communityHeroDescription(): string {
+        return `Start a helpful conversation in ${this.forum?.title || 'Community'} and give neighbors enough context to respond well.`;
+    }
+
+    get cultureHeroTitle(): string {
+        return 'Ask in Culture';
+    }
+
+    get cultureHeroDescription(): string {
+        return `Start a thoughtful discussion in ${this.forum?.title || 'Culture'} and give readers enough context to answer clearly.`;
+    }
+
+    get educationHeroTitle(): string {
+        return 'Ask in Education';
+    }
+
+    get educationHeroDescription(): string {
+        return `Start a clear question in ${this.forum?.title || 'Education'} and give enough context for helpful answers.`;
+    }
+
+    get healthHeroTitle(): string {
+        return 'Ask in Health';
+    }
+
+    get healthHeroDescription(): string {
+        return `Start a clear question in ${this.forum?.title || 'Health'} and include the symptoms, service, or resource you need help with.`;
+    }
+
+    get housingHeroTitle(): string {
+        return 'Ask in Housing';
+    }
+
+    get housingHeroDescription(): string {
+        return `Start a clear question in ${this.forum?.title || 'Housing'} and include the area, budget, or program details that matter.`;
+    }
+
+    get titlePlaceholder(): string {
+        switch (this.slug) {
+            case 'housing':
+                return 'e.g., How do I apply for affordable housing in Brooklyn?';
+            case 'health':
+                return 'e.g., Where can I find free health screenings in Queens?';
+            case 'education':
+                return 'e.g., How do I register my child for a public school transfer?';
+            default:
+                return 'e.g., What is the best way to get started with this topic?';
+        }
     }
 }

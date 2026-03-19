@@ -1,32 +1,27 @@
 <div class="mycommunities-page">
-
-  <header class="discovery-header">
-    <div class="header-inner">
-      <h1>My Communities</h1>
-      <p>The places you call home in NYC360</p>
-
-      <div class="filter-bar">
-
-        <div class="search-input">
-          <i class="bi bi-search"></i>
-          <input type="text" placeholder="Search your communities..." [(ngModel)]="searchText"
-            (keyup.enter)="onSearch()">
-        </div>
-
-        <div class="type-select">
-          <i class="bi bi-funnel"></i>
-          <select [(ngModel)]="selectedType" (change)="onTypeChange()">
-            <option [ngValue]="null">All Categories</option>
-            <option *ngFor="let type of communityTypes" [ngValue]="type.id">
-              {{ type.name }}
-            </option>
-          </select>
-        </div>
-
-        <button class="btn-search" (click)="onSearch()">Filter</button>
+  <app-community-department-hero title="My Communities"
+    description="Stay close to the groups you joined and keep up with the local spaces you care about most."
+    [showDefaultSearch]="false">
+    <div hero-search-slot class="my-communities-hero-filter-bar">
+      <div class="search-input">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Search your communities..." [(ngModel)]="searchText"
+          (keyup.enter)="onSearch()">
       </div>
+
+      <div class="type-select">
+        <i class="bi bi-funnel"></i>
+        <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+          <option [ngValue]="null">All Categories</option>
+          <option *ngFor="let type of communityTypes" [ngValue]="type.id">
+            {{ type.name }}
+          </option>
+        </select>
+      </div>
+
+      <button class="btn-search" type="button" (click)="onSearch()">Filter</button>
     </div>
-  </header>
+  </app-community-department-hero>
 
   <div class="container">
 
@@ -47,7 +42,7 @@
       <i class="bi bi-people"></i>
       <h3>No joined communities found</h3>
       <p>You haven't joined any communities matching your search yet.</p>
-      <a routerLink="/public/community/explore" class="btn-explore">Explore New Communities</a>
+      <a routerLink="/public/discover" class="btn-explore">Explore New Communities</a>
     </div>
 
     <div class="comm-grid" *ngIf="communities.length > 0">

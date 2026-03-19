@@ -8,11 +8,12 @@ import { environment } from '../../../../../../environments/environment';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
+import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 
 @Component({
   selector: 'app-community-discovery',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, CommunityDepartmentHeroComponent],
   templateUrl: './community-discovery.html',
   styleUrls: ['./community-discovery.scss']
 })

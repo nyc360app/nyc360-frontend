@@ -1,5 +1,31 @@
-<div class="saved-posts-page" [style.--accent-color]="fallbackColor">
-    <header class="saved-header">
+<div class="saved-posts-page" [style.--accent-color]="fallbackColor" [class.news-theme]="isNewsCategory"
+    [class.community-theme]="isCommunityCategory" [class.health-theme]="isHealthCategory"
+    [class.housing-theme]="isHousingCategory">
+    <app-news-department-hero *ngIf="isNewsCategory" title="Saved News"
+        description="Return to the articles, updates, and News discussions you bookmarked to revisit later.">
+    </app-news-department-hero>
+
+    <app-community-department-hero *ngIf="isCommunityCategory" title="Saved Community"
+        description="Jump back into the community discussions and local updates you saved for later.">
+    </app-community-department-hero>
+
+    <app-category-department-hero *ngIf="isCultureCategory" categoryPath="culture" title="Saved Culture"
+        description="Return to the cultural stories, events, and updates you bookmarked to revisit later.">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isEducationCategory" categoryPath="education" title="Saved Education"
+        description="Come back to the education stories and resources you saved.">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isHealthCategory" categoryPath="health" title="Saved Health"
+        description="Come back to the health updates, guides, and resources you saved.">
+    </app-category-department-hero>
+
+    <app-housing-department-hero *ngIf="isHousingCategory" title="Saved Housing"
+        description="Come back to the housing listings, programs, and updates you saved.">
+    </app-housing-department-hero>
+
+    <header class="saved-header" *ngIf="!isNewsCategory && !isCommunityCategory && !isCultureCategory && !isEducationCategory && !isHealthCategory && !isHousingCategory">
         <div class="container text-center">
             <div class="category-icon" *ngIf="categoryTheme?.icon">
                 <img [src]="categoryTheme.icon" [alt]="categoryTheme.label">

@@ -1,0 +1,53 @@
+<section class="news-department-hero" [style.--theme-color]="theme?.color || '#333333'">
+  <div class="container text-center hero-inner">
+    <p class="top-meta">Welcome at NYC360</p>
+    <h1 class="main-title">{{ title }}</h1>
+    <p class="sub-meta">{{ description }}</p>
+
+    <form class="hero-search" (submit)="onSearch(searchInput.value); $event.preventDefault()">
+      <i class="bi bi-search search-icon" aria-hidden="true"></i>
+      <input #searchInput type="text" class="search-input" [placeholder]="searchPlaceholder" autocomplete="off">
+      <button type="submit" class="search-btn">Search</button>
+    </form>
+
+    <div class="header-nav-buttons">
+      <ng-container *ngFor="let btn of headerButtons">
+        <div class="nav-dropdown-wrapper" *ngIf="btn.isDropdown; else standardButton">
+          <button class="nav-btn dropdown-toggle-btn" type="button">
+            <i class="bi" [ngClass]="btn.icon || 'bi-dot'"></i>
+            <span class="ms-2">{{ btn.label }}</span>
+            <i class="bi bi-chevron-down ms-2 small-arrow"></i>
+          </button>
+
+          <div class="dropdown-menu-custom">
+            <ng-container *ngFor="let child of btn.children">
+              <a *ngIf="child.isAction" [routerLink]="hasContributorAccess() ? child.link : null"
+                [queryParams]="child.queryParams" class="dropdown-item-custom"
+                (click)="handleContributorAction($event)" [class.locked]="!hasContributorAccess()">
+                <i class="bi" [ngClass]="!hasContributorAccess() ? 'bi-lock-fill' : (child.icon || 'bi-dot')"></i>
+                {{ child.label }}
+              </a>
+
+              <a *ngIf="!child.isAction" [routerLink]="child.link" [queryParams]="child.queryParams"
+                class="dropdown-item-custom">
+                <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
+                {{ child.label }}
+              </a>
+            </ng-container>
+          </div>
+        </div>
+
+        <ng-template #standardButton>
+          <a [routerLink]="btn.link" [queryParams]="btn.queryParams" class="nav-btn">
+            <i *ngIf="btn.icon" [class]="'bi ' + btn.icon + ' me-2'"></i>
+            {{ btn.label }}
+          </a>
+        </ng-template>
+      </ng-container>
+    </div>
+  </div>
+
+  <app-verification-modal *ngIf="showVerificationModal" [categoryName]="theme?.label || 'News'"
+    [categoryId]="categoryId" [extraOccupations]="categoryTags" (close)="closeModal()" (verified)="onVerified()">
+  </app-verification-modal>
+</section>

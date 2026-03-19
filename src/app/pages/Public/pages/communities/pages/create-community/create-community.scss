@@ -58,40 +58,6 @@ $division-tag-colors: (
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.create-header {
-  background: linear-gradient(180deg, #fff3ec 0%, #ffefe6 100%);
-  text-align: center;
-  padding: 44px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-  small {
-    color: $primary-orange;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 8px;
-  }
-
-  h1 {
-    color: $text-dark;
-    font-size: clamp(1.8rem, 2.2vw, 2.5rem);
-    line-height: 1.1;
-    margin: 0;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
-
-  p {
-    margin: 10px auto 0;
-    max-width: 760px;
-    color: #6b7280;
-    font-size: 0.98rem;
-    line-height: 1.6;
-  }
-}
-
 .container {
   max-width: 1220px;
   margin: 0 auto;

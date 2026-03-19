@@ -94,7 +94,7 @@ export const CATEGORY_THEMES: { [key: number]: any } = {
     topLinks: [
       { label: 'Explore', route: '/public/housing/feed', icon: 'bi-rss' },
       { label: 'My Inquiries', route: '/public/category/housing/saved', icon: 'bi-journal-text' },
-      { label: 'Contributor Dashboard', route: '/public/category/housing/dashboard', icon: 'bi-speedometer2' },
+      { label: 'Contributor Dashboard', route: '/public/housing/agent/dashboard', icon: 'bi-speedometer2' },
 
       {
         label: 'Contributor Activity',

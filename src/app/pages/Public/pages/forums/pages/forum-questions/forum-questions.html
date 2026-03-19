@@ -1,5 +1,30 @@
 <div class="questions-page">
-    <header class="questions-header">
+    <app-news-department-hero *ngIf="isNewsForum" [title]="newsHeroTitle" [description]="newsHeroDescription">
+    </app-news-department-hero>
+
+    <app-community-department-hero *ngIf="isCommunityForum" [title]="communityHeroTitle"
+        [description]="communityHeroDescription">
+    </app-community-department-hero>
+
+    <app-category-department-hero *ngIf="isCultureForum" categoryPath="culture" [title]="cultureHeroTitle"
+        [description]="cultureHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isEducationForum" categoryPath="education" [title]="educationHeroTitle"
+        [description]="educationHeroDescription">
+    </app-category-department-hero>
+
+    <app-category-department-hero *ngIf="isHealthForum" categoryPath="health" [title]="healthHeroTitle"
+        [description]="healthHeroDescription">
+    </app-category-department-hero>
+
+    <app-housing-department-hero *ngIf="isHousingForum" [title]="housingHeroTitle"
+        [description]="housingHeroDescription">
+    </app-housing-department-hero>
+
+    <header class="questions-header" [class.news-theme]="isNewsForum" [class.community-theme]="isCommunityForum"
+        [class.education-theme]="isEducationForum" [class.health-theme]="isHealthForum"
+        [class.housing-theme]="isHousingForum">
         <div class="container header-container">
             <div class="header-top">
                 <div class="back-link" routerLink="/public/forums">
@@ -22,7 +47,7 @@
                         </span>
                     </div>
                 </div>
-                <button class="btn-create-question" [routerLink]="['/public/forums', slug, 'create']">
+                <button class="btn-create-question" *ngIf="!isNewsForum && !isCommunityForum" [routerLink]="['/public/forums', slug, 'create']">
                     <i class="bi bi-plus-lg"></i>
                     Ask a Question
                 </button>

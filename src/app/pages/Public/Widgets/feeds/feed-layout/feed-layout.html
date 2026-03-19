@@ -1,6 +1,43 @@
-<div class="feed-layout-container" [class.housing-theme]="isHousingCategory">
+<div class="feed-layout-container" [class.housing-theme]="isHousingCategory" [class.news-theme]="isNewsCategory"
+  [class.education-theme]="isEducationCategory" [class.health-theme]="isHealthCategory">
+  <app-news-department-hero *ngIf="isNewsCategory" [title]="newsHeroTitle" [description]="newsHeroDescription">
+  </app-news-department-hero>
 
-  <header class="category-header">
+  <app-category-department-hero *ngIf="isCultureCategory" categoryPath="culture" [title]="cultureHeroTitle"
+    [description]="cultureHeroDescription">
+  </app-category-department-hero>
+
+  <app-category-department-hero *ngIf="isEducationCategory" categoryPath="education" [title]="educationHeroTitle"
+    [description]="educationHeroDescription" [showSearch]="false">
+    <div hero-search-slot class="education-hero-filter-bar">
+      <div class="search-box">
+        <i class="bi bi-search text-muted"></i>
+        <input type="text" placeholder="Search topics or resources..." [ngModel]="searchQuery"
+          (ngModelChange)="searchQuery = $event" (keyup.enter)="loadPosts()">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="location-box">
+        <i class="bi bi-geo-alt" style="color: var(--primary-color)"></i>
+        <input type="text" placeholder="Location..." (input)="onLocationType($any($event.target).value)">
+
+        <div *ngIf="locations.length > 0" class="loc-dropdown shadow-sm">
+          <div *ngFor="let loc of locations" class="loc-item" (click)="selectLocation(loc.id)">
+            {{ loc.neighborhood }}
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-go" type="button" (click)="loadPosts()">Search</button>
+    </div>
+  </app-category-department-hero>
+
+  <app-category-department-hero *ngIf="isHealthCategory" categoryPath="health" [title]="healthHeroTitle"
+    [description]="healthHeroDescription">
+  </app-category-department-hero>
+
+  <header class="category-header" *ngIf="!isNewsCategory && !isCultureCategory && !isEducationCategory && !isHealthCategory">
     <div class="container text-center">
       <p class="top-meta">Welcome at NYC360</p>
       <h1 class="main-title">{{ pageTitle }}</h1>
@@ -8,7 +45,7 @@
     </div>
   </header>
 
-  <div class="search-container container">
+  <div class="search-container container" *ngIf="!isNewsCategory && !isCultureCategory && !isEducationCategory && !isHealthCategory">
     <div class="search-floater shadow-lg">
       <div class="search-box">
         <i class="bi bi-search text-muted"></i>

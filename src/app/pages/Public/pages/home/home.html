@@ -157,8 +157,8 @@
       [style.--cat-color]="getCategoryColor(group.category)">
       <header class="block-header">
         <div class="header-left">
-          <div class="vertical-bar" [ngClass]="'bar-'+group.category"></div>
-          <h2>{{ getCategoryName(group.category) }}</h2>
+          <div class="vertical-bar" [style.background]="getCategoryColor(group.category)"></div>
+          <h2 [style.color]="getCategoryColor(group.category)">{{ getCategoryName(group.category) }}</h2>
         </div>
         <div class="slider-controls" *ngIf="group.posts.length > 3">
           <button class="ctrl-btn prev" (click)="scrollGroup(group.category, 'left')">
@@ -170,7 +170,11 @@
         </div>
       </header>
 
-      <div class="slider-wrapper">
+      <div class="empty-group-state" *ngIf="group.posts.length === 0">
+        No posts available yet for this department.
+      </div>
+
+      <div class="slider-wrapper" *ngIf="group.posts.length > 0">
         <div class="slider-container" [id]="'slider-'+group.category">
           <div class="std-card-v2" *ngFor="let post of group.posts" (click)="goToPost(post)">
             <div class="card-media">

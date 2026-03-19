@@ -82,96 +82,72 @@ $font-body: 'Inter', sans-serif;
   padding-bottom: 60px;
 }
 
-/* --- Header Section --- */
-.discovery-header {
-  background-color: $bg-header;
-  padding: 60px 20px;
-  text-align: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+.my-communities-hero-filter-bar {
+  max-width: 800px;
+  margin: 32px auto 0;
+  background: $white;
+  padding: 10px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
 
-  h1 {
-    font-family: $font-header;
-    font-size: 2.5rem;
-    color: $primary-orange;
-    margin-bottom: 10px;
-    font-weight: 700;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 20px;
   }
 
-  p {
-    color: #8c7b70;
-    font-size: 1.1rem;
-    margin-bottom: 40px;
-  }
-
-  /* Filter Bar Styling */
-  .filter-bar {
-    max-width: 800px;
-    margin: 0 auto;
-    background: $white;
-    padding: 10px;
-    border-radius: 50px;
+  .search-input,
+  .type-select {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    position: relative;
-    z-index: 10;
+    background: #f9f9f9;
+    padding: 12px 20px;
+    border-radius: 30px;
+
+    i {
+      color: $text-gray;
+      font-size: 1.1rem;
+    }
+
+    input,
+    select {
+      border: none;
+      background: transparent;
+      outline: none;
+      width: 100%;
+      font-size: 1rem;
+      color: $text-dark;
+    }
 
     @media (max-width: 768px) {
-      flex-direction: column;
-      border-radius: 20px;
-      padding: 20px;
+      width: 100%;
+    }
+  }
+
+  .btn-search {
+    background: $primary-orange;
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      background: $primary-hover;
+      transform: translateY(-1px);
     }
 
-    /* Inputs */
-    .search-input,
-    .type-select {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #f9f9f9;
-      padding: 12px 20px;
-      border-radius: 30px;
-
-      i {
-        color: $text-gray;
-        font-size: 1.1rem;
-      }
-
-      input,
-      select {
-        border: none;
-        background: transparent;
-        outline: none;
-        width: 100%;
-        font-size: 1rem;
-        color: $text-dark;
-      }
-
-      @media (max-width: 768px) {
-        width: 100%;
-      }
-    }
-
-    .btn-search {
-      background: $primary-orange;
-      color: white;
-      border: none;
-      padding: 12px 35px;
-      border-radius: 30px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-
-      &:hover {
-        background: $primary-hover;
-        transform: translateY(-1px);
-      }
-
-      @media (max-width: 768px) {
-        width: 100%;
-      }
+    @media (max-width: 768px) {
+      width: 100%;
     }
   }
 }

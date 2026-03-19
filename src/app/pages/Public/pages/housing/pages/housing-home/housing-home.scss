@@ -16,116 +16,17 @@ $card-shadow: 0 10px 40px rgba(188, 157, 95, 0.08);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-// --- 🏷️ Header Section ---
-.housing-header {
-    background-color: $housing-bg;
-    padding: 60px 20px 40px;
-    text-align: center;
-    border-bottom: 1px solid rgba($housing-accent, 0.1);
-
-    .welcome-text {
-        font-size: 0.9rem;
-        color: $housing-text-sub;
-        font-weight: 500;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .page-title {
-        font-family: 'Playfair Display', serif; // Serif for that premium look
-        font-size: 4.5rem;
-        font-weight: 900;
-        color: $housing-accent;
-        margin: 0;
-        letter-spacing: -1px;
-
-        @media (max-width: 768px) {
-            font-size: 3rem;
-        }
-    }
-
-    .page-subtitle {
-        font-size: 1.1rem;
-        color: $housing-text-sub;
-        max-width: 600px;
-        margin: 15px auto 0;
-        line-height: 1.6;
-    }
-
-    .header-nav-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-        margin-top: 30px;
-
-        .nav-btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 24px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba($housing-accent, 0.4);
-            border-radius: 50px;
-            color: $housing-accent-dark;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(5px);
-
-            i {
-                font-size: 1.1rem;
-                margin-right: 8px;
-            }
-
-            &:hover {
-                background: $housing-accent;
-                color: $white;
-                border-color: $housing-accent;
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba($housing-accent, 0.2);
-            }
-
-            &.active {
-                background: $housing-accent;
-                color: $white;
-                border-color: $housing-accent;
-                box-shadow: 0 4px 12px rgba($housing-accent, 0.2);
-            }
-
-            &.gold {
-                background: $housing-accent;
-                color: $white;
-                border-color: $housing-accent;
-                box-shadow: 0 4px 12px rgba($housing-accent, 0.2);
-
-                &:hover {
-                    background: $housing-accent-dark;
-                    box-shadow: 0 6px 18px rgba($housing-accent, 0.3);
-                }
-            }
-        }
-    }
-
-    .breadcrumbs-overlay {
-        margin-top: 20px;
-        z-index: 10;
-
-        @media (max-width: 768px) {
-            margin-top: 15px;
-        }
-    }
-}
-
 // --- 🏠 Hero Section ---
 .hero-container {
     max-width: 1200px;
-    margin: -30px auto 40px;
+    margin: 48px auto 40px;
     padding: 0 20px;
     position: relative;
     z-index: 10;
+
+    @media (max-width: 768px) {
+        margin-top: 32px;
+    }
 }
 
 .hero-premium-card {

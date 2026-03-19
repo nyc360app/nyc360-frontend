@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,8 @@ import { PostsService } from '../services/posts';
 import { environment } from '../../../../../environments/environment';
 import { ImageService } from '../../../../../shared/services/image.service';
 import { ImgFallbackDirective } from '../../../../../shared/directives/img-fallback.directive';
+import { NewsDepartmentHeroComponent } from '../../news-department-hero/news-department-hero.component';
+import { CategoryDepartmentHeroComponent } from '../../category-department-hero/category-department-hero.component';
 
 import { CategoryEnum, CATEGORY_THEMES } from '../models/categories';
 
@@ -16,11 +18,12 @@ import { CategoryEnum, CATEGORY_THEMES } from '../models/categories';
   templateUrl: './feed-layout.html',
   styleUrls: ['./feed-layout.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, RouterModule, ImgFallbackDirective, NewsDepartmentHeroComponent, CategoryDepartmentHeroComponent],
   // ⚡ PERFORMANCE BOOST: استراتيجية التحديث اليدوي
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FeedLayoutComponent implements OnInit, OnDestroy {
+  protected readonly CategoryEnum = CategoryEnum;
   posts: any[] = [];
   locations: any[] = [];
   loading = true;
@@ -63,14 +66,16 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.route.data.subscribe(data => {
+      combineLatest([this.route.data, this.route.queryParams]).subscribe(([data, queryParams]) => {
         this.currentCategory = data['categoryEnum'];
         this.pageTitle = data['title'];
         this.isHousingCategory = this.currentCategory === CategoryEnum.Housing;
+        this.searchQuery = (queryParams['search'] || '').trim();
 
         const theme = CATEGORY_THEMES[this.currentCategory] || { color: '#333' };
         this.applyTheme(theme.color);
-        this.resetFilters();
+        this.selectedLocationId = null;
+        this.currentPage = 1;
         this.loadPosts();
       })
     );
@@ -199,7 +204,60 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
     this.currentPage = 1;
     this.loadPosts();
   }
-  resetFilters() { this.searchQuery = ''; this.selectedLocationId = null; this.currentPage = 1; }
+  resetFilters() {
+    this.searchQuery = '';
+    this.selectedLocationId = null;
+    this.currentPage = 1;
+    this.loadPosts();
+  }
+
+  get isNewsCategory(): boolean {
+    return this.currentCategory === CategoryEnum.News;
+  }
+
+  get isCultureCategory(): boolean {
+    return this.currentCategory === CategoryEnum.Culture;
+  }
+
+  get isEducationCategory(): boolean {
+    return this.currentCategory === CategoryEnum.Education;
+  }
+
+  get isHealthCategory(): boolean {
+    return this.currentCategory === CategoryEnum.Health;
+  }
+
+  get newsHeroTitle(): string {
+    return 'News Explore';
+  }
+
+  get newsHeroDescription(): string {
+    return 'Browse the latest articles, updates, and reporting published across NYC360 News.';
+  }
+
+  get cultureHeroTitle(): string {
+    return 'Culture Explore';
+  }
+
+  get cultureHeroDescription(): string {
+    return 'Browse the latest articles, updates, and cultural reporting published across NYC360 Culture.';
+  }
+
+  get educationHeroTitle(): string {
+    return 'Explore Education';
+  }
+
+  get educationHeroDescription(): string {
+    return 'Search school updates, learning resources, and education opportunities across NYC360.';
+  }
+
+  get healthHeroTitle(): string {
+    return 'Health Explore';
+  }
+
+  get healthHeroDescription(): string {
+    return 'Browse health updates, trusted resources, and practical guidance across NYC360.';
+  }
 
   // --- Image Resolvers ---
   resolvePostImage(post: any): string | null {

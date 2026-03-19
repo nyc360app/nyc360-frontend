@@ -16,12 +16,13 @@ import {
   CommunityLeaderApplicationPayload
 } from '../../../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
 import { buildCommunityD01BadgeOptions, isCommunityLeaderTag } from '../../../../../../shared/utils/community-badge-policy';
+import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 
 
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, VerificationModalComponent, CommunityLeaderApplicationModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, VerificationModalComponent, CommunityLeaderApplicationModalComponent, CommunityDepartmentHeroComponent],
   templateUrl: './community.html',
   styleUrls: ['./community.scss']
 })

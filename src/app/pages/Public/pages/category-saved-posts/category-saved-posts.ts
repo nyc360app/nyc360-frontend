@@ -5,12 +5,16 @@ import { PostsService } from '../posts/services/posts';
 import { CATEGORY_THEMES } from '../../Widgets/feeds/models/categories';
 import { ApiResponse, Post } from '../posts/models/posts';
 import { ImageService } from '../../../../shared/services/image.service';
+import { NewsDepartmentHeroComponent } from '../../Widgets/news-department-hero/news-department-hero.component';
+import { CommunityDepartmentHeroComponent } from '../../Widgets/community-department-hero/community-department-hero.component';
+import { CategoryDepartmentHeroComponent } from '../../Widgets/category-department-hero/category-department-hero.component';
+import { HousingDepartmentHeroComponent } from '../../Widgets/housing-department-hero/housing-department-hero.component';
 
 
 @Component({
     selector: 'app-category-saved-posts',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, NewsDepartmentHeroComponent, CommunityDepartmentHeroComponent, CategoryDepartmentHeroComponent, HousingDepartmentHeroComponent],
     templateUrl: './category-saved-posts.html',
     styleUrls: ['./category-saved-posts.scss']
 })
@@ -78,5 +82,29 @@ export class CategorySavedPostsComponent implements OnInit {
 
     get fallbackColor(): string {
         return this.categoryTheme?.color || '#000000';
+    }
+
+    get isNewsCategory(): boolean {
+        return this.categoryTheme?.path === 'news';
+    }
+
+    get isCommunityCategory(): boolean {
+        return this.categoryTheme?.path === 'community';
+    }
+
+    get isCultureCategory(): boolean {
+        return this.categoryTheme?.path === 'culture';
+    }
+
+    get isEducationCategory(): boolean {
+        return this.categoryTheme?.path === 'education';
+    }
+
+    get isHealthCategory(): boolean {
+        return this.categoryTheme?.path === 'health';
+    }
+
+    get isHousingCategory(): boolean {
+        return this.categoryTheme?.path === 'housing';
     }
 }

@@ -1,53 +1,48 @@
 <div class="discovery-page">
-  
-  <header class="discovery-header">
-    <div class="header-inner">
-      <h1>Explore Communities</h1>
-      <p>Find your tribe in New York City</p>
+  <app-community-department-hero title="Explore Communities"
+    description="Find active groups, neighborhoods, and local spaces that match what matters to you."
+    [showDefaultSearch]="false">
+    <div hero-search-slot class="community-discovery-hero-filter-bar">
+      <div class="search-input">
+        <i class="bi bi-search"></i>
+        <input 
+          type="text" 
+          placeholder="Search communities..." 
+          [(ngModel)]="searchText" 
+          (keyup.enter)="onSearch()">
+      </div>
 
-      <div class="filter-bar">
+      <div class="location-search">
+        <i class="bi bi-geo-alt"></i>
+        <input 
+          type="text" 
+          placeholder="Neighborhood" 
+          [ngModel]="locationSearchText"
+          (ngModelChange)="onLocationInput($event)">
         
-        <div class="search-input">
-          <i class="bi bi-search"></i>
-          <input 
-            type="text" 
-            placeholder="Search communities..." 
-            [(ngModel)]="searchText" 
-            (keyup.enter)="onSearch()">
-        </div>
+        <i *ngIf="locationSearchText" class="bi bi-x-circle clear-icon" (click)="clearLocation()"></i>
 
-        <div class="location-search">
-          <i class="bi bi-geo-alt"></i>
-          <input 
-            type="text" 
-            placeholder="Neighborhood" 
-            [ngModel]="locationSearchText"
-            (ngModelChange)="onLocationInput($event)">
-          
-          <i *ngIf="locationSearchText" class="bi bi-x-circle clear-icon" (click)="clearLocation()"></i>
-
-          <div class="loc-dropdown" *ngIf="showLocationDropdown">
-            <div class="loc-item" *ngFor="let loc of locationSuggestions" (click)="selectLocation(loc)">
-              <strong>{{ loc.neighborhood }}</strong>
-              <span>{{ loc.borough }}, {{ loc.zipCode }}</span>
-            </div>
+        <div class="loc-dropdown" *ngIf="showLocationDropdown">
+          <div class="loc-item" *ngFor="let loc of locationSuggestions" (click)="selectLocation(loc)">
+            <strong>{{ loc.neighborhood }}</strong>
+            <span>{{ loc.borough }}, {{ loc.zipCode }}</span>
           </div>
         </div>
-
-        <div class="type-select">
-          <i class="bi bi-funnel"></i>
-          <select [(ngModel)]="selectedType" (change)="onTypeChange()">
-            <option [ngValue]="null">All Categories</option>
-            <option *ngFor="let type of communityTypes" [ngValue]="type.id">
-              {{ type.name }}
-            </option>
-          </select>
-        </div>
-        
-        <button class="btn-search" (click)="onSearch()">Find</button>
       </div>
+
+      <div class="type-select">
+        <i class="bi bi-funnel"></i>
+        <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+          <option [ngValue]="null">All Categories</option>
+          <option *ngFor="let type of communityTypes" [ngValue]="type.id">
+            {{ type.name }}
+          </option>
+        </select>
+      </div>
+      
+      <button class="btn-search" type="button" (click)="onSearch()">Find</button>
     </div>
-  </header>
+  </app-community-department-hero>
 
   <div class="container">
     

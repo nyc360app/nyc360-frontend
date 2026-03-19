@@ -1,15 +1,6 @@
 <div class="feed-page">
-    <!-- Header with Background Design -->
-    <header class="feed-header">
-        <div class="header-content">
-            <h1 class="page-title">Housing Feed</h1>
-            <p class="page-subtitle">Discover your next home in New York City with ease</p>
-        </div>
-    </header>
-
-    <!-- Filter & Search Bar -->
-    <div class="filter-section">
-        <div class="filter-container">
+    <app-housing-department-hero [title]="housingHeroTitle" [description]="housingHeroDescription" [showSearch]="false">
+        <div hero-search-slot class="filter-container housing-hero-filter-bar">
             <div class="search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" [(ngModel)]="filters.Search" placeholder="Search by title, description..."
@@ -38,9 +29,8 @@
                 </button>
             </div>
         </div>
-    </div>
+    </app-housing-department-hero>
 
-    <!-- Main Content Grid -->
     <main class="feed-content">
         <div class="result-meta" *ngIf="!isLoading">
             <span class="count">{{ totalCount }} properties found</span>
