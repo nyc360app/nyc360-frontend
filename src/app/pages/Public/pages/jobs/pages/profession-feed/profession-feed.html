@@ -60,7 +60,7 @@
 
             <!-- Connect RSS -->
             <ng-container *ngIf="hasProfessionAccess; else lockedRSS">
-              <a routerLink="/public/rss/connect" class="simple-item"
+              <a routerLink="/public/rss/connect" [queryParams]="{ category: 8 }" class="simple-item"
                 style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
                 <i class="bi bi-rss me-2" style="color: #00695C;"></i> Connect RSS Feed
               </a>

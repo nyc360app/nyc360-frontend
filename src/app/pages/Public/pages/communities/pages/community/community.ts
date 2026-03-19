@@ -9,20 +9,15 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../../Authentication/Service/auth';
 import { UserInfo } from '../../../../../Authentication/models/user-info';
 import { ToastService } from '../../../../../../shared/services/toast.service';
-
-import { VerificationModalComponent } from '../../../../../../shared/components/verification-modal/verification-modal';
-import {
-  CommunityLeaderApplicationModalComponent,
-  CommunityLeaderApplicationPayload
-} from '../../../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
 import { buildCommunityD01BadgeOptions, isCommunityLeaderTag } from '../../../../../../shared/utils/community-badge-policy';
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
+import { CommunityLeaderApplicationPayload } from '../../models/community-leader-application';
 
 
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, VerificationModalComponent, CommunityLeaderApplicationModalComponent, CommunityDepartmentHeroComponent],
+  imports: [CommonModule, FormsModule, RouterLink, CommunityDepartmentHeroComponent],
   templateUrl: './community.html',
   styleUrls: ['./community.scss']
 })
@@ -67,6 +62,10 @@ export class CommunityComponent implements OnInit {
 
   openVerificationModal(preferredOccupationName: string | null = null) {
     this.verificationModalOccupations = this.prioritizeVerificationOccupations(preferredOccupationName);
+    if (!this.verificationModalOccupations.length) {
+      this.toastService.error('Community verification roles are not configured on the backend yet.');
+      return;
+    }
     this.isVerificationModalOpen = true;
     this.isActivityDropdownOpen = false; // Close dropdown
   }

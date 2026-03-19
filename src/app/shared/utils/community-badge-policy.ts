@@ -24,6 +24,12 @@ const COMMUNITY_LEADER_TAG_NAMES = [
   'community leader badge'
 ] as const;
 
+const COMMUNITY_D01_TAG_IDS = {
+  leader: 2000,
+  create: 2001,
+  organization: 2002
+} as const;
+
 const COMMUNITY_D01_LABELS = {
   leader: 'Apply for Community Leader Badges',
   create: 'Apply for Create a Community',
@@ -71,6 +77,10 @@ function pickByAliases(options: BadgeOption[], aliases: readonly string[]): Badg
   }) || null;
 }
 
+function pickById(options: BadgeOption[], id: number): BadgeOption | null {
+  return options.find((option) => option.id === id) || null;
+}
+
 export function isInternalCommunityMembershipTag(tag: TagLike | null | undefined): boolean {
   if (!tag) return false;
 
@@ -105,44 +115,34 @@ export function isCommunityLeaderTag(tag: TagLike | null | undefined): boolean {
  */
 export function buildCommunityD01BadgeOptions(tags: TagLike[] | null | undefined): BadgeOption[] {
   const incoming = toBadgeOptions(tags);
-  const pool: BadgeOption[] = [...incoming];
-
-  // Ensure known legacy community tag IDs are always available as safe fallbacks.
-  if (!pool.some((option) => option.id === 2001)) {
-    pool.push({ id: 2001, name: 'Community Leader' });
-  }
-  if (!pool.some((option) => option.id === 2002)) {
-    pool.push({ id: 2002, name: 'Organization Rep' });
-  }
+  if (!incoming.length) return [];
 
   const usedIds = new Set<number>();
 
-  let leader = pickByAliases(pool, COMMUNITY_D01_ALIASES.leader);
-  if (!leader) {
-    leader = pool.find((option) => option.id === 2001) || null;
-  }
+  let leader = pickById(incoming, COMMUNITY_D01_TAG_IDS.leader) || pickByAliases(incoming, COMMUNITY_D01_ALIASES.leader);
   if (leader) usedIds.add(leader.id);
 
-  let organization = pickByAliases(pool, COMMUNITY_D01_ALIASES.organization);
-  if (organization && usedIds.has(organization.id)) organization = null;
-  if (!organization) {
-    organization = pool.find((option) => option.id === 2002 && !usedIds.has(option.id)) || null;
-  }
-  if (organization) usedIds.add(organization.id);
-
-  let create = pickByAliases(pool, COMMUNITY_D01_ALIASES.create);
+  let create = pickById(incoming, COMMUNITY_D01_TAG_IDS.create) || pickByAliases(incoming, COMMUNITY_D01_ALIASES.create);
   if (create && usedIds.has(create.id)) create = null;
-  if (!create) {
-    // If backend exposes only one non-leader community badge, reuse it for the create flow label.
-    create = organization || null;
-  }
   if (create) usedIds.add(create.id);
 
-  // Always return the 3 public community badge labels in required order.
-  // IDs are resolved to known valid tags; when dedicated backend tags are missing, create/org may share an ID.
-  return [
-    { id: (leader || { id: 2001 }).id, name: COMMUNITY_D01_LABELS.leader },
-    { id: (create || organization || leader || { id: 2002 }).id, name: COMMUNITY_D01_LABELS.create },
-    { id: (organization || create || leader || { id: 2002 }).id, name: COMMUNITY_D01_LABELS.organization }
-  ];
+  let organization = pickById(incoming, COMMUNITY_D01_TAG_IDS.organization) || pickByAliases(incoming, COMMUNITY_D01_ALIASES.organization);
+  if (organization && usedIds.has(organization.id)) organization = null;
+  if (organization) usedIds.add(organization.id);
+
+  const results: BadgeOption[] = [];
+
+  if (leader) {
+    results.push({ id: leader.id, name: COMMUNITY_D01_LABELS.leader });
+  }
+
+  if (create) {
+    results.push({ id: create.id, name: COMMUNITY_D01_LABELS.create });
+  }
+
+  if (organization) {
+    results.push({ id: organization.id, name: COMMUNITY_D01_LABELS.organization });
+  }
+
+  return results;
 }

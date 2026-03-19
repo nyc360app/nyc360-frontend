@@ -4,10 +4,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { CommunityService } from '../../pages/communities/services/community';
-import { CommunityLeaderApplicationModalComponent, CommunityLeaderApplicationPayload } from '../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
+import { CommunityLeaderApplicationModalComponent } from '../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
 import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { buildCommunityD01BadgeOptions, isCommunityLeaderTag } from '../../../../shared/utils/community-badge-policy';
+import { CommunityLeaderApplicationPayload } from '../../pages/communities/models/community-leader-application';
 
 @Component({
   selector: 'app-community-department-hero',
@@ -38,6 +39,7 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   verificationModalOccupations: any[] = [];
   isVerificationModalOpen = false;
   isLeaderApplicationModalOpen = false;
+  isSubmittingLeaderApplication = false;
 
   ngOnInit(): void {
     this.authService.fullUserInfo$
@@ -92,6 +94,11 @@ export class CommunityDepartmentHeroComponent implements OnInit {
 
   openVerificationModal(preferredOccupationName: string | null = null): void {
     this.verificationModalOccupations = this.prioritizeVerificationOccupations(preferredOccupationName);
+    if (!this.verificationModalOccupations.length) {
+      this.toastService.error('Community verification roles are not configured on the backend yet.');
+      this.cdr.markForCheck();
+      return;
+    }
     this.isVerificationModalOpen = true;
     this.isActivityDropdownOpen = false;
   }
@@ -99,6 +106,7 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   openLeaderApplicationModal(): void {
     this.isVerificationModalOpen = false;
     this.verificationModalOccupations = [];
+    this.isSubmittingLeaderApplication = false;
     this.isLeaderApplicationModalOpen = true;
     this.isActivityDropdownOpen = false;
   }
@@ -125,13 +133,39 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   }
 
   closeLeaderApplicationModal(): void {
+    this.isSubmittingLeaderApplication = false;
     this.isLeaderApplicationModalOpen = false;
     this.cdr.markForCheck();
   }
 
-  onLeaderApplicationSubmitted(_payload: CommunityLeaderApplicationPayload): void {
-    this.toastService.success('Community leader application submitted. Avg response time: 4 hours.');
-    this.closeLeaderApplicationModal();
+  onLeaderApplicationSubmitted(payload: CommunityLeaderApplicationPayload): void {
+    if (this.isSubmittingLeaderApplication) return;
+
+    this.isSubmittingLeaderApplication = true;
+    this.cdr.markForCheck();
+
+    this.communityService.submitCommunityLeaderApplication(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res: any) => {
+          this.isSubmittingLeaderApplication = false;
+
+          if (res?.isSuccess || res?.IsSuccess) {
+            const status = String(res?.data?.status || 'Pending').trim();
+            this.toastService.success(`Community leader application submitted. Status: ${status}.`);
+            this.closeLeaderApplicationModal();
+            return;
+          }
+
+          this.toastService.error(this.getLeaderApplicationErrorMessage(res));
+          this.cdr.markForCheck();
+        },
+        error: (error: any) => {
+          this.isSubmittingLeaderApplication = false;
+          this.toastService.error(this.getLeaderApplicationErrorMessage(error));
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   toggleActivityDropdown(event: Event): void {
@@ -208,5 +242,23 @@ export class CommunityDepartmentHeroComponent implements OnInit {
       .replace(/[^a-z0-9]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  private getLeaderApplicationErrorMessage(source: any): string {
+    if (source?.status === 401) {
+      return 'Please log in to submit a community leader application.';
+    }
+
+    if (source?.status === 403) {
+      return 'Your account is not allowed to submit a community leader application.';
+    }
+
+    return source?.error?.error?.Message
+      || source?.error?.Error?.Message
+      || source?.error?.message
+      || source?.error?.Message
+      || source?.Error?.Message
+      || source?.message
+      || 'Unable to submit the community leader application.';
   }
 }

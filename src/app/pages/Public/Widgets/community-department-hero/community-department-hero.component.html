@@ -69,7 +69,8 @@
           </ng-template>
 
           <ng-container *ngIf="hasCommunityLeaderAccess; else lockedRSS">
-            <a routerLink="/public/rss/connect" class="simple-item activity-pill" (click)="closeActivityDropdown()">
+            <a routerLink="/public/rss/connect" [queryParams]="{ category: 0 }" class="simple-item activity-pill"
+              (click)="closeActivityDropdown()">
               Connect RSS Feed
             </a>
           </ng-container>
@@ -99,7 +100,7 @@
   </app-verification-modal>
 
   <app-community-leader-application-modal *ngIf="isLeaderApplicationModalOpen" [fullName]="leaderApplicationFullName"
-    [email]="leaderApplicationEmail" [phoneNumber]="leaderApplicationPhoneNumber"
+    [email]="leaderApplicationEmail" [phoneNumber]="leaderApplicationPhoneNumber" [isSubmitting]="isSubmittingLeaderApplication"
     (close)="closeLeaderApplicationModal()" (submitApplication)="onLeaderApplicationSubmitted($event)">
   </app-community-leader-application-modal>
 </section>

@@ -33,13 +33,12 @@ export class VerificationModalComponent implements OnInit {
 
   @Input() extraOccupations: any[] = [];
 
-  occupations: any[] = [
+  private readonly defaultOccupations: any[] = [
     { id: 1854, name: 'Housing Advisor' },
     { id: 1855, name: 'Housing Organization' },
-    { id: 1856, name: 'Licensed Agent' },
-    { id: 2001, name: 'Community Leader' },
-    { id: 2002, name: 'Organization Rep' }
+    { id: 1856, name: 'Licensed Agent' }
   ];
+  occupations: any[] = [];
 
   documentTypes = [
     { id: 1, name: 'Government ID' },
@@ -56,11 +55,10 @@ export class VerificationModalComponent implements OnInit {
   }
 
   ngOnInit() {
-    const sourceOccupations = (this.extraOccupations && this.extraOccupations.length > 0)
-      ? this.extraOccupations
-      : this.occupations;
+    const sourceOccupations = this.resolveOccupations();
 
     // Community membership tags are internal and should never appear as public badge options.
+    // Community D01 roles must come from backend tags, not hardcoded frontend IDs.
     this.occupations = this.dedupeById(
       this.normalizeOccupations(filterPublicCommunityBadges(sourceOccupations))
     );
@@ -78,11 +76,22 @@ export class VerificationModalComponent implements OnInit {
   }
 
   private dedupeById(items: any[]): any[] {
-    // Keep labels distinct even if backend tag ID is reused as fallback for multiple D01 labels.
     return items.filter((item, index, arr) => {
       const key = `${item.id}::${item.name}`;
       return arr.findIndex((x) => `${x.id}::${x.name}` === key) === index;
     });
+  }
+
+  private resolveOccupations(): any[] {
+    if (Array.isArray(this.extraOccupations) && this.extraOccupations.length > 0) {
+      return this.extraOccupations;
+    }
+
+    if (this.isCommunityPolicyMode) {
+      return [];
+    }
+
+    return this.defaultOccupations;
   }
 
   private normalizeOccupations(items: any[]): any[] {
@@ -111,7 +120,7 @@ export class VerificationModalComponent implements OnInit {
   private getInitialOccupationId(): number | null {
     if (!this.occupations.length) return null;
 
-    const preferredId = 1856; // Keep current default for housing-oriented flows.
+    const preferredId = this.isCommunityPolicyMode ? 2000 : 1856;
     const hasPreferred = this.occupations.some((occ) => occ.id === preferredId);
     if (hasPreferred) return preferredId;
 
@@ -133,6 +142,8 @@ export class VerificationModalComponent implements OnInit {
 
     if (this.verificationForm.invalid || !this.selectedDocFile) {
       this.verificationForm.markAllAsTouched();
+      this.toastService.error('Please complete the required fields and upload a supporting document.');
+      this.scrollToFirstInvalidField();
       return;
     }
 
@@ -253,5 +264,20 @@ export class VerificationModalComponent implements OnInit {
       || normalized.includes('already requested')
       || normalized.includes('already exists')
       || normalized.includes('pending');
+  }
+
+  private scrollToFirstInvalidField(): void {
+    if (typeof document === 'undefined') return;
+
+    setTimeout(() => {
+      const firstInvalid = document.querySelector(
+        '.verification-modal .ng-invalid, .verification-modal .file-upload-wrapper'
+      ) as HTMLElement | null;
+
+      firstInvalid?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    });
   }
 }

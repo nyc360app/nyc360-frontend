@@ -3,6 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { ApiResponse, CommunityHomeData, CommunitySuggestion } from '../models/community';
+import {
+  CommunityLeaderApplicationPayload,
+  CommunityLeaderApplicationResponseData
+} from '../models/community-leader-application';
 
 export interface LocationDto {
   id: number;
@@ -19,6 +23,7 @@ export class CommunityService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiBaseUrl}/communities`;
   private locationsUrl = `${environment.apiBaseUrl}/locations`;
+  private leaderApplicationsUrl = `${environment.apiBaseUrl}/communities/leader-applications`;
 
   // 1. GET: Home Feed
   getCommunityHome(page: number = 1, pageSize: number = 20): Observable<ApiResponse<CommunityHomeData>> {
@@ -61,5 +66,32 @@ export class CommunityService {
       .set('Query', query)
       .set('Limit', limit);
     return this.http.get<ApiResponse<LocationDto[]>>(`${this.locationsUrl}/search`, { params });
+  }
+
+  submitCommunityLeaderApplication(
+    payload: CommunityLeaderApplicationPayload
+  ): Observable<ApiResponse<CommunityLeaderApplicationResponseData | null>> {
+    const formData = new FormData();
+
+    formData.append('fullName', payload.fullName);
+    formData.append('email', payload.email);
+    formData.append('phoneNumber', payload.phoneNumber);
+    formData.append('communityName', payload.communityName);
+    formData.append('location', payload.location);
+    formData.append('motivation', payload.motivation);
+    formData.append('experience', payload.experience);
+    formData.append('ledBefore', String(payload.ledBefore));
+    formData.append('weeklyAvailability', payload.weeklyAvailability);
+    formData.append('agreedToGuidelines', String(payload.agreedToGuidelines));
+    formData.append('verificationFile', payload.verificationFile);
+
+    if (payload.profileLink) {
+      formData.append('profileLink', payload.profileLink);
+    }
+
+    return this.http.post<ApiResponse<CommunityLeaderApplicationResponseData | null>>(
+      `${this.leaderApplicationsUrl}/submit`,
+      formData
+    );
   }
 }

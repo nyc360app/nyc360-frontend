@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RssService } from '../service/rss.service';
-import { CategoryEnum, CATEGORY_THEMES } from '../../../Widgets/feeds/models/categories';
+import { CATEGORY_THEMES } from '../../../Widgets/feeds/models/categories';
 
 @Component({
     selector: 'app-connect-rss',
@@ -35,32 +35,17 @@ export class ConnectRssComponent implements OnInit {
     categoryName = signal<string>('');
 
     ngOnInit() {
-        // Get category from query params
-        this.route.queryParams.subscribe(params => {
-            const categoryId = params['category'];
-            if (categoryId !== undefined && categoryId !== null) {
-                const catId = Number(categoryId);
-                this.rssForm.patchValue({ Category: catId });
-
-                // Get category info from CATEGORY_THEMES
-                const catInfo = CATEGORY_THEMES[catId];
-                if (catInfo) {
-                    this.categoryInfo.set(catInfo);
-                    this.categoryName.set(catInfo.label);
-                }
-            }
+        this.route.queryParamMap.subscribe(params => {
+            const rawCategory = Number(params.get('category'));
+            const fallbackCategory = Number(this.rssForm.get('Category')?.value ?? 0);
+            const resolvedCategory = Number.isFinite(rawCategory) ? rawCategory : fallbackCategory;
+            this.applyCategory(resolvedCategory);
         });
     }
 
     onSubmit() {
-        console.log('Form submitted');
-        console.log('Form valid:', this.rssForm.valid);
-        console.log('Form value:', this.rssForm.value);
-        console.log('Form errors:', this.getFormValidationErrors());
-
         if (this.rssForm.invalid) {
             this.rssForm.markAllAsTouched();
-            console.error('Form is invalid');
             return;
         }
 
@@ -68,62 +53,75 @@ export class ConnectRssComponent implements OnInit {
         this.errorMessage.set(null);
         this.successMessage.set(null);
 
-        const formData = this.rssForm.value as any;
+        const formData = {
+            ...this.rssForm.getRawValue(),
+            ImageUrl: this.rssForm.get('ImageUrl')?.value?.trim() || ''
+        } as any;
         formData.Category = Number(formData.Category);
-
-        console.log('Sending data:', formData);
+        this.applyCategory(formData.Category);
 
         this.rssService.connectRss(formData).subscribe({
             next: (res) => {
-                console.log('Response:', res);
-                // Check if response is successful (either IsSuccess is true OR response exists without error)
-                const isSuccess = res?.IsSuccess === true || (res && !res.Error);
+                const isSuccess = this.isSuccessfulResponse(res);
 
                 if (isSuccess) {
-                    this.successMessage.set('RSS Feed connected successfully!');
-                    setTimeout(() => {
-                        // Navigate back to the category page
-                        const catInfo = this.categoryInfo();
-                        if (catInfo && catInfo.route) {
-                            this.router.navigate([catInfo.route]);
-                        } else {
-                            this.router.navigate(['/home']);
-                        }
-                    }, 2000);
+                    this.successMessage.set('RSS feed request submitted successfully!');
+                    this.navigateAfterSuccess(formData.Category);
                 } else {
-                    this.errorMessage.set(res?.Error?.Message || 'Failed to connect RSS feed.');
+                    this.errorMessage.set(this.getErrorMessage(res) || 'Failed to submit RSS feed request.');
                 }
                 this.isSubmitting.set(false);
             },
             error: (err) => {
-                console.error('Error:', err);
-                // Check if it's actually a success (status 200) but Angular treats it as error
                 if (err.status === 200 || err.status === 201) {
-                    this.successMessage.set('RSS Feed connected successfully!');
-                    setTimeout(() => {
-                        const catInfo = this.categoryInfo();
-                        if (catInfo && catInfo.route) {
-                            this.router.navigate([catInfo.route]);
-                        } else {
-                            this.router.navigate(['/home']);
-                        }
-                    }, 2000);
+                    this.successMessage.set('RSS feed request submitted successfully!');
+                    this.navigateAfterSuccess(formData.Category);
                 } else {
-                    this.errorMessage.set('An unexpected error occurred.');
+                    this.errorMessage.set(this.getErrorMessage(err?.error ?? err) || 'An unexpected error occurred.');
                 }
                 this.isSubmitting.set(false);
             }
         });
     }
 
-    getFormValidationErrors() {
-        const errors: any = {};
-        Object.keys(this.rssForm.controls).forEach(key => {
-            const control = this.rssForm.get(key);
-            if (control && control.errors) {
-                errors[key] = control.errors;
-            }
-        });
-        return errors;
+    private applyCategory(categoryId: number): void {
+        const info = this.getCategoryInfo(categoryId);
+        const resolvedCategoryId = info ? categoryId : 0;
+        const resolvedInfo = info || this.getCategoryInfo(resolvedCategoryId);
+
+        this.rssForm.patchValue({ Category: resolvedCategoryId }, { emitEvent: false });
+        this.categoryInfo.set(resolvedInfo);
+        this.categoryName.set(resolvedInfo?.label || '');
+    }
+
+    private navigateAfterSuccess(categoryId: number) {
+        setTimeout(() => {
+            const catInfo = this.getCategoryInfo(categoryId);
+            this.router.navigate([catInfo?.route || '/public/home']);
+        }, 2000);
+    }
+
+    private isSuccessfulResponse(payload: any): boolean {
+        const explicitStatus = payload?.isSuccess ?? payload?.IsSuccess;
+        if (typeof explicitStatus === 'boolean') {
+            return explicitStatus;
+        }
+
+        return !!payload && !this.getErrorMessage(payload);
+    }
+
+    private getErrorMessage(payload: any): string | null {
+        const nestedError = payload?.error?.error;
+        const topLevelError = payload?.error ?? payload?.Error;
+
+        return nestedError?.message
+            || nestedError?.Message
+            || topLevelError?.message
+            || topLevelError?.Message
+            || null;
+    }
+
+    private getCategoryInfo(categoryId: number): any {
+        return Number.isFinite(categoryId) ? (CATEGORY_THEMES as any)[categoryId] : null;
     }
 }
