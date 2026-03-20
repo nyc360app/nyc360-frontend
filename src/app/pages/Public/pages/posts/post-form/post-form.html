@@ -4,13 +4,16 @@
     <div class="title-section">
       <span class="header-kicker">{{ isEditMode ? 'Editing studio' : 'Publishing studio' }}</span>
       <div class="title-row">
-        <h2>{{ isEditMode ? 'Edit Post' : 'Create New Post' }}</h2>
+        <h2>{{ pageTitle }}</h2>
         <span *ngIf="predefinedCategory !== null" class="category-pill">
           <i class="bi bi-grid-fill"></i>
           {{ getCategoryName(predefinedCategory) }}
         </span>
       </div>
-      <p class="subtitle">Share your story with the world.</p>
+      <p class="subtitle">{{ pageSubtitle }}</p>
+      <p class="subtitle" *ngIf="isNewsCategorySelected && !canPublishNewsContent">
+        Successful News submissions are sent to moderation and will not appear publicly until approved.
+      </p>
     </div>
     <button (click)="goBack()" class="btn-back">
       <i class="bi bi-arrow-left"></i>
@@ -43,6 +46,9 @@
               <option *ngFor="let type of postTypes" [value]="type.id">{{ type.name }}</option>
             </select>
           </div>
+          <small class="error-msg" *ngIf="isNewsCategorySelected">
+            News submissions are automatically sent as <strong>Type: News</strong>.
+          </small>
         </div>
       </div>
 
@@ -173,7 +179,7 @@
 
         <button type="submit" class="btn-luxury" [disabled]="isLoading">
           <span *ngIf="!isSubmitting">
-            <i class="bi bi-send-check-fill"></i> {{ isEditMode ? 'SAVE CHANGES' : 'PUBLISH POST' }}
+            <i class="bi bi-send-check-fill"></i> {{ submitButtonLabel }}
           </span>
           <span *ngIf="isSubmitting" class="d-flex align-items-center gap-2">
             <span class="spinner-border spinner-border-sm"></span> PROCESSING...

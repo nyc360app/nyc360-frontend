@@ -96,6 +96,35 @@ a {
     }
   }
 
+  .access-status-row {
+    width: min(100%, 860px);
+    margin: 0 auto 22px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 0 15px;
+  }
+
+  .access-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--theme-color), white 90%);
+    border: 1px solid color-mix(in srgb, var(--theme-color), white 72%);
+    color: var(--theme-color);
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1;
+
+    &.subtle {
+      background: rgba(255, 255, 255, 0.78);
+      color: color-mix(in srgb, var(--theme-color), black 18%);
+      font-weight: 600;
+    }
+  }
+
   .header-nav-buttons {
     display: flex;
     justify-content: center;

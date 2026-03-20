@@ -79,10 +79,13 @@
                 <button class="btn-refresh" (click)="loadData()">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
-                <a [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
+                <a *ngIf="!isNewsCategory || canCreateNewsContent" [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
                     class="btn-create-p">
-                    <i class="bi bi-plus-lg"></i> <span>Article</span>
+                    <i class="bi bi-plus-lg"></i> <span>{{ newsCreateButtonLabel }}</span>
                 </a>
+                <button *ngIf="isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
+                    <i class="bi bi-lock-fill"></i> <span>News Access Required</span>
+                </button>
             </div>
         </header>
 
@@ -194,8 +197,11 @@
                         <div class="empty-state">
                             <i class="bi bi-layout-text-sidebar-reverse"></i>
                             <p>Your list is empty in this category.</p>
-                            <a [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
+                            <a *ngIf="!isNewsCategory || canCreateNewsContent" [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
                                 class="btn-create-p">Start Now</a>
+                            <p *ngIf="isNewsCategory && !canCreateNewsContent" class="mt-3 mb-0 text-muted">
+                                News contributor access is required before you can create or submit a News story.
+                            </p>
                         </div>
                     </ng-template>
                 </div>

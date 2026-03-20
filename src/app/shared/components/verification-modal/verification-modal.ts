@@ -108,13 +108,10 @@ export class VerificationModalComponent implements OnInit {
   private toDisplayOccupationName(name: string): string {
     if (!name) return '';
 
-    // Community badges can arrive as technical labels like "D01.1 Apply ...".
-    // Strip only that machine prefix and keep user-facing role text.
-    if (this.isCommunityPolicyMode) {
-      return name.replace(/^[A-Z]\d{2}\.\d+\s*[-:.]?\s*/i, '').trim();
-    }
-
-    return name;
+    // Division badges can arrive as technical labels like "D01.1 ..." or "D08.0.1 ...".
+    // Strip only the stable machine prefix and keep the user-facing role text.
+    const normalizedName = name.replace(/^[A-Z]\d{2}(?:\.\d+)+\s*[-:.]?\s*/i, '').trim();
+    return normalizedName || name;
   }
 
   private getInitialOccupationId(): number | null {

@@ -38,6 +38,7 @@ export interface CategoryHomeData {
   featured: CategoryPost[];
   latest: CategoryPost[];
   trending: CategoryPost[];
+  tags?: any[];
 }
 
 export interface CategoryHomeResponse {

@@ -10,6 +10,13 @@
       <button type="submit" class="search-btn">Search</button>
     </form>
 
+    <div class="access-status-row" *ngIf="canSubmitContent || canPublishContent || canConnectRss || newsAccess.grantedKeys.length > 0">
+      <span class="access-chip" *ngIf="canSubmitContent">Can Submit</span>
+      <span class="access-chip" *ngIf="canPublishContent">Can Publish</span>
+      <span class="access-chip" *ngIf="canConnectRss">Can Connect RSS</span>
+      <span class="access-chip subtle" *ngFor="let key of newsAccess.grantedKeys">{{ key }}</span>
+    </div>
+
     <div class="header-nav-buttons">
       <ng-container *ngFor="let btn of headerButtons">
         <div class="nav-dropdown-wrapper" *ngIf="btn.isDropdown; else standardButton">
@@ -21,10 +28,10 @@
 
           <div class="dropdown-menu-custom">
             <ng-container *ngFor="let child of btn.children">
-              <a *ngIf="child.isAction" [routerLink]="hasContributorAccess() ? child.link : null"
+              <a *ngIf="child.isAction && isActionVisible(child)" [routerLink]="canUseAction(child) ? child.link : null"
                 [queryParams]="child.queryParams" class="dropdown-item-custom"
-                (click)="handleContributorAction($event)" [class.locked]="!hasContributorAccess()">
-                <i class="bi" [ngClass]="!hasContributorAccess() ? 'bi-lock-fill' : (child.icon || 'bi-dot')"></i>
+                (click)="handleContributorAction($event, child)" [class.locked]="!canUseAction(child)">
+                <i class="bi" [ngClass]="!canUseAction(child) ? 'bi-lock-fill' : (child.icon || 'bi-dot')"></i>
                 {{ child.label }}
               </a>
 
@@ -48,6 +55,6 @@
   </div>
 
   <app-verification-modal *ngIf="showVerificationModal" [categoryName]="theme?.label || 'News'"
-    [categoryId]="categoryId" [extraOccupations]="categoryTags" (close)="closeModal()" (verified)="onVerified()">
+    [categoryId]="categoryId" [extraOccupations]="newsBadgeTags" (close)="closeModal()" (verified)="onVerified()">
   </app-verification-modal>
 </section>

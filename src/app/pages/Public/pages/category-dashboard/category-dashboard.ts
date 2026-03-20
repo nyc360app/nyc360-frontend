@@ -10,6 +10,7 @@ import { NewsDepartmentHeroComponent } from '../../Widgets/news-department-hero/
 import { CommunityDepartmentHeroComponent } from '../../Widgets/community-department-hero/community-department-hero.component';
 import { CategoryDepartmentHeroComponent } from '../../Widgets/category-department-hero/category-department-hero.component';
 import { HousingDepartmentHeroComponent } from '../../Widgets/housing-department-hero/housing-department-hero.component';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../shared/services/news.service';
 
 @Component({
     selector: 'app-category-dashboard',
@@ -23,6 +24,7 @@ export class CategoryDashboardComponent implements OnInit {
     private router = inject(Router);
     private postsService = inject(PostsService);
     private cdr = inject(ChangeDetectorRef);
+    private newsService = inject(NewsService);
     protected imageService = inject(ImageService);
     protected authService = inject(AuthService);
 
@@ -33,6 +35,7 @@ export class CategoryDashboardComponent implements OnInit {
     isLoading = true;
     activeView: 'dashboard' | 'list' = 'dashboard';
     currentUsername: string = 'User';
+    newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
 
     ngOnInit(): void {
         const user = this.authService.currentUser$.value;
@@ -53,11 +56,31 @@ export class CategoryDashboardComponent implements OnInit {
         if (categoryEntry) {
             this.activeCategoryId = Number(categoryEntry[0]);
             this.categoryTheme = categoryEntry[1];
+            this.syncNewsAccess();
             this.loadData();
         } else {
             this.categoryTheme = { label: 'General', color: '#0A3D91' };
+            this.newsAccess = EMPTY_NEWS_ACCESS;
             this.isLoading = false;
         }
+    }
+
+    private syncNewsAccess(): void {
+        if (this.categoryTheme?.path !== 'news') {
+            this.newsAccess = EMPTY_NEWS_ACCESS;
+            return;
+        }
+
+        this.newsService.getNewsAccess().subscribe({
+            next: (access) => {
+                this.newsAccess = access;
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.newsAccess = EMPTY_NEWS_ACCESS;
+                this.cdr.markForCheck();
+            }
+        });
     }
 
     loadData() {
@@ -134,6 +157,17 @@ export class CategoryDashboardComponent implements OnInit {
         return this.activeView === 'dashboard'
             ? 'Track performance, engagement, and publishing momentum across your News contributions.'
             : 'Review, refine, and manage the News stories you have published in NYC360.';
+    }
+
+    get canCreateNewsContent(): boolean {
+        return this.authService.hasRole('SuperAdmin') || this.newsAccess.canSubmitContent;
+    }
+
+    get newsCreateButtonLabel(): string {
+        if (!this.isNewsCategory) return 'Article';
+        return this.authService.hasRole('SuperAdmin') || this.newsAccess.canPublishContent
+            ? 'Publish Article'
+            : 'Submit Story';
     }
 
     get communityHeroTitle(): string {

@@ -12,6 +12,7 @@
             </div>
         </div>
 
+        <ng-container *ngIf="!isNewsCategory() || hasNewsRssAccess(); else newsRssLocked">
         <form [formGroup]="rssForm" (ngSubmit)="onSubmit()">
 
             <div class="form-group">
@@ -70,5 +71,17 @@
             </button>
 
         </form>
+        </ng-container>
+
+        <ng-template #newsRssLocked>
+            <div class="message error-msg" *ngIf="newsRssAccessResolved(); else resolvingNewsAccess">
+                <i class="fa fa-lock"></i> You need Publisher-level News RSS access to connect a feed.
+            </div>
+            <ng-template #resolvingNewsAccess>
+                <div class="message">
+                    <i class="fa fa-spinner fa-spin"></i> Checking your News RSS access...
+                </div>
+            </ng-template>
+        </ng-template>
     </div>
 </div>

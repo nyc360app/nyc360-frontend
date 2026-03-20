@@ -4,8 +4,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
-import { CategoryHomeService } from '../category-home/service/category-home.service';
 import { CATEGORY_THEMES, CategoryEnum } from '../feeds/models/categories';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../shared/services/news.service';
 
 interface HeroButtonChild {
   label: string;
@@ -35,7 +35,7 @@ interface HeroButton {
 export class NewsDepartmentHeroComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
-  private readonly homeService = inject(CategoryHomeService);
+  private readonly newsService = inject(NewsService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -49,7 +49,8 @@ export class NewsDepartmentHeroComponent implements OnInit {
 
   showVerificationModal = false;
   currentUserInfo: any | null = null;
-  categoryTags: any[] = [];
+  newsBadgeTags: any[] = [];
+  newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
 
   ngOnInit(): void {
     this.authService.fullUserInfo$
@@ -59,16 +60,29 @@ export class NewsDepartmentHeroComponent implements OnInit {
         this.cdr.markForCheck();
       });
 
-    this.homeService.getCategoryHomeData(this.categoryId, 1).subscribe({
+    this.newsService.getNewsHome(12).subscribe({
       next: (res: any) => {
-        this.categoryTags = res?.isSuccess && Array.isArray(res?.data?.tags) ? res.data.tags : [];
+        this.newsBadgeTags = res?.isSuccess && Array.isArray(res?.data?.tags) ? res.data.tags : [];
         this.cdr.markForCheck();
       },
       error: () => {
-        this.categoryTags = [];
+        this.newsBadgeTags = [];
         this.cdr.markForCheck();
       }
     });
+
+    this.newsService.getNewsAccess()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (access) => {
+          this.newsAccess = access;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.newsAccess = EMPTY_NEWS_ACCESS;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   onSearch(query: string): void {
@@ -79,18 +93,38 @@ export class NewsDepartmentHeroComponent implements OnInit {
   }
 
   hasContributorAccess(): boolean {
-    if (this.authService.hasRole('SuperAdmin')) return true;
-
-    if (this.categoryTags.length > 0 && this.currentUserInfo?.tags) {
-      const userTagIds = this.currentUserInfo.tags.map((tag: any) => tag.id);
-      return this.categoryTags.some((tag) => userTagIds.includes(tag.id));
-    }
-
-    return false;
+    return this.canSubmitContent;
   }
 
-  handleContributorAction(event: Event): void {
-    if (this.hasContributorAccess()) return;
+  get canSubmitContent(): boolean {
+    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canSubmitContent;
+  }
+
+  get canPublishContent(): boolean {
+    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canPublishContent;
+  }
+
+  get canConnectRss(): boolean {
+    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canConnectRss;
+  }
+
+  isActionVisible(child: HeroButtonChild): boolean {
+    if (!child?.isAction) return true;
+
+    if (this.isRssAction(child)) {
+      return this.canConnectRss;
+    }
+
+    return true;
+  }
+
+  canUseAction(child: HeroButtonChild): boolean {
+    if (!child?.isAction) return true;
+    return this.isRssAction(child) ? this.canConnectRss : this.canSubmitContent;
+  }
+
+  handleContributorAction(event: Event, child: HeroButtonChild): void {
+    if (this.canUseAction(child)) return;
 
     event.preventDefault();
     event.stopPropagation();
@@ -101,6 +135,16 @@ export class NewsDepartmentHeroComponent implements OnInit {
 
   onVerified(): void {
     this.authService.fetchFullUserInfo().subscribe();
+    this.newsService.refreshNewsAccess().subscribe({
+      next: (access) => {
+        this.newsAccess = access;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.newsAccess = EMPTY_NEWS_ACCESS;
+        this.cdr.markForCheck();
+      }
+    });
     this.closeModal();
   }
 
@@ -144,5 +188,10 @@ export class NewsDepartmentHeroComponent implements OnInit {
     });
 
     return buttons;
+  }
+
+  private isRssAction(child: HeroButtonChild): boolean {
+    const route = Array.isArray(child?.link) ? child.link.join('/') : '';
+    return route.includes('/rss/connect');
   }
 }

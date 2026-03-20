@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ElementRef, ViewChild, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,6 +9,9 @@ import { PostsService } from '../services/posts';
 import { CATEGORY_LIST } from '../../../../../pages/models/category-list';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { CategoryContextService } from '../../../../../shared/services/category-context.service';
+import { CATEGORY_THEMES, CategoryEnum } from '../../../Widgets/feeds/models/categories';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../../shared/services/news.service';
+import { AuthService } from '../../../../Authentication/Service/auth';
 
 @Component({
   selector: 'app-post-form',
@@ -26,6 +29,8 @@ export class PostFormComponent implements OnInit {
   private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
   private categoryContext = inject(CategoryContextService);
+  private newsService = inject(NewsService);
+  private authService = inject(AuthService);
   protected readonly environment = environment;
 
   form: FormGroup;
@@ -70,7 +75,7 @@ export class PostFormComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(5)]],
       content: ['', [Validators.required, Validators.minLength(20)]],
       category: [7, Validators.required], // Default to 7 (News) - excluding Community, Housing, Professions
-      type: [0, Validators.required],
+      type: [1, Validators.required],
       locationSearch: ['']
     });
   }
@@ -80,10 +85,57 @@ export class PostFormComponent implements OnInit {
     return cat ? cat.name : 'Unknown';
   }
 
+  get selectedCategoryId(): number {
+    return Number(this.form.get('category')?.value ?? this.predefinedCategory ?? CategoryEnum.News);
+  }
+
+  get isNewsCategorySelected(): boolean {
+    return this.selectedCategoryId === CategoryEnum.News;
+  }
+
+  get canSubmitNewsContent(): boolean {
+    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canSubmitContent;
+  }
+
+  get canPublishNewsContent(): boolean {
+    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canPublishContent;
+  }
+
+  get pageTitle(): string {
+    if (!this.isNewsCategorySelected) {
+      return this.isEditMode ? 'Edit Post' : 'Create New Post';
+    }
+
+    return this.isEditMode ? 'Edit News Story' : 'Create News Story';
+  }
+
+  get pageSubtitle(): string {
+    if (!this.isNewsCategorySelected) {
+      return 'Share your story with the world.';
+    }
+
+    if (this.canPublishNewsContent) {
+      return 'Publish a verified News story directly into NYC360.';
+    }
+
+    return 'Submit your News story for editorial review in NYC360.';
+  }
+
+  get submitButtonLabel(): string {
+    if (this.isEditMode) return 'SAVE CHANGES';
+    if (!this.isNewsCategorySelected) return 'PUBLISH POST';
+    return this.canPublishNewsContent ? 'PUBLISH NEWS STORY' : 'SUBMIT FOR REVIEW';
+  }
+
   predefinedCategory: number | null = null;
+  newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
+  isCheckingNewsAccess = false;
 
   ngOnInit() {
     this.setupSearch();
+    this.form.get('category')?.valueChanges.subscribe((categoryId) => {
+      this.applyCategoryRules(Number(categoryId));
+    });
 
     this.route.queryParams.subscribe(queryParams => {
       if (queryParams['category']) {
@@ -102,6 +154,9 @@ export class PostFormComponent implements OnInit {
 
       if (this.predefinedCategory !== null) {
         this.form.patchValue({ category: this.predefinedCategory });
+        this.applyCategoryRules(this.predefinedCategory);
+      } else {
+        this.applyCategoryRules(Number(this.form.get('category')?.value ?? CategoryEnum.News));
       }
       // If predefinedCategory is null, the form keeps its default from initialization
     });
@@ -118,6 +173,41 @@ export class PostFormComponent implements OnInit {
         } else {
           this.loadPostData(this.postId);
         }
+      }
+    });
+  }
+
+  private applyCategoryRules(categoryId: number) {
+    const typeControl = this.form.get('type');
+    if (!typeControl) return;
+
+    if (categoryId === CategoryEnum.News) {
+      typeControl.setValue(1, { emitEvent: false });
+      typeControl.disable({ emitEvent: false });
+      this.loadNewsAccess();
+      return;
+    }
+
+    if (typeControl.disabled) {
+      typeControl.enable({ emitEvent: false });
+    }
+
+    this.newsAccess = EMPTY_NEWS_ACCESS;
+  }
+
+  private loadNewsAccess() {
+    this.isCheckingNewsAccess = true;
+
+    this.newsService.getNewsAccess().subscribe({
+      next: (access) => {
+        this.newsAccess = access;
+        this.isCheckingNewsAccess = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.newsAccess = EMPTY_NEWS_ACCESS;
+        this.isCheckingNewsAccess = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -261,7 +351,14 @@ export class PostFormComponent implements OnInit {
       locationSearch: post.location?.neighborhoodNet || ''
     });
 
-    if (post.location) this.selectedLocation = post.location;
+    this.applyCategoryRules(Number(post.category));
+
+    if (post.location) {
+      this.selectedLocation = {
+        ...post.location,
+        id: post.location?.id ?? post.locationId ?? this.selectedLocation?.id ?? 0
+      };
+    }
 
     // Map tags
     if (post.tags && Array.isArray(post.tags)) {
@@ -281,31 +378,42 @@ export class PostFormComponent implements OnInit {
 
   // --- Submit ---
   onSubmit() {
-    // Location is mandatory per user logic (implied by API call requirement), but if user didn't change it on edit...
-    // Let's assume on create it's mandatory.
-    if (this.form.invalid || (!this.selectedLocation && !this.isEditMode)) {
-      // On edit if location is already there but not re-selected, we might need handling. 
-      // But assuming selectedLocation is populated on load.
-      // Actually let's just check selectedLocation if we require it.
+    const rawValue = this.form.getRawValue();
+    const categoryId = Number(rawValue.category);
+    const isNewsCategory = categoryId === CategoryEnum.News;
+    const hasAnyAttachments = this.selectedFiles.length > 0 || this.existingAttachments.length > 0;
+
+    if (isNewsCategory && !this.canSubmitNewsContent) {
+      this.toastService.error('Your account does not currently have News submission access.');
+      return;
     }
 
-    // User requested validation for all fields.
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.toastService.error('Please fill in all required fields marked with *');
       return;
     }
 
+    if (!this.selectedLocation) {
+      this.form.get('locationSearch')?.markAsTouched();
+      this.toastService.error('Please select a valid location from the list.');
+      return;
+    }
+
+    if (!hasAnyAttachments) {
+      this.toastService.error('Please upload at least one image or video.');
+      return;
+    }
+
     this.isSubmitting = true;
 
-    // Prepare final payload
     const formData: any = {
-      title: this.form.value.title,
-      content: this.form.value.content,
-      category: this.form.value.category,
-      type: this.form.value.type,
-      locationId: this.selectedLocation ? this.selectedLocation.id : 0, // 0 or null if not selected but required?
-      tags: this.selectedTags.map((t: any) => t.id) // Send IDs array
+      title: rawValue.title,
+      content: rawValue.content,
+      category: categoryId,
+      type: isNewsCategory ? 1 : Number(rawValue.type),
+      locationId: this.selectedLocation.id,
+      tags: this.selectedTags.map((t: any) => t.id)
     };
 
     let request$: Observable<any>;
@@ -320,8 +428,8 @@ export class PostFormComponent implements OnInit {
       next: (res: any) => {
         this.isSubmitting = false;
         if (res.isSuccess) {
-          this.toastService.success(this.isEditMode ? 'Post updated successfully!' : 'Post published successfully!');
-          this.router.navigate(['/public/home']);
+          this.toastService.success(this.getSuccessMessage(isNewsCategory));
+          this.navigateAfterSubmit(categoryId);
         } else {
           this.toastService.error(res.error?.message || 'Operation failed');
         }
@@ -342,6 +450,31 @@ export class PostFormComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/public/home']);
+    const target = this.getCategoryRoute(this.selectedCategoryId);
+    this.router.navigate([target]);
+  }
+
+  private getSuccessMessage(isNewsCategory: boolean): string {
+    if (this.isEditMode) {
+      return isNewsCategory ? 'News story updated successfully!' : 'Post updated successfully!';
+    }
+
+    if (!isNewsCategory) {
+      return 'Post published successfully!';
+    }
+
+    return this.canPublishNewsContent
+      ? 'News story published successfully!'
+      : 'News story submitted for review successfully!';
+  }
+
+  private navigateAfterSubmit(categoryId: number): void {
+    const target = this.getCategoryRoute(categoryId);
+    this.router.navigate([target]);
+  }
+
+  private getCategoryRoute(categoryId: number): string {
+    const theme = (CATEGORY_THEMES as any)[categoryId];
+    return theme?.route || '/public/home';
   }
 }

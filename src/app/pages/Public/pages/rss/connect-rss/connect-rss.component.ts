@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RssService } from '../service/rss.service';
-import { CATEGORY_THEMES } from '../../../Widgets/feeds/models/categories';
+import { CATEGORY_THEMES, CategoryEnum } from '../../../Widgets/feeds/models/categories';
+import { EMPTY_NEWS_ACCESS, NewsService } from '../../../../../shared/services/news.service';
 
 @Component({
     selector: 'app-connect-rss',
@@ -17,6 +18,7 @@ export class ConnectRssComponent implements OnInit {
     private rssService = inject(RssService);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
+    private newsService = inject(NewsService);
 
     rssForm = this.fb.group({
         Url: ['', [Validators.required, Validators.pattern(/^(http|https):\/\/[^ "]+$/)]],
@@ -33,6 +35,8 @@ export class ConnectRssComponent implements OnInit {
     // Category information
     categoryInfo = signal<any>(null);
     categoryName = signal<string>('');
+    newsRssAccessResolved = signal(false);
+    hasNewsRssAccess = signal(false);
 
     ngOnInit() {
         this.route.queryParamMap.subscribe(params => {
@@ -44,6 +48,11 @@ export class ConnectRssComponent implements OnInit {
     }
 
     onSubmit() {
+        if (this.isNewsCategory() && !this.hasNewsRssAccess()) {
+            this.errorMessage.set('You need Publisher-level News RSS access to connect a feed.');
+            return;
+        }
+
         if (this.rssForm.invalid) {
             this.rssForm.markAllAsTouched();
             return;
@@ -92,6 +101,8 @@ export class ConnectRssComponent implements OnInit {
         this.rssForm.patchValue({ Category: resolvedCategoryId }, { emitEvent: false });
         this.categoryInfo.set(resolvedInfo);
         this.categoryName.set(resolvedInfo?.label || '');
+        this.syncCategoryValidation(resolvedCategoryId);
+        this.resolveNewsRssAccess(resolvedCategoryId);
     }
 
     private navigateAfterSuccess(categoryId: number) {
@@ -123,5 +134,45 @@ export class ConnectRssComponent implements OnInit {
 
     private getCategoryInfo(categoryId: number): any {
         return Number.isFinite(categoryId) ? (CATEGORY_THEMES as any)[categoryId] : null;
+    }
+
+    isNewsCategory(): boolean {
+        return Number(this.rssForm.get('Category')?.value) === CategoryEnum.News;
+    }
+
+    private syncCategoryValidation(categoryId: number): void {
+        const descriptionControl = this.rssForm.get('Description');
+        if (!descriptionControl) return;
+
+        if (categoryId === CategoryEnum.News) {
+            descriptionControl.clearValidators();
+        } else {
+            descriptionControl.setValidators([Validators.required]);
+        }
+
+        descriptionControl.updateValueAndValidity({ emitEvent: false });
+    }
+
+    private resolveNewsRssAccess(categoryId: number): void {
+        if (categoryId !== CategoryEnum.News) {
+            this.newsRssAccessResolved.set(false);
+            this.hasNewsRssAccess.set(true);
+            return;
+        }
+
+        this.newsRssAccessResolved.set(false);
+        this.hasNewsRssAccess.set(false);
+
+        this.newsService.getNewsAccess().subscribe({
+            next: (access) => {
+                const canConnect = access?.canConnectRss ?? EMPTY_NEWS_ACCESS.canConnectRss;
+                this.hasNewsRssAccess.set(!!canConnect);
+                this.newsRssAccessResolved.set(true);
+            },
+            error: () => {
+                this.hasNewsRssAccess.set(false);
+                this.newsRssAccessResolved.set(true);
+            }
+        });
     }
 }

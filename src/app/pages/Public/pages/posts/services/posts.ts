@@ -95,6 +95,8 @@ export class PostsService {
     formData.append('Title', data.title);
     formData.append('Content', data.content);
     if (data.category !== null && data.category !== undefined) formData.append('Category', data.category.toString());
+    if (data.type !== null && data.type !== undefined) formData.append('Type', data.type.toString());
+    if (data.locationId !== null && data.locationId !== undefined) formData.append('LocationId', data.locationId.toString());
 
     // Handle Tags
     if (data.tags && Array.isArray(data.tags)) {
