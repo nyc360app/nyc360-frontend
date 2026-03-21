@@ -116,7 +116,7 @@ export class AgentRequestsComponent implements OnInit {
 
     viewPost(postId: number) {
         if (postId) {
-            this.router.navigate(['/public/housing/details', postId]);
+            this.router.navigate(['/housing/details', postId]);
         }
     }
 

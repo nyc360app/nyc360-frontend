@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
-import { CATEGORY_THEMES, CategoryEnum } from '../feeds/models/categories';
+import { CATEGORY_THEMES, CategoryEnum, getDepartmentDiscussionsRoute, getDepartmentExploreRoute } from '../feeds/models/categories';
 import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../shared/services/news.service';
 
 interface HeroButtonChild {
@@ -87,7 +87,7 @@ export class NewsDepartmentHeroComponent implements OnInit {
 
   onSearch(query: string): void {
     const normalizedQuery = query.trim();
-    this.router.navigate(['/public/feed', this.theme?.path || 'news'], {
+    this.router.navigate([getDepartmentExploreRoute(this.theme?.path || 'news')], {
       queryParams: normalizedQuery ? { search: normalizedQuery } : {}
     });
   }
@@ -183,7 +183,7 @@ export class NewsDepartmentHeroComponent implements OnInit {
 
     buttons.push({
       label: 'Ask a Question',
-      link: ['/public/forums', this.theme?.path || 'news'],
+      link: [getDepartmentDiscussionsRoute(this.theme?.path || 'news')],
       icon: 'bi-question-circle'
     });
 

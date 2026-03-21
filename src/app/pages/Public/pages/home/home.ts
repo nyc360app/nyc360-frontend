@@ -309,7 +309,7 @@ export class Home implements OnInit {
   goToPost(post: Post) {
     // ✅ Redirection Logic: If this is a Job Post, go to Job Profile
     if (post.category === 8 && (post as any).linkedResource) {
-      this.router.navigate(['/public/job-profile', (post as any).linkedResource.id]);
+      this.router.navigate(['/professions/jobs', (post as any).linkedResource.id]);
       return;
     }
 

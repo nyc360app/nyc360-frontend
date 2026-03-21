@@ -247,7 +247,7 @@ export class ListingAuthorizationComponent implements OnInit {
                 console.log('ListingAuthorization: Response', res);
                 if (res?.isSuccess || res?.IsSuccess) { // handling different casing from backend if unsure
                     this.toastService.success('Authorization submitted successfully!');
-                    this.router.navigate(['/public/housing/details', this.listingId]);
+                    this.router.navigate(['/housing/details', this.listingId]);
                 } else {
                     const errorMsg = res?.Error?.Message || res?.error?.message || res?.Error?.message || res?.error?.Message || 'Submission failed';
                     this.toastService.error(errorMsg);

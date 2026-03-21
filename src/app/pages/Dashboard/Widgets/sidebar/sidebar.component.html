@@ -64,6 +64,12 @@
                 <span class="link-text">Tags</span>
             </a>
 
+            <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/tags/verifications" routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-patch-check-fill"></i>
+                <span class="link-text">Tag Verifications</span>
+            </a>
+
             <a class="nav-item" *ngIf="canViewRSS" routerLink="/admin/topics" routerLinkActive="active"
                 (click)="closeMobileMenu()">
                 <i class="bi bi-chat-square-quote-fill"></i>

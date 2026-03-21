@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
 import { CategoryHomeService } from '../category-home/service/category-home.service';
-import { CATEGORY_THEMES, CategoryEnum } from '../feeds/models/categories';
+import { CATEGORY_THEMES, CategoryEnum, getDepartmentDiscussionsRoute, getDepartmentExploreRoute } from '../feeds/models/categories';
 
 interface HeroButtonChild {
   label: string;
@@ -84,7 +84,7 @@ export class CategoryDepartmentHeroComponent implements OnInit, OnChanges {
 
   onSearch(query: string): void {
     const normalizedQuery = query.trim();
-    this.router.navigate(['/public/feed', this.theme?.path || this.categoryPath || 'culture'], {
+    this.router.navigate([getDepartmentExploreRoute(this.theme?.path || this.categoryPath || 'culture')], {
       queryParams: normalizedQuery ? { search: normalizedQuery } : {}
     });
   }
@@ -180,7 +180,7 @@ export class CategoryDepartmentHeroComponent implements OnInit, OnChanges {
 
     buttons.push({
       label: 'Ask a Question',
-      link: ['/public/forums', this.theme?.path || this.categoryPath || 'culture'],
+      link: [getDepartmentDiscussionsRoute(this.theme?.path || this.categoryPath || 'culture')],
       icon: 'bi-question-circle'
     });
 

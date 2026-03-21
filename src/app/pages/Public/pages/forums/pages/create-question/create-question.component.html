@@ -29,7 +29,7 @@
         [class.education-theme]="isEducationForum" [class.health-theme]="isHealthForum"
         [class.housing-theme]="isHousingForum">
         <a class="back-pill" *ngIf="isNewsForum || isCommunityForum || isCultureForum || isEducationForum || isHealthForum || isHousingForum"
-            [routerLink]="['/public/forums', slug]">
+            [routerLink]="forumRoute">
             <i class="bi bi-arrow-left"></i>
             Back to Discussions
         </a>
@@ -37,9 +37,9 @@
         <p>Get help from the {{ forum?.title || 'community' }}. Be clear and specific for the best answers.</p>
     </div>
 
-    <div class="content-wrapper">
+    <div class="content-wrapper" [class.locked-layout]="!canCreateQuestion">
         <!-- Main Form -->
-        <div class="form-card">
+        <div class="form-card" *ngIf="canCreateQuestion; else newsAccessLocked">
             <form (ngSubmit)="onSubmit()" #questionForm="ngForm">
 
                 <div class="form-group" [class.has-error]="titleInput.invalid && titleInput.touched">
@@ -99,7 +99,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn-cancel" [routerLink]="['/public/forums', slug]"
+                    <button type="button" class="btn-cancel" [routerLink]="forumRoute"
                         [disabled]="isSubmitting">
                         <i class="bi bi-x-lg"></i>
                         Cancel
@@ -113,8 +113,41 @@
             </form>
         </div>
 
+        <ng-template #newsAccessLocked>
+            <div class="form-card locked-state">
+                <span class="locked-eyebrow">Restricted Discussion Access</span>
+                <div class="lock-badge">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h2>News Access Required</h2>
+                <p>
+                    News questions are limited to approved News contributors so the discussion layer stays moderated and aligned with D08.
+                </p>
+                <div class="locked-points">
+                    <div class="locked-point">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Approved News roles can open discussions and ask follow-up questions.</span>
+                    </div>
+                    <div class="locked-point">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>This keeps the News discussion layer verified and moderated.</span>
+                    </div>
+                </div>
+                <div class="locked-actions">
+                    <a class="btn-cancel" [routerLink]="forumRoute">
+                        <i class="bi bi-arrow-left"></i>
+                        Back to Discussions
+                    </a>
+                    <a class="btn-primary-link" [routerLink]="['/news']">
+                        <i class="bi bi-newspaper"></i>
+                        Open News Department
+                    </a>
+                </div>
+            </div>
+        </ng-template>
+
         <!-- Tips Sidebar -->
-        <div class="tips-card">
+        <div class="tips-card" *ngIf="canCreateQuestion; else accessSupportCard">
             <div class="tips-header">
                 <i class="bi bi-lightbulb-fill"></i>
                 <h3>Writing Tips</h3>
@@ -173,6 +206,57 @@
                 </p>
             </div>
         </div>
+
+        <ng-template #accessSupportCard>
+            <aside class="tips-card access-guide">
+                <div class="tips-header">
+                    <i class="bi bi-shield-check"></i>
+                    <h3>Access Guide</h3>
+                </div>
+
+                <div class="tips-content">
+                    <div class="tip-item completed">
+                        <div class="tip-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="tip-text">
+                            <strong>Controlled entry</strong>
+                            <p>News discussions are limited to approved News contributors and publishers.</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div class="tip-text">
+                            <strong>Apply through News</strong>
+                            <p>Request a News badge from the News department if you need contributor access.</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <div class="tip-text">
+                            <strong>D08 workflow</strong>
+                            <p>Creation, moderation, and publishing stay separated so News remains regulated.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="community-stats">
+                    <div class="stat-badge">
+                        <i class="bi bi-arrow-up-right-circle"></i>
+                        <span>Next Step</span>
+                    </div>
+                    <p class="stat-description">
+                        Open the News department to review access badges, submission tools, and your contributor status.
+                    </p>
+                </div>
+            </aside>
+        </ng-template>
     </div>
 </div>
 </div>

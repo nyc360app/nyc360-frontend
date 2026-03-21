@@ -140,6 +140,8 @@ export class PostFormComponent implements OnInit {
     this.route.queryParams.subscribe(queryParams => {
       if (queryParams['category']) {
         this.predefinedCategory = +queryParams['category'];
+      } else if (Number.isFinite(Number(this.route.snapshot.data['categoryId']))) {
+        this.predefinedCategory = Number(this.route.snapshot.data['categoryId']);
       } else {
         // Fallback to context, but exclude Community (0), Housing (4), and Professions (8)
         const contextCat = this.categoryContext.getCategory();

@@ -148,7 +148,7 @@ export class EditOfferComponent implements OnInit {
         this.isSubmitting = false;
         if (res.isSuccess) {
           this.toastService.success('Job offer updated successfully!');
-          this.router.navigate(['/public/profession/my-offers']);
+          this.router.navigate(['/professions/offers']);
         } else {
           this.toastService.error(res.error?.message || 'Update failed');
         }

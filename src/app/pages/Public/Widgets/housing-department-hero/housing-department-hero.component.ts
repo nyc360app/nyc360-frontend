@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
+import { getDepartmentArticleCreateRoute, getDepartmentDashboardRoute, getDepartmentDiscussionsRoute, getDepartmentExploreRoute, getDepartmentRssConnectRoute, getDepartmentSavedRoute } from '../feeds/models/categories';
 
 interface HeroButtonChild {
   label: string;
@@ -51,9 +52,9 @@ export class HousingDepartmentHeroComponent implements OnInit {
   ];
 
   readonly headerButtons: HeroButton[] = [
-    { label: 'Explore', link: ['/public/housing/feed'], icon: 'bi-rss' },
-    { label: 'My Inquiries', link: ['/public/category/housing/saved'], icon: 'bi-journal-text' },
-    { label: 'Contributor Dashboard', link: ['/public/housing/agent/dashboard'], icon: 'bi-speedometer2' },
+    { label: 'Explore', link: [getDepartmentExploreRoute('housing')], icon: 'bi-rss' },
+    { label: 'My Inquiries', link: [getDepartmentSavedRoute('housing')], icon: 'bi-journal-text' },
+    { label: 'Contributor Dashboard', link: [getDepartmentDashboardRoute('housing')], icon: 'bi-speedometer2' },
     {
       label: 'Contributor Activity',
       icon: 'bi-activity',
@@ -61,26 +62,24 @@ export class HousingDepartmentHeroComponent implements OnInit {
       children: [
         {
           label: 'Publish News Article',
-          link: ['/public/posts/create'],
+          link: [getDepartmentArticleCreateRoute('housing')],
           icon: 'bi-pencil-square',
-          isAction: true,
-          queryParams: { category: 4 }
+          isAction: true
         },
         {
           label: 'Connect RSS Feed',
-          link: ['/public/rss/connect'],
+          link: [getDepartmentRssConnectRoute('housing')],
           icon: 'bi-broadcast',
-          isAction: true,
-          queryParams: { category: 4 }
+          isAction: true
         },
         {
           label: 'House Listing',
-          link: ['/public/housing/create/renting'],
+          link: ['/housing/create/renting'],
           icon: 'bi-key'
         }
       ]
     },
-    { label: 'Ask a Question', link: ['/public/forums/housing'], icon: 'bi-question-circle' }
+    { label: 'Ask a Question', link: [getDepartmentDiscussionsRoute('housing')], icon: 'bi-question-circle' }
   ];
 
   showVerificationModal = false;
@@ -93,7 +92,7 @@ export class HousingDepartmentHeroComponent implements OnInit {
 
   onSearch(query: string): void {
     const normalizedQuery = query.trim();
-    this.router.navigate(['/public/housing/feed'], {
+    this.router.navigate([getDepartmentExploreRoute('housing')], {
       queryParams: normalizedQuery ? { search: normalizedQuery } : {}
     });
   }

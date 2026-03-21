@@ -9,13 +9,13 @@
       </p>
 
       <div class="header-nav-buttons">
-        <a routerLink="/public/profession/jobs" class="nav-btn">
+        <a routerLink="/professions/jobs" class="nav-btn">
           <i class="bi bi-compass me-2"></i> Explore
         </a>
-        <a routerLink="/public/category/professions/saved" class="nav-btn">
+        <a routerLink="/professions/saved" class="nav-btn">
           <i class="bi bi-chat-left-text me-2"></i> My Inquiries
         </a>
-        <a routerLink="/public/profession/my-offers" class="nav-btn">
+        <a routerLink="/professions/offers" class="nav-btn">
           <i class="bi bi-envelope-paper me-2"></i> My Offers
         </a>
 
@@ -43,7 +43,7 @@
 
             <!-- Publish News -->
             <ng-container *ngIf="hasProfessionAccess; else lockedNews">
-              <a routerLink="/public/posts/create" [queryParams]="{ category: 8 }" class="simple-item"
+              <a routerLink="/professions/create/article" class="simple-item"
                 style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
                 <i class="bi bi-newspaper me-2" style="color: #00695C;"></i>Publish News Article
               </a>
@@ -60,7 +60,7 @@
 
             <!-- Connect RSS -->
             <ng-container *ngIf="hasProfessionAccess; else lockedRSS">
-              <a routerLink="/public/rss/connect" [queryParams]="{ category: 8 }" class="simple-item"
+              <a routerLink="/professions/rss/connect" class="simple-item"
                 style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
                 <i class="bi bi-rss me-2" style="color: #00695C;"></i> Connect RSS Feed
               </a>
@@ -78,7 +78,7 @@
           </div>
         </div>
 
-        <a routerLink="/public/forums/professions" class="nav-btn">
+        <a routerLink="/professions/discussions" class="nav-btn">
           <i class="bi bi-patch-question me-2"></i> Ask a Question
         </a>
       </div>
@@ -167,7 +167,7 @@
       <div class="row g-4 justify-content-center">
         <div class="col-md-6" *ngFor="let item of (hiringNews | slice:0:6)">
           <div class="job-pill-card p-4 rounded-3 bg-white border h-100 hover-lift"
-            [routerLink]="['/public/job-profile', item.id]" style="cursor: pointer;">
+            [routerLink]="['/professions/jobs', item.id]" style="cursor: pointer;">
             <div class="d-flex align-items-start gap-3">
               <div class="job-icon-box p-3 rounded-circle" style="background: rgba(0, 105, 92, 0.1);">
                 <i class="bi bi-briefcase-fill style='color: #00695C;' fs-4"></i>
@@ -196,7 +196,7 @@
 
       <div class="text-center mt-5">
         <button class="btn px-5 py-3 rounded-pill fw-bold shadow-lg" style="background-color: #00695C; color: white;"
-          routerLink="/public/profession/jobs">
+          routerLink="/professions/jobs">
           Browse All Openings <i class="bi bi-arrow-right ms-2"></i>
         </button>
       </div>

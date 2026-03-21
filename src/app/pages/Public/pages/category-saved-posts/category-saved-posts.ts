@@ -28,12 +28,20 @@ export class CategorySavedPostsComponent implements OnInit {
     activeCategoryId: number = -1;
     posts: Post[] = [];
     isLoading = true;
+    private resolvedCategoryPath = '';
 
     ngOnInit(): void {
-        this.route.params.subscribe(params => {
-            const path = params['categoryPath'];
-            this.resolveCategory(path);
-        });
+        this.route.params.subscribe(() => this.resolveCategoryFromRoute());
+        this.route.data.subscribe(() => this.resolveCategoryFromRoute());
+    }
+
+    private resolveCategoryFromRoute(): void {
+        const path = this.route.snapshot.params['categoryPath'] || this.route.snapshot.data['categoryPath'];
+        if (!path || path === this.resolvedCategoryPath) {
+            return;
+        }
+        this.resolvedCategoryPath = path;
+        this.resolveCategory(path);
     }
 
     resolveCategory(path: string) {

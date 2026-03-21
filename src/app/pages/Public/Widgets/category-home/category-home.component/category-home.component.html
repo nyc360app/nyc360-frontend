@@ -137,7 +137,7 @@
       <section class="latest-grid-section mb-5 fade-in-up" *ngIf="gridPosts.length > 0 && !isHousingCategory">
         <div class="section-header mb-3">
           <h3>Highlights</h3>
-          <a [routerLink]="['/public/feed', activeTheme?.path]" class="view-all">View All</a>
+          <a [routerLink]="exploreRoute" class="view-all">View All</a>
         </div>
         <div class="row g-4">
           <div class="col-md-4" *ngFor="let post of gridPosts">

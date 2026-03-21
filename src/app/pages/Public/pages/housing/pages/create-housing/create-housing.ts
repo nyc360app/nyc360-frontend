@@ -396,9 +396,9 @@ export class CreateHousingComponent implements OnInit {
 
                     if (newId) {
                         if (isPublished) {
-                            this.router.navigate(['/public/housing/listing-authorization'], { queryParams: { id: newId } });
+                            this.router.navigate(['/housing/listing-authorization'], { queryParams: { id: newId } });
                         } else {
-                            this.router.navigate(['/public/housing/details', newId]);
+                            this.router.navigate(['/housing/details', newId]);
                         }
                     }
                     // else {

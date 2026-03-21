@@ -9,6 +9,7 @@ import { VerificationModalComponent } from '../../../../shared/components/verifi
 import { ToastService } from '../../../../shared/services/toast.service';
 import { buildCommunityD01BadgeOptions, isCommunityLeaderTag } from '../../../../shared/utils/community-badge-policy';
 import { CommunityLeaderApplicationPayload } from '../../pages/communities/models/community-leader-application';
+import { getDepartmentExploreRoute } from '../feeds/models/categories';
 
 @Component({
   selector: 'app-community-department-hero',
@@ -87,7 +88,7 @@ export class CommunityDepartmentHeroComponent implements OnInit {
 
   onSearch(query: string): void {
     const search = query.trim();
-    this.router.navigate(['/public/discover'], {
+    this.router.navigate([getDepartmentExploreRoute('community')], {
       queryParams: search ? { search } : {}
     });
   }

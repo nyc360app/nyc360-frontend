@@ -15,15 +15,15 @@
     </form>
 
     <div class="header-nav-buttons">
-      <a routerLink="/public/discover" class="nav-btn">
+      <a routerLink="/community/explore" class="nav-btn">
         <i class="bi bi-rss nav-btn-icon"></i>
         <span>Explore</span>
       </a>
-      <a routerLink="/public/category/community/saved" class="nav-btn">
+      <a routerLink="/community/saved" class="nav-btn">
         <i class="bi bi-journal-text nav-btn-icon"></i>
         <span>My Inquiries</span>
       </a>
-      <a routerLink="/public/category/community/dashboard" class="nav-btn">
+      <a routerLink="/community/dashboard" class="nav-btn">
         <i class="bi bi-speedometer2 nav-btn-icon"></i>
         <span>Contributor Dashboard</span>
       </a>
@@ -41,7 +41,7 @@
             Apply For Community Leader
           </button>
 
-          <a routerLink="/public/create-community" class="simple-item activity-pill" (click)="closeActivityDropdown()">
+          <a routerLink="/community/create/community" class="simple-item activity-pill" (click)="closeActivityDropdown()">
             Creating a Community
           </a>
 
@@ -51,7 +51,7 @@
           </button>
 
           <ng-container *ngIf="hasCommunityLeaderAccess; else lockedNews">
-            <a routerLink="/public/posts/create" [queryParams]="{ category: 0 }" class="simple-item activity-pill"
+            <a routerLink="/community/create/article" class="simple-item activity-pill"
               (click)="closeActivityDropdown()">
               Publish News Article
             </a>
@@ -69,7 +69,7 @@
           </ng-template>
 
           <ng-container *ngIf="hasCommunityLeaderAccess; else lockedRSS">
-            <a routerLink="/public/rss/connect" [queryParams]="{ category: 0 }" class="simple-item activity-pill"
+            <a routerLink="/community/rss/connect" class="simple-item activity-pill"
               (click)="closeActivityDropdown()">
               Connect RSS Feed
             </a>
@@ -88,7 +88,7 @@
         </div>
       </div>
 
-      <a routerLink="/public/forums/community" class="nav-btn">
+      <a routerLink="/community/discussions" class="nav-btn">
         <i class="bi bi-question-circle nav-btn-icon"></i>
         <span>Ask a Question</span>
       </a>

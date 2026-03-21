@@ -44,15 +44,15 @@ export class EditHousingComponent implements OnInit {
                 if (res.isSuccess) {
                     const data = res.data.info || res.data;
                     const path = data.isRenting ? 'renting' : 'sale';
-                    this.router.navigate(['/public/housing/edit', path, id], { replaceUrl: true });
+                    this.router.navigate(['/housing/edit', path, id], { replaceUrl: true });
                 } else {
                     this.toastService.error('Failed to load listing');
-                    this.router.navigate(['/public/housing/home']);
+                    this.router.navigate(['/housing']);
                 }
             },
             error: () => {
                 this.toastService.error('Error loading listing');
-                this.router.navigate(['/public/housing/home']);
+                this.router.navigate(['/housing']);
             }
         });
     }

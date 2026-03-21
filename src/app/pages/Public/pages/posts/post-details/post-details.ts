@@ -150,7 +150,7 @@ export class PostDetailsComponent implements OnInit {
 
     // ✅ Redirection Logic: If this is a Job Post (Category 8/Professions), go to Job Profile
     if (rawPost.category === 8 && rawPost.linkedResource) {
-      this.router.navigate(['/public/job-profile', rawPost.linkedResource.id]);
+      this.router.navigate(['/professions/jobs', rawPost.linkedResource.id]);
       return;
     }
 

@@ -8,7 +8,7 @@
 
   <div class="container">
     <div class="forums-grid" *ngIf="!isLoading && forums.length > 0">
-      <div class="forum-card" *ngFor="let forum of forums" [routerLink]="['/public/forums', forum.slug]">
+      <div class="forum-card" *ngFor="let forum of forums" [routerLink]="forumRoute(forum.slug)">
         <div class="card-icon-wrapper">
           <img [src]="resolveIcon(forum.iconUrl)" [alt]="forum.title" class="forum-icon">
         </div>

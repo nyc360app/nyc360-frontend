@@ -46,6 +46,24 @@
                 <span>My Articles</span>
             </button>
 
+            <button *ngIf="isNewsCategory && hasNewsModerationAccess" class="nav-item"
+                [class.active]="activeView === 'submissions'" (click)="setView('submissions')">
+                <i class="bi bi-shield-check"></i>
+                <span>Moderation</span>
+            </button>
+
+            <button *ngIf="isNewsCategory && hasNewsRssRequestAccess" class="nav-item"
+                [class.active]="activeView === 'rssRequests'" (click)="setView('rssRequests')">
+                <i class="bi bi-inboxes"></i>
+                <span>RSS Requests</span>
+            </button>
+
+            <button *ngIf="isNewsCategory && hasNewsRssSourceAccess" class="nav-item"
+                [class.active]="activeView === 'rssSources'" (click)="setView('rssSources')">
+                <i class="bi bi-broadcast"></i>
+                <span>RSS Sources</span>
+            </button>
+
             <div class="nav-divider"></div>
 
             <a class="nav-item" [routerLink]="backHomeLink">
@@ -70,20 +88,19 @@
 
         <header class="content-header">
             <div class="header-title">
-                <h1>{{ activeView === 'dashboard' ? 'Analytics' : 'My List' }}</h1>
-                <p>{{ activeView === 'dashboard' ? 'Performance overview for ' + categoryTheme?.label : 'Manage articles
-                    for ' + categoryTheme?.label }}</p>
+                <h1>{{ contentHeaderTitle }}</h1>
+                <p>{{ contentHeaderDescription }}</p>
             </div>
 
             <div class="header-actions">
-                <button class="btn-refresh" (click)="loadData()">
+                <button class="btn-refresh" (click)="refreshCurrentView()">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
-                <a *ngIf="!isNewsCategory || canCreateNewsContent" [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
+                <a *ngIf="(activeView === 'dashboard' || activeView === 'list') && (!isNewsCategory || canCreateNewsContent)" [routerLink]="createArticleLink"
                     class="btn-create-p">
                     <i class="bi bi-plus-lg"></i> <span>{{ newsCreateButtonLabel }}</span>
                 </a>
-                <button *ngIf="isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
+                <button *ngIf="(activeView === 'dashboard' || activeView === 'list') && isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
                     <i class="bi bi-lock-fill"></i> <span>News Access Required</span>
                 </button>
             </div>
@@ -136,6 +153,31 @@
                     </div>
                 </div>
 
+                <div class="news-workflow-card" *ngIf="isNewsCategory">
+                    <div class="workflow-copy">
+                        <h3>Editorial Workflow</h3>
+                        <p>{{ newsWorkflowSummary }}</p>
+                    </div>
+
+                    <div class="workflow-actions">
+                        <button *ngIf="hasNewsModerationAccess" type="button" class="btn-create-p"
+                            (click)="setView('submissions')">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Open Moderation</span>
+                        </button>
+                        <button *ngIf="hasNewsRssRequestAccess" type="button" class="btn-create-p secondary-action"
+                            (click)="setView('rssRequests')">
+                            <i class="bi bi-inboxes"></i>
+                            <span>Open RSS Requests</span>
+                        </button>
+                        <button *ngIf="hasNewsRssSourceAccess" type="button" class="btn-create-p secondary-action"
+                            (click)="setView('rssSources')">
+                            <i class="bi bi-broadcast"></i>
+                            <span>Open RSS Sources</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="analysis-row">
                     <div class="top-post-card" *ngIf="analytics?.topPost">
                         <div class="card-h">
@@ -162,6 +204,15 @@
                             <span>Keep posting to maintain your status!</span>
                         </div>
                     </div>
+
+                    <div class="tips-card" *ngIf="isNewsCategory && hasNewsOrganizationListingAccess">
+                        <h3>SPACE Access</h3>
+                        <p>Your account includes the News Organization listing key for THE360.SPACE.</p>
+                        <div class="tip-i">
+                            <i class="bi bi-geo-alt-fill" [style.color]="fallbackColor"></i>
+                            <span>The listing workflow is pending final SPACE integration.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -178,12 +229,21 @@
                                 <img [src]="imageService.resolvePostImage(post)" alt="">
                             </div>
                             <div class="post-details">
-                                <h4 class="post-t">{{ post.title }}</h4>
+                                <div class="post-title-row">
+                                    <h4 class="post-t">{{ post.title }}</h4>
+                                    <span *ngIf="isNewsCategory" class="post-status-badge"
+                                        [ngClass]="getNewsPostStatusClass(post)">
+                                        {{ getNewsPostStatus(post) }}
+                                    </span>
+                                </div>
                                 <div class="post-m">
                                     <span>{{ post.createdAt | date:'MMM d, y' }}</span>
                                     <span class="sep"></span>
                                     <span>{{ post.stats?.views || 0 }} Views</span>
                                 </div>
+                                <p *ngIf="isNewsCategory" class="post-status-note">
+                                    {{ getNewsPostStatusHint(post) }}
+                                </p>
                             </div>
                             <div class="post-actions-cell">
                                 <a [routerLink]="['/public/posts/details', post.id]" class="btn-v">View</a>
@@ -197,7 +257,7 @@
                         <div class="empty-state">
                             <i class="bi bi-layout-text-sidebar-reverse"></i>
                             <p>Your list is empty in this category.</p>
-                            <a *ngIf="!isNewsCategory || canCreateNewsContent" [routerLink]="['/public/posts/create']" [queryParams]="{category: activeCategoryId}"
+                            <a *ngIf="!isNewsCategory || canCreateNewsContent" [routerLink]="createArticleLink"
                                 class="btn-create-p">Start Now</a>
                             <p *ngIf="isNewsCategory && !canCreateNewsContent" class="mt-3 mb-0 text-muted">
                                 News contributor access is required before you can create or submit a News story.
@@ -207,7 +267,220 @@
                 </div>
             </div>
 
+            <div *ngIf="activeView === 'submissions'" class="publisher-queue-view">
+                <div class="queue-toolbar">
+                    <label class="toolbar-search-field">
+                        <i class="bi bi-search"></i>
+                        <input type="text" [(ngModel)]="newsSubmissionSearch" placeholder="Search pending submissions...">
+                    </label>
+                    <button class="btn-create-p secondary-action" type="button" (click)="loadPendingNewsSubmissions()">
+                        <i class="bi bi-search"></i>
+                        <span>Search Queue</span>
+                    </button>
+                </div>
+
+                <div class="queue-empty" *ngIf="!isLoadingNewsSubmissions && pendingNewsSubmissions.length === 0">
+                    <i class="bi bi-check2-all"></i>
+                    <p>No pending News submissions right now.</p>
+                </div>
+
+                <div class="queue-list" *ngIf="pendingNewsSubmissions.length > 0">
+                    <article class="queue-card" *ngFor="let item of pendingNewsSubmissions">
+                        <div class="queue-card-head">
+                            <div>
+                                <h3>{{ getNewsSubmissionTitle(item) }}</h3>
+                                <p>{{ getNewsSubmissionAuthor(item) }} · {{ getNewsSubmissionDate(item) | date:'medium' }}</p>
+                            </div>
+                            <span class="queue-badge pending">Pending</span>
+                        </div>
+
+                        <p class="queue-excerpt">{{ getNewsSubmissionExcerpt(item) || 'No preview available.' }}</p>
+
+                        <div class="queue-actions">
+                            <textarea [(ngModel)]="item._moderationNote"
+                                placeholder="Optional moderation note"></textarea>
+                            <div class="queue-action-buttons">
+                                <button type="button" class="btn-create-p danger-action"
+                                    [disabled]="processingSubmissionId === getNewsSubmissionId(item)"
+                                    (click)="reviewNewsSubmission(item, false)">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>Reject</span>
+                                </button>
+                                <button type="button" class="btn-create-p"
+                                    [disabled]="processingSubmissionId === getNewsSubmissionId(item)"
+                                    (click)="reviewNewsSubmission(item, true)">
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Approve</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div *ngIf="activeView === 'rssRequests'" class="publisher-queue-view">
+                <div class="queue-toolbar">
+                    <label class="toolbar-select-field">
+                        <span>Request Status</span>
+                        <select [(ngModel)]="newsRssRequestStatus" (change)="loadNewsRssRequests()">
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="queue-info-note">
+                    Only News RSS requests created through the Publisher-level News RSS flow appear here.
+                </div>
+
+                <div class="queue-empty" *ngIf="!isLoadingNewsRssRequests && newsRssRequests.length === 0">
+                    <i class="bi bi-broadcast-pin"></i>
+                    <p>No News RSS requests were found for this status.</p>
+                    <span>
+                        Journalist, trainee, assistant, and plain resident accounts cannot create News RSS requests on the current backend.
+                    </span>
+                </div>
+
+                <div class="queue-list" *ngIf="newsRssRequests.length > 0">
+                    <article class="queue-card" *ngFor="let item of newsRssRequests">
+                        <div class="queue-card-head">
+                            <div>
+                                <h3>{{ getNewsRssRequestName(item) }}</h3>
+                                <p>{{ getNewsRssRequester(item) }} · {{ (item.createdAt || item.CreatedAt) | date:'medium' }}</p>
+                            </div>
+                            <span class="queue-badge" [ngClass]="getNewsRssStatusClass(item)">
+                                {{ getNewsRssStatusLabel(item) }}
+                            </span>
+                        </div>
+
+                        <a class="rss-link-preview" [href]="getNewsRssRequestUrl(item)" target="_blank" rel="noreferrer">
+                            <i class="bi bi-link-45deg"></i>
+                            <span>{{ getNewsRssRequestUrl(item) }}</span>
+                        </a>
+                        <p class="queue-excerpt">{{ item.description || item.Description || 'No description provided.' }}</p>
+
+                        <div class="queue-actions" *ngIf="newsRssRequestStatus === 'Pending'">
+                            <textarea [(ngModel)]="item._adminNote"
+                                placeholder="Optional admin note"></textarea>
+                            <div class="queue-action-buttons">
+                                <button type="button" class="btn-create-p danger-action"
+                                    [disabled]="processingRssRequestId === getNewsRssRequestId(item)"
+                                    (click)="reviewNewsRssRequest(item, 'Rejected')">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>Reject</span>
+                                </button>
+                                <button type="button" class="btn-create-p"
+                                    [disabled]="processingRssRequestId === getNewsRssRequestId(item)"
+                                    (click)="reviewNewsRssRequest(item, 'Approved')">
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Approve</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div *ngIf="activeView === 'rssSources'" class="publisher-queue-view">
+                <div class="queue-toolbar queue-toolbar-split">
+                    <p class="toolbar-hint">Publisher-managed sources used by the News ingestion pipeline.</p>
+                    <button type="button" class="btn-create-p" (click)="openCreateRssSourceModal()">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>New RSS Source</span>
+                    </button>
+                </div>
+
+                <div class="queue-empty" *ngIf="!isLoadingNewsRssSources && newsRssSources.length === 0">
+                    <i class="bi bi-broadcast"></i>
+                    <p>No News RSS sources configured yet.</p>
+                </div>
+
+                <div class="queue-list" *ngIf="newsRssSources.length > 0">
+                    <article class="queue-card" *ngFor="let item of newsRssSources">
+                        <div class="queue-card-head">
+                            <div>
+                                <h3>{{ item.name || item.Name }}</h3>
+                                <p>{{ (item.lastChecked || item.LastChecked) | date:'medium' }}</p>
+                            </div>
+                            <span class="queue-badge" [class.approved]="item.isActive ?? item.IsActive" [class.rejected]="!(item.isActive ?? item.IsActive)">
+                                {{ (item.isActive ?? item.IsActive) ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+
+                        <a class="rss-link-preview" [href]="item.rssUrl || item.RssUrl" target="_blank" rel="noreferrer">
+                            <i class="bi bi-link-45deg"></i>
+                            <span>{{ item.rssUrl || item.RssUrl }}</span>
+                        </a>
+                        <p class="queue-excerpt">{{ item.description || item.Description || 'No description provided.' }}</p>
+
+                        <div class="queue-action-buttons compact">
+                            <button type="button" class="btn-create-p secondary-action" (click)="openEditRssSourceModal(item)">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Edit</span>
+                            </button>
+                            <button type="button" class="btn-create-p danger-action" (click)="deleteNewsRssSource(item)">
+                                <i class="bi bi-trash3"></i>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
         </div>
     </main>
 </div>
+</div>
+
+<div class="rss-source-modal-backdrop" *ngIf="showRssSourceModal" (click)="closeRssSourceModal()">
+    <div class="rss-source-modal-card" (click)="$event.stopPropagation()">
+        <div class="rss-source-modal-head">
+            <div>
+                <h3>{{ editingRssSourceId ? 'Edit News RSS Source' : 'Create News RSS Source' }}</h3>
+                <p>Manage publisher-approved RSS sources for NYC360 News.</p>
+            </div>
+            <button type="button" class="btn-refresh" (click)="closeRssSourceModal()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="rss-source-form-grid">
+            <label>
+                <span>RSS URL</span>
+                <input type="url" [(ngModel)]="rssSourceForm.url" placeholder="https://example.com/rss">
+            </label>
+            <label>
+                <span>Name</span>
+                <input type="text" [(ngModel)]="rssSourceForm.name" placeholder="Source name">
+            </label>
+            <label class="full-width">
+                <span>Description</span>
+                <textarea [(ngModel)]="rssSourceForm.description" rows="4" placeholder="What does this source cover?"></textarea>
+            </label>
+            <label>
+                <span>Image URL</span>
+                <input type="url" [(ngModel)]="rssSourceForm.imageUrl" placeholder="https://example.com/logo.png">
+            </label>
+            <label>
+                <span>Image File</span>
+                <input type="file" (change)="onRssSourceFileSelected($event)" accept=".jpg,.jpeg,.png,.webp">
+            </label>
+            <label class="full-width inline-check" *ngIf="editingRssSourceId">
+                <input type="checkbox" [(ngModel)]="rssSourceForm.isActive">
+                <span>Keep this RSS source active</span>
+            </label>
+        </div>
+
+        <div class="rss-source-modal-actions">
+            <button type="button" class="btn-create-p secondary-action" [disabled]="isTestingRssSource" (click)="testRssSourceUrl()">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>{{ isTestingRssSource ? 'Testing...' : 'Test Feed' }}</span>
+            </button>
+            <button type="button" class="btn-create-p" [disabled]="isSubmittingRssSource" (click)="submitRssSourceForm()">
+                <i class="bi bi-save2"></i>
+                <span>{{ isSubmittingRssSource ? 'Saving...' : (editingRssSourceId ? 'Update Source' : 'Create Source') }}</span>
+            </button>
+        </div>
+    </div>
 </div>

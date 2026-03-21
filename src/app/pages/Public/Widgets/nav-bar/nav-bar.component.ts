@@ -70,8 +70,12 @@ export class NavBarComponent implements OnInit, OnDestroy {
     // Logic to keep buttons persistent if URL matches category route OR any of its sub-links
     const found = this.categories.find(cat => {
       const isMainRoute = cat.route ? url.startsWith(cat.route) : false;
+      const isLegacyCategoryHome = cat.path ? url.startsWith(`/public/category/${cat.path}`) : false;
+      const isLegacyCommunityHome = cat.path === 'community' && url.startsWith('/public/community');
+      const isLegacyHousingHome = cat.path === 'housing' && url.startsWith('/public/housing');
+      const isLegacyProfessionsHome = cat.path === 'professions' && url.startsWith('/public/profession');
       const isSubRoute = cat.topLinks ? (cat.topLinks as any[]).some(link => url.startsWith(link.route)) : false;
-      return isMainRoute || isSubRoute;
+      return isMainRoute || isLegacyCategoryHome || isLegacyCommunityHome || isLegacyHousingHome || isLegacyProfessionsHome || isSubRoute;
     });
 
     if (found) {

@@ -41,7 +41,10 @@ export class ConnectRssComponent implements OnInit {
     ngOnInit() {
         this.route.queryParamMap.subscribe(params => {
             const rawCategory = Number(params.get('category'));
-            const fallbackCategory = Number(this.rssForm.get('Category')?.value ?? 0);
+            const routeCategory = Number(this.route.snapshot.data['categoryId']);
+            const fallbackCategory = Number.isFinite(routeCategory)
+                ? routeCategory
+                : Number(this.rssForm.get('Category')?.value ?? 0);
             const resolvedCategory = Number.isFinite(rawCategory) ? rawCategory : fallbackCategory;
             this.applyCategory(resolvedCategory);
         });

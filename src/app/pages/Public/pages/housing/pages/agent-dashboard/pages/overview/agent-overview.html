@@ -132,7 +132,7 @@
     <div class="recent-card">
         <div class="d-flex justify-content-between align-items-center mb-4 p-3">
             <h3 class="section-title m-0">Recent Inquiries</h3>
-            <button class="btn-export" [routerLink]="['/public/housing/agent/dashboard/requests']">View All
+            <button class="btn-export" [routerLink]="['/housing/dashboard/requests']">View All
                 Requests</button>
         </div>
 
@@ -169,7 +169,7 @@
                     <span class="status-pill" [ngClass]="getStatusClass(inquiry.status)">
                         {{ inquiry.status }}
                     </span>
-                    <button class="btn-view-req" [routerLink]="['/public/housing/agent/dashboard/requests']">
+                    <button class="btn-view-req" [routerLink]="['/housing/dashboard/requests']">
                         View Full Request
                     </button>
                 </div>

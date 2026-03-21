@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CategoryPost } from '../models/category-home.models';
 import { CategoryHomeService } from '../service/category-home.service';
-import { CATEGORY_THEMES } from '../../feeds/models/categories';
+import { CATEGORY_THEMES, getDepartmentDiscussionsRoute, getDepartmentExploreRoute } from '../../feeds/models/categories';
 import { environment } from '../../../../../environments/environment';
 import { ImageService } from '../../../../../shared/services/image.service';
 import { ImgFallbackDirective } from '../../../../../shared/directives/img-fallback.directive';
@@ -89,17 +89,25 @@ export class CategoryHomeComponent implements OnInit {
   // Tag-based Permissions
   currentUserInfo: any | null = null;
   categoryTags: any[] = [];
+  private resolvedCategoryPath = '';
 
   ngOnInit(): void {
     // Removed initVerificationForm();
     this.setupAuthSubscription();
-    this.route.params.subscribe(params => {
-      const path = params['categoryPath'];
-      this.resolveCategory(path);
-    });
+    this.route.params.subscribe(() => this.resolveCategoryFromRoute());
+    this.route.data.subscribe(() => this.resolveCategoryFromRoute());
   }
 
   // ... existing methods ...
+
+  private resolveCategoryFromRoute(): void {
+    const path = this.route.snapshot.params['categoryPath'] || this.route.snapshot.data['categoryPath'];
+    if (!path || path === this.resolvedCategoryPath) {
+      return;
+    }
+    this.resolvedCategoryPath = path;
+    this.resolveCategory(path);
+  }
 
   resolveCategory(path: string) {
     this.isLoading = true;
@@ -172,7 +180,7 @@ export class CategoryHomeComponent implements OnInit {
     } else {
       // Default fallbacks
       buttons = [
-        { label: 'Feed', link: ['/public/feed', path], icon: 'bi-rss' }
+        { label: 'Explore', link: [getDepartmentExploreRoute(path)], icon: 'bi-rss' }
       ];
     }
 
@@ -181,7 +189,7 @@ export class CategoryHomeComponent implements OnInit {
     // Add 'Ask a Question' Button at the end
     buttons.push({
       label: 'Ask a Question',
-      link: ['/public/forums', path || 'news'],
+      link: [getDepartmentDiscussionsRoute(path || 'news')],
       icon: 'bi-question-circle'
     });
 
@@ -313,7 +321,7 @@ export class CategoryHomeComponent implements OnInit {
     if (options.search) queryParams.search = options.search;
     if (options.filter) queryParams.filter = options.filter;
     if (options.tab) queryParams.tab = options.tab;
-    this.router.navigate(['/public/feed', this.activeTheme?.path || 'news'], { queryParams });
+    this.router.navigate([getDepartmentExploreRoute(this.activeTheme?.path || 'news')], { queryParams });
   }
 
   onSearch(query: string) {
@@ -341,6 +349,10 @@ export class CategoryHomeComponent implements OnInit {
 
   get healthHeroDescription(): string {
     return 'Health updates, trusted resources, and practical support for New Yorkers.';
+  }
+
+  get exploreRoute(): string {
+    return getDepartmentExploreRoute(this.activeTheme?.path || 'news');
   }
 
   get searchPlaceholder(): string {

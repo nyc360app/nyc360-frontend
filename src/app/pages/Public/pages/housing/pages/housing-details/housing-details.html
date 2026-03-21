@@ -352,7 +352,7 @@
                         </div>
                     </div>
                     <button class="btn-action gold w-100"
-                        [routerLink]="property.isRenting ? ['/public/housing/edit/renting', property.id] : ['/public/housing/edit/sale', property.id]">
+                        [routerLink]="property.isRenting ? ['/housing/edit/renting', property.id] : ['/housing/edit/sale', property.id]">
                         Edit Property Details
                     </button>
                 </div>
@@ -457,7 +457,7 @@
         <h3>Similar Homes Nearby</h3>
         <div class="similar-grid">
             <div class="similar-card" *ngFor="let item of similarProperties"
-                [routerLink]="['/public/housing/details', item.id]">
+                [routerLink]="['/housing/details', item.id]">
                 <div class="sim-img" *ngIf="item.mediaUrl">
                     <video *ngIf="item.mediaType === 'video'" [src]="item.mediaUrl" muted loop autoplay playsinline
                         onmouseover="this.play()" onmouseout="this.pause()"

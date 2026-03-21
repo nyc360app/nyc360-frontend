@@ -44,11 +44,11 @@
         <section class="section-wrapper" *ngIf="homesForSale.length > 0">
             <div class="section-head">
                 <h3 class="section-title">Homes For Sale</h3>
-                <a [routerLink]="['/public/housing/feed']" [queryParams]="{type: 'sale'}" class="view-all">View All</a>
+                <a [routerLink]="['/housing/explore']" [queryParams]="{type: 'sale'}" class="view-all">View All</a>
             </div>
             <div class="housing-grid">
                 <div class="premium-card" *ngFor="let item of homesForSale"
-                    [routerLink]="['/public/housing/details', item.id]">
+                    [routerLink]="['/housing/details', item.id]">
 
                     <div class="card-thumb">
                         <ng-container *ngIf="item.mediaUrl">
@@ -83,11 +83,11 @@
         <section class="section-wrapper" *ngIf="homesForRent.length > 0">
             <div class="section-head">
                 <h3 class="section-title">Homes For Rent</h3>
-                <a [routerLink]="['/public/housing/feed']" [queryParams]="{type: 'rent'}" class="view-all">View All</a>
+                <a [routerLink]="['/housing/explore']" [queryParams]="{type: 'rent'}" class="view-all">View All</a>
             </div>
             <div class="housing-grid four-cols">
                 <div class="premium-card" *ngFor="let item of (homesForRent | slice:0:8)"
-                    [routerLink]="['/public/housing/details', item.id]">
+                    [routerLink]="['/housing/details', item.id]">
 
                     <div class="card-thumb">
                         <ng-container *ngIf="item.mediaUrl">
@@ -180,7 +180,7 @@
             <div class="housing-grid four-cols">
                 <div class="premium-card"
                     *ngFor="let item of (allPosts.length > 0 ? (allPosts | slice:0:8) : (homesForRent | slice:4:12))"
-                    [routerLink]="['/public/housing/details', item.id]">
+                    [routerLink]="['/housing/details', item.id]">
 
                     <div class="card-thumb">
                         <ng-container *ngIf="item.mediaUrl">

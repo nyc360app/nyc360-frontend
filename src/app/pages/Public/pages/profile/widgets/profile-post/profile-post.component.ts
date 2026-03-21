@@ -110,7 +110,7 @@ export class ProfilePostComponent {
 
         // ✅ Redirection Logic: If this is a Job Post, go to Job Profile
         if (this.post?.category === 8 && this.post?.linkedResource) {
-            this.router.navigate(['/public/job-profile', this.post.linkedResource.id]);
+            this.router.navigate(['/professions/jobs', this.post.linkedResource.id]);
             return;
         }
 

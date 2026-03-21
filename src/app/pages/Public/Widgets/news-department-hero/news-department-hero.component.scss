@@ -109,6 +109,7 @@ a {
   .access-chip {
     display: inline-flex;
     align-items: center;
+    gap: 8px;
     padding: 8px 14px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--theme-color), white 90%);
@@ -117,6 +118,10 @@ a {
     font-size: 0.82rem;
     font-weight: 700;
     line-height: 1;
+
+    i {
+      font-size: 0.9rem;
+    }
 
     &.subtle {
       background: rgba(255, 255, 255, 0.78);
@@ -257,6 +262,7 @@ a {
     }
   }
 }
+
 
 @media (max-width: 768px) {
   .news-department-hero {

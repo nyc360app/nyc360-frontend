@@ -152,7 +152,7 @@ export class HousingHomeComponent implements OnInit {
             numberOfRooms: item.numberOfRooms || item.NumberOfRooms || (metadata ? metadata.Rooms : 0),
             numberOfBathrooms: item.numberOfBathrooms || item.NumberOfBathrooms || (metadata ? metadata.Bathrooms : 0),
             size: item.size || item.Size || (metadata ? metadata.SizeSqFt : 0),
-            routingPath: (item.startingPrice || item.numberOfRooms || item.location) ? '/public/housing/details' : '/public/posts/details'
+            routingPath: (item.startingPrice || item.numberOfRooms || item.location) ? '/housing/details' : '/public/posts/details'
         };
     }
 

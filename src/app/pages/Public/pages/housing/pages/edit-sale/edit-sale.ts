@@ -196,14 +196,14 @@ export class EditSaleComponent implements OnInit {
                     this.populateForm(data);
                 } else {
                     this.toastService.error('Failed to load listing');
-                    this.router.navigate(['/public/housing/home']);
+                    this.router.navigate(['/housing']);
                 }
                 this.isLoading = false;
             },
             error: () => {
                 this.isLoading = false;
                 this.toastService.error('Error loading listing');
-                this.router.navigate(['/public/housing/home']);
+                this.router.navigate(['/housing']);
             }
         });
     }
@@ -440,7 +440,7 @@ export class EditSaleComponent implements OnInit {
                     this.isSubmitting = false;
                     if (res?.isSuccess) {
                         this.toastService.success('Listing Updated!');
-                        this.router.navigate(['/public/housing/details', this.postId]);
+                        this.router.navigate(['/housing/details', this.postId]);
                     } else {
                         this.toastService.error(res?.error?.message || 'Failed');
                     }

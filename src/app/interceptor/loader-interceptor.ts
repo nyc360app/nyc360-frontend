@@ -9,7 +9,8 @@ export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
   // Only show loader for 'Outer' (Main) pages
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
   const mainPaths = ['', '/', '/public/home', '/public/housing/home', '/public/events/home', '/public/community'];
-  const isMainPage = mainPaths.some(path => currentPath === path) || currentPath.startsWith('/public/category/');
+  const isDepartmentRoot = /^\/(community|culture|education|health|housing|lifestyle|legal|news|professions|social|transportation|tv)$/.test(currentPath);
+  const isMainPage = mainPaths.some(path => currentPath === path) || currentPath.startsWith('/public/category/') || isDepartmentRoot;
 
   if (isMainPage) {
     loaderService.show();

@@ -331,13 +331,13 @@ export class CreateSaleComponent implements OnInit {
 
                     if (newId) {
                         if (isPublished) {
-                            this.router.navigate(['/public/housing/listing-authorization'], { queryParams: { id: newId } });
+                            this.router.navigate(['/housing/listing-authorization'], { queryParams: { id: newId } });
                         } else {
-                            this.router.navigate(['/public/housing/details', newId]);
+                            this.router.navigate(['/housing/details', newId]);
                         }
                     } else {
                         console.warn('Could not extract new listing ID', res);
-                        this.router.navigate(['/public/housing/home']);
+                        this.router.navigate(['/housing']);
                     }
                 } else {
                     this.toastService.error(res?.error?.message || 'Failed');

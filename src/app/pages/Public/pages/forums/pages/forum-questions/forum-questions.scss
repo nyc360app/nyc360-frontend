@@ -153,6 +153,23 @@
             }
         }
 
+        .forum-access-note {
+            align-self: flex-start;
+            color: #6b7280;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            max-width: 340px;
+
+            @media (max-width: 768px) {
+                max-width: none;
+                width: 100%;
+            }
+        }
+
         .skeleton-icon {
             width: 100px;
             height: 100px;
@@ -230,6 +247,12 @@
                 }
             }
         }
+    }
+
+    .access-note {
+        margin-top: 1rem;
+        color: #6b7280;
+        font-weight: 500;
     }
 
     .questions-header.community-theme {

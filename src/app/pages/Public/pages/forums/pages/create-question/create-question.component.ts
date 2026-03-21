@@ -10,6 +10,9 @@ import { NewsDepartmentHeroComponent } from '../../../../Widgets/news-department
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 import { CategoryDepartmentHeroComponent } from '../../../../Widgets/category-department-hero/category-department-hero.component';
 import { HousingDepartmentHeroComponent } from '../../../../Widgets/housing-department-hero/housing-department-hero.component';
+import { AuthService } from '../../../../../Authentication/Service/auth';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../../../shared/services/news.service';
+import { getDepartmentDiscussionsRoute } from '../../../../Widgets/feeds/models/categories';
 
 @Component({
     selector: 'app-create-question',
@@ -24,6 +27,8 @@ export class CreateQuestionComponent implements OnInit {
     private forumService = inject(ForumService);
     private loaderService = inject(GlobalLoaderService);
     private toastService = inject(ToastService);
+    private authService = inject(AuthService);
+    private newsService = inject(NewsService);
 
     slug: string = '';
     forum: Forum | null = null;
@@ -31,14 +36,25 @@ export class CreateQuestionComponent implements OnInit {
     title: string = '';
     content: string = '';
     isSubmitting = false;
+    newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
+    private resolvedSlug = '';
 
     ngOnInit() {
-        this.route.params.subscribe(params => {
-            this.slug = params['slug'];
-            if (this.slug) {
-                this.loadForum();
-            }
-        });
+        this.route.params.subscribe(() => this.resolveForumFromRoute());
+        this.route.data.subscribe(() => this.resolveForumFromRoute());
+    }
+
+    private resolveForumFromRoute(): void {
+        const nextSlug = this.route.snapshot.params['slug'] || this.route.snapshot.data['slug'] || '';
+        if (!nextSlug || nextSlug === this.resolvedSlug) {
+            return;
+        }
+        this.resolvedSlug = nextSlug;
+        this.slug = nextSlug;
+        if (this.slug) {
+            this.resolveNewsAccess();
+            this.loadForum();
+        }
     }
 
     loadForum() {
@@ -65,6 +81,10 @@ export class CreateQuestionComponent implements OnInit {
 
     onSubmit() {
         if (!this.forum) return;
+        if (!this.canCreateQuestion) {
+            this.toastService.error('Your account does not currently have News discussion access.');
+            return;
+        }
         if (!this.title.trim() || !this.content.trim()) {
             this.toastService.warning('Please fill in all fields');
             return;
@@ -86,7 +106,7 @@ export class CreateQuestionComponent implements OnInit {
                 if (res.isSuccess) {
                     this.toastService.success('Question created successfully');
                     // Navigate back to the forum's question list
-                    this.router.navigate(['/public/forums', this.slug]);
+                    this.router.navigate(this.forumRoute);
                 } else {
                     this.toastService.error(res.error?.Message || 'Failed to create question');
                 }
@@ -106,6 +126,11 @@ export class CreateQuestionComponent implements OnInit {
 
     get isNewsForum(): boolean {
         return this.slug === 'news';
+    }
+
+    get canCreateQuestion(): boolean {
+        if (!this.isNewsForum) return true;
+        return this.authService.hasRole('SuperAdmin') || this.newsAccess.canSubmitContent;
     }
 
     get isCommunityForum(): boolean {
@@ -187,5 +212,25 @@ export class CreateQuestionComponent implements OnInit {
             default:
                 return 'e.g., What is the best way to get started with this topic?';
         }
+    }
+
+    get forumRoute(): any[] {
+        return [getDepartmentDiscussionsRoute(this.slug)];
+    }
+
+    private resolveNewsAccess(): void {
+        if (!this.isNewsForum) {
+            this.newsAccess = EMPTY_NEWS_ACCESS;
+            return;
+        }
+
+        this.newsService.getNewsAccess().subscribe({
+            next: (access) => {
+                this.newsAccess = access;
+            },
+            error: () => {
+                this.newsAccess = EMPTY_NEWS_ACCESS;
+            }
+        });
     }
 }

@@ -165,7 +165,7 @@ export class CommunityComponent implements OnInit {
   onCommunitySearch(): void {
     const search = this.communitySearchTerm.trim();
     this.router.navigate(
-      ['/public/discover'],
+      ['/community/explore'],
       { queryParams: search ? { search } : {} }
     );
   }

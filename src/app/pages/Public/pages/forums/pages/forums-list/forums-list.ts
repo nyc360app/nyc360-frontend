@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { ForumService } from '../../services/forum.service';
 import { Forum } from '../../models/forum';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
+import { getDepartmentDiscussionsRoute, isDepartmentPath } from '../../../../Widgets/feeds/models/categories';
 
 @Component({
     selector: 'app-forums-list',
@@ -44,5 +45,13 @@ export class ForumsListComponent implements OnInit {
     resolveIcon(iconUrl: string): string {
         if (!iconUrl) return '/MAIN Blue & Orange.png';
         return `https://nyc360.runasp.net/forums/${iconUrl}`;
+    }
+
+    forumRoute(slug: string): any[] {
+        if (isDepartmentPath(slug)) {
+            return [getDepartmentDiscussionsRoute(slug)];
+        }
+
+        return ['/public/forums', slug];
     }
 }

@@ -10,11 +10,19 @@
       <button type="submit" class="search-btn">Search</button>
     </form>
 
-    <div class="access-status-row" *ngIf="canSubmitContent || canPublishContent || canConnectRss || newsAccess.grantedKeys.length > 0">
-      <span class="access-chip" *ngIf="canSubmitContent">Can Submit</span>
-      <span class="access-chip" *ngIf="canPublishContent">Can Publish</span>
-      <span class="access-chip" *ngIf="canConnectRss">Can Connect RSS</span>
-      <span class="access-chip subtle" *ngFor="let key of newsAccess.grantedKeys">{{ key }}</span>
+    <div class="access-status-row" *ngIf="canSubmitContent || canPublishContent || canConnectRss">
+      <span class="access-chip" *ngIf="canSubmitContent">
+        <i class="bi bi-pencil-square"></i>
+        Submit Stories
+      </span>
+      <span class="access-chip" *ngIf="canPublishContent">
+        <i class="bi bi-megaphone"></i>
+        Publish Directly
+      </span>
+      <span class="access-chip" *ngIf="canConnectRss">
+        <i class="bi bi-broadcast-pin"></i>
+        Manage RSS
+      </span>
     </div>
 
     <div class="header-nav-buttons">

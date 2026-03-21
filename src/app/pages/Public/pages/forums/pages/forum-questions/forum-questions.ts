@@ -9,6 +9,9 @@ import { NewsDepartmentHeroComponent } from '../../../../Widgets/news-department
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 import { CategoryDepartmentHeroComponent } from '../../../../Widgets/category-department-hero/category-department-hero.component';
 import { HousingDepartmentHeroComponent } from '../../../../Widgets/housing-department-hero/housing-department-hero.component';
+import { AuthService } from '../../../../../Authentication/Service/auth';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../../../shared/services/news.service';
+import { getDepartmentDiscussionCreateRoute, getDepartmentQuestionDetailsRoute } from '../../../../Widgets/feeds/models/categories';
 
 @Component({
     selector: 'app-forum-questions',
@@ -21,6 +24,8 @@ export class ForumQuestionsComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private forumService = inject(ForumService);
     private loaderService = inject(GlobalLoaderService);
+    private authService = inject(AuthService);
+    private newsService = inject(NewsService);
 
     slug: string = '';
     forum: Forum | null = null;
@@ -30,14 +35,25 @@ export class ForumQuestionsComponent implements OnInit {
     totalCount = 0;
     totalPages = 0;
     isLoading = false;
+    newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
+    private resolvedSlug = '';
 
     ngOnInit() {
-        this.route.params.subscribe(params => {
-            this.slug = params['slug'];
-            if (this.slug) {
-                this.loadQuestions();
-            }
-        });
+        this.route.params.subscribe(() => this.resolveForumFromRoute());
+        this.route.data.subscribe(() => this.resolveForumFromRoute());
+    }
+
+    private resolveForumFromRoute(): void {
+        const nextSlug = this.route.snapshot.params['slug'] || this.route.snapshot.data['slug'] || '';
+        if (!nextSlug || nextSlug === this.resolvedSlug) {
+            return;
+        }
+        this.resolvedSlug = nextSlug;
+        this.slug = nextSlug;
+        if (this.slug) {
+            this.resolveNewsAccess();
+            this.loadQuestions();
+        }
     }
 
     loadQuestions() {
@@ -78,6 +94,11 @@ export class ForumQuestionsComponent implements OnInit {
 
     get isNewsForum(): boolean {
         return this.slug === 'news';
+    }
+
+    get canCreateQuestionInForum(): boolean {
+        if (!this.isNewsForum) return true;
+        return this.authService.hasRole('SuperAdmin') || this.newsAccess.canSubmitContent;
     }
 
     get isCommunityForum(): boolean {
@@ -146,5 +167,29 @@ export class ForumQuestionsComponent implements OnInit {
 
     get housingHeroDescription(): string {
         return this.forum?.description || 'Ask about rentals, buying, housing programs, and neighborhood options.';
+    }
+
+    get createQuestionRoute(): any[] {
+        return [getDepartmentDiscussionCreateRoute(this.slug)];
+    }
+
+    questionDetailsRoute(questionId: number): any[] {
+        return [getDepartmentQuestionDetailsRoute(this.slug, questionId)];
+    }
+
+    private resolveNewsAccess(): void {
+        if (!this.isNewsForum) {
+            this.newsAccess = EMPTY_NEWS_ACCESS;
+            return;
+        }
+
+        this.newsService.getNewsAccess().subscribe({
+            next: (access) => {
+                this.newsAccess = access;
+            },
+            error: () => {
+                this.newsAccess = EMPTY_NEWS_ACCESS;
+            }
+        });
     }
 }

@@ -50,7 +50,7 @@
         <div class="property-grid view-transition" *ngIf="!isLoading && listings.length > 0 && currentView === 'grid'">
             <ng-container *ngFor="let item of listings">
                 <!-- 1. Standard Card (With Media) -->
-                <div class="property-card" *ngIf="item.mediaUrl" [routerLink]="['/public/housing/details', item.id]">
+                <div class="property-card" *ngIf="item.mediaUrl" [routerLink]="['/housing/details', item.id]">
                     <div class="card-image">
                         <ng-container *ngIf="isVideo(item.mediaUrl); else imgBlock">
                             <video [src]="item.mediaUrl" class="w-100 h-100 object-fit-cover" muted loop
@@ -85,7 +85,7 @@
 
                 <!-- 2. Text-Only Card (Different Design) -->
                 <div class="property-card text-only-card" *ngIf="!item.mediaUrl"
-                    [routerLink]="['/public/housing/details', item.id]">
+                    [routerLink]="['/housing/details', item.id]">
                     <div class="card-header-minimal">
                         <span class="type-badge" [class.rent]="item.isRenting">
                             {{ item.isRenting ? 'For Rent' : 'For Sale' }}
@@ -120,7 +120,7 @@
         </div>
 
         <div class="property-row-list view-transition" *ngIf="!isLoading && listings.length > 0 && currentView === 'row'">
-            <article class="property-row-card" *ngFor="let item of listings" [routerLink]="['/public/housing/details', item.id]">
+            <article class="property-row-card" *ngFor="let item of listings" [routerLink]="['/housing/details', item.id]">
                 <div class="row-media" *ngIf="item.mediaUrl; else rowNoMedia">
                     <ng-container *ngIf="isVideo(item.mediaUrl); else rowImageBlock">
                         <video [src]="item.mediaUrl" class="w-100 h-100 object-fit-cover" muted loop

@@ -185,7 +185,7 @@ export class CreateOfferComponent implements OnInit {
         this.isSubmitting = false;
         if (res.isSuccess) {
           this.toastService.success('Job Offer Created Successfully!');
-          this.router.navigate(['/public/job-profile', res.data]);
+          this.router.navigate(['/professions/jobs', res.data]);
         } else {
           this.toastService.error(res.error?.message || 'Failed to create offer');
         }

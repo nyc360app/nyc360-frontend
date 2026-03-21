@@ -47,10 +47,14 @@
                         </span>
                     </div>
                 </div>
-                <button class="btn-create-question" *ngIf="!isNewsForum && !isCommunityForum" [routerLink]="['/public/forums', slug, 'create']">
+                <button class="btn-create-question" *ngIf="canCreateQuestionInForum"
+                    [routerLink]="createQuestionRoute">
                     <i class="bi bi-plus-lg"></i>
                     Ask a Question
                 </button>
+                <div class="forum-access-note" *ngIf="isNewsForum && !canCreateQuestionInForum">
+                    News question access requires an approved News contributor role.
+                </div>
             </div>
 
             <!-- Loading state -->
@@ -88,7 +92,7 @@
                         <span class="created-at">{{ question.createdAt | date:'mediumDate' }}</span>
                     </div>
                     <h3 class="question-title">
-                        <a [routerLink]="['/public/forums/questions', question.id]">{{ question.title }}</a>
+                        <a [routerLink]="questionDetailsRoute(question.id)">{{ question.title }}</a>
                     </h3>
                     <p class="question-excerpt">{{ question.content | slice:0:150 }}{{ question.content.length > 150 ?
                         '...' : '' }}</p>
@@ -123,9 +127,13 @@
             </div>
             <h3>No questions yet</h3>
             <p>Be the first one to ask a question in this forum!</p>
-            <button class="btn-create-question secondary" [routerLink]="['/public/forums', slug, 'create']">
+            <button class="btn-create-question secondary" *ngIf="canCreateQuestionInForum"
+                [routerLink]="createQuestionRoute">
                 Ask a Question
             </button>
+            <p class="access-note" *ngIf="isNewsForum && !canCreateQuestionInForum">
+                News discussion access is limited to approved News contributors.
+            </p>
         </div>
     </div>
 </div>

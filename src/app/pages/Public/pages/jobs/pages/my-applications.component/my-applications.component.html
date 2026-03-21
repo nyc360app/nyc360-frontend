@@ -16,7 +16,7 @@
       <i class="bi bi-briefcase-history display-1"></i>
       <h2>No Applications Yet</h2>
       <p>You haven't applied to any professions yet. Start exploring now!</p>
-      <button class="btn-primary" routerLink="/public/profession/jobs">Explore Jobs</button>
+      <button class="btn-primary" routerLink="/professions/jobs">Explore Jobs</button>
     </div>
 
     <div class="apps-grid" *ngIf="!isLoading && applications.length > 0">
@@ -38,7 +38,7 @@
             </div>
             
             <div class="btns-row">
-              <button class="btn-view" [routerLink]="['/public/job-profile', app.offer.id]">View Offer</button>
+              <button class="btn-view" [routerLink]="['/professions/jobs', app.offer.id]">View Offer</button>
               <button 
                 class="btn-withdraw" 
                 *ngIf="app.status === 0" 

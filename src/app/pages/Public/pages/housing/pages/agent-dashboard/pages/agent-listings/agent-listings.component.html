@@ -5,7 +5,7 @@
             <p class="page-subtitle">Manage your active and inactive housing properties.</p>
         </div>
         <div class="header-actions">
-            <button class="btn-create" routerLink="/public/housing/create">
+            <button class="btn-create" routerLink="/housing/create/renting">
                 <i class="bi bi-plus-lg"></i> New Listing
             </button>
         </div>
@@ -24,7 +24,7 @@
         </div>
         <h3>No Listings Found</h3>
         <p>You haven't posted any housing listings yet. Start by creating your first one!</p>
-        <button class="btn-primary-gold mt-4" routerLink="/public/housing/create">Create My First Listing</button>
+        <button class="btn-primary-gold mt-4" routerLink="/housing/create/renting">Create My First Listing</button>
     </div>
 
     <!-- Listings Grid (Replaced Table with Cards) -->
@@ -84,7 +84,7 @@
                         <i class="bi bi-droplet"></i>
                         <span>{{ item.bathrooms }} Baths</span>
                     </div>
-                    <div class="spec-item inquiry-link" [routerLink]="['/public/housing/agent/dashboard/requests']">
+                    <div class="spec-item inquiry-link" [routerLink]="['/housing/dashboard/requests']">
                         <i class="bi bi-chat-left-dots"></i>
                         <span>{{ item.totalInquiries }} Inquiries</span>
                     </div>
@@ -92,13 +92,13 @@
 
                 <div class="card-footer-actions">
                     <button class="btn-action authorize" *ngIf="!item.isPublished"
-                        [routerLink]="['/public/housing/listing-authorization']" [queryParams]="{listingId: item.id}">
+                        [routerLink]="['/housing/listing-authorization']" [queryParams]="{listingId: item.id}">
                         <i class="bi bi-shield-check"></i> Authorize
                     </button>
-                    <button class="btn-action edit" [routerLink]="['/public/housing/edit', item.id]">
+                    <button class="btn-action edit" [routerLink]="['/housing/edit', item.id]">
                         <i class="bi bi-pencil-square"></i> Edit
                     </button>
-                    <button class="btn-action view" [routerLink]="['/public/housing/details', item.id]">
+                    <button class="btn-action view" [routerLink]="['/housing/details', item.id]">
                         <i class="bi bi-eye"></i> View
                     </button>
                 </div>
