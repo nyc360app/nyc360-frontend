@@ -55,14 +55,14 @@
     <div class="comm-grid">
       <div class="comm-card" *ngFor="let comm of communities">
         <div class="card-head">
-          <img [src]="resolveAvatar(comm.avatarUrl)" class="comm-img" [routerLink]="['/public/community', comm.slug]" [alt]="comm.name">
+          <img [src]="resolveAvatar(comm.avatarUrl)" class="comm-img" [routerLink]="['/community', comm.slug]" [alt]="comm.name">
           <div class="badges">
             <span class="type-badge" *ngIf="comm.type">{{ communityTypes[comm.type - 1]?.name }}</span>
           </div>
         </div>
         
         <div class="card-body">
-          <h3 [routerLink]="['/public/community', comm.slug]">{{ comm.name }}</h3>
+          <h3 [routerLink]="['/community', comm.slug]">{{ comm.name }}</h3>
           
           <p class="desc" title="{{comm.description}}">
             {{ (comm.description || 'Join this community to connect with others.') | slice:0:80 }}
@@ -82,7 +82,7 @@
             [class.joined]="comm.isJoined"
             [class.success-state]="comm.showSuccess"
             (click)="joinCommunity(comm)" 
-            [disabled]="comm.isLoadingJoin || comm.isJoined">
+            [disabled]="comm.isLoadingJoin || comm.isJoined || comm.isJoinRequested">
             
             <ng-container *ngIf="comm.showSuccess">
               <i class="bi bi-check-circle-fill"></i> Successfully Joined!
@@ -94,7 +94,8 @@
               </ng-container>
               
               <ng-container *ngIf="!comm.isLoadingJoin">
-                <ng-container *ngIf="!comm.isJoined">Join Community</ng-container>
+                <ng-container *ngIf="!comm.isJoined && !comm.isJoinRequested">Join Community</ng-container>
+                <ng-container *ngIf="comm.isJoinRequested"><i class="bi bi-hourglass-split"></i> Request Pending</ng-container>
                 <ng-container *ngIf="comm.isJoined"><i class="bi bi-check-lg"></i> Joined</ng-container>
               </ng-container>
             </ng-container>

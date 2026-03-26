@@ -10,20 +10,7 @@
       <button type="submit" class="search-btn">Search</button>
     </form>
 
-    <div class="access-status-row" *ngIf="canSubmitContent || canPublishContent || canConnectRss">
-      <span class="access-chip" *ngIf="canSubmitContent">
-        <i class="bi bi-pencil-square"></i>
-        Submit Stories
-      </span>
-      <span class="access-chip" *ngIf="canPublishContent">
-        <i class="bi bi-megaphone"></i>
-        Publish Directly
-      </span>
-      <span class="access-chip" *ngIf="canConnectRss">
-        <i class="bi bi-broadcast-pin"></i>
-        Manage RSS
-      </span>
-    </div>
+    
 
     <div class="header-nav-buttons">
       <ng-container *ngFor="let btn of headerButtons">
@@ -36,14 +23,21 @@
 
           <div class="dropdown-menu-custom">
             <ng-container *ngFor="let child of btn.children">
-              <a *ngIf="child.isAction && isActionVisible(child)" [routerLink]="canUseAction(child) ? child.link : null"
+              <button *ngIf="child.opensVerification" type="button" class="dropdown-item-custom"
+                (click)="openVerificationRequest()">
+                <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
+                {{ child.label }}
+              </button>
+
+              <a *ngIf="child.isAction" [routerLink]="canUseAction(child) ? child.link : null"
                 [queryParams]="child.queryParams" class="dropdown-item-custom"
                 (click)="handleContributorAction($event, child)" [class.locked]="!canUseAction(child)">
                 <i class="bi" [ngClass]="!canUseAction(child) ? 'bi-lock-fill' : (child.icon || 'bi-dot')"></i>
                 {{ child.label }}
               </a>
 
-              <a *ngIf="!child.isAction" [routerLink]="child.link" [queryParams]="child.queryParams"
+              <a *ngIf="!child.isAction && !child.opensVerification" [routerLink]="child.link"
+                [queryParams]="child.queryParams"
                 class="dropdown-item-custom">
                 <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
                 {{ child.label }}

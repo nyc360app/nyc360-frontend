@@ -25,13 +25,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
+  const hasBearerToken = !!token;
+
   const injector = inject(Injector);
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
 
       // 🛑 Case 1: 401 Unauthorized (Token Expired or Invalid)
-      if (error.status === 401 && !req.url.includes('/auth/login') && !req.url.includes('/auth/refresh-token')) {
+      if (
+        hasBearerToken
+        && error.status === 401
+        && !req.url.includes('/auth/login')
+        && !req.url.includes('/auth/refresh-token')
+      ) {
         const authService = injector.get(AuthService);
         return authService.refreshAccessToken().pipe(
           switchMap((newToken) => {

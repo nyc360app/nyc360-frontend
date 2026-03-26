@@ -1,4 +1,6 @@
 export interface CommunityLeaderApplicationPayload {
+  occupationId?: number;
+  occupationName?: string;
   fullName: string;
   email: string;
   phoneNumber: string;

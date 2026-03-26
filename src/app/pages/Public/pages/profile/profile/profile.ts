@@ -187,7 +187,7 @@ export class ProfileComponent implements OnInit {
   navigateToCommunity(comm: any) {
     if (!comm) return;
     const identifier = comm.slug || comm.id;
-    this.router.navigate(['/public/community', identifier]);
+    this.router.navigate(['/community', identifier]);
   }
 
   // --- Manage Profile Actions ---

@@ -46,6 +46,7 @@ export interface CommunitySuggestion {
 
   // UI State (Not from API, added locally)
   isJoined?: boolean;
+  isJoinRequested?: boolean;
   isLoadingJoin?: boolean;
 }
 

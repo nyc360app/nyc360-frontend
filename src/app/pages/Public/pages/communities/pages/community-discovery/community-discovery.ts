@@ -5,10 +5,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommunityService, LocationDto } from '../../services/community';
 import { CommunitySuggestion } from '../../models/community';
 import { environment } from '../../../../../../environments/environment';
-import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
+import { getCommunityErrorMessage } from '../../../../../../shared/utils/community-contract';
+import { resolveCommunityMediaUrl } from '../../../../../../shared/utils/community-media';
 
 @Component({
   selector: 'app-community-discovery',
@@ -82,7 +84,7 @@ export class CommunityDiscoveryComponent implements OnInit {
       switchMap(query => {
         if (!query || query.length < 2) {
           this.locationSuggestions = [];
-          return [];
+          return of({ isSuccess: true, data: [] });
         }
         return this.communityService.searchLocations(query);
       })
@@ -117,11 +119,12 @@ export class CommunityDiscoveryComponent implements OnInit {
           this.totalPages = (res.totalPages && res.totalPages > 0) ? res.totalPages : 1;
         }
       },
-      error: () => {
+      error: (error) => {
         this.isLoading = false;
         this.loaderService.hide();
         this.communities = [];
         this.totalPages = 1;
+        this.toastService.error(getCommunityErrorMessage(error, 'Unable to load communities right now.'));
       }
     });
   }
@@ -184,9 +187,8 @@ export class CommunityDiscoveryComponent implements OnInit {
       next: (res) => {
         comm.isLoadingJoin = false;
         if (res.isSuccess) {
-          comm.isJoined = true;
-          comm.memberCount++;
-          this.toastService.success('Successfully joined the community!');
+          comm.isJoinRequested = true;
+          this.toastService.success('Your join request was sent to the community leader.');
 
           // Show success message temporarily
           comm.showSuccess = true;
@@ -194,20 +196,18 @@ export class CommunityDiscoveryComponent implements OnInit {
             comm.showSuccess = false;
           }, 3000);
         } else {
-          this.toastService.error((res as any).message || 'Failed to join community.');
+          this.toastService.error(getCommunityErrorMessage(res, 'Failed to join the community.'));
         }
       },
-      error: () => {
+      error: (error) => {
         comm.isLoadingJoin = false;
-        this.toastService.error('An error occurred while joining.');
+        this.toastService.error(getCommunityErrorMessage(error, 'An error occurred while joining.'));
       }
     });
   }
 
   resolveAvatar(url?: string): string {
-    if (!url) return 'assets/images/default-group.png';
-    if (url.includes('http')) return url;
-    return `${environment.apiBaseUrl2}/communities/${url}`;
+    return resolveCommunityMediaUrl(url, 'assets/images/default-group.png');
   }
 
   getTypeName(typeId: number): string {

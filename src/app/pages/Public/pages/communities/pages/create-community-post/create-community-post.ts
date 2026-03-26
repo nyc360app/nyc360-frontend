@@ -8,6 +8,7 @@ import { CreateCommunityService } from '../../services/createcommunty'; // Use t
 import { Tag } from '../../models/createcommunty';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { CategoryContextService } from '../../../../../../shared/services/category-context.service';
+import { getCommunityErrorMessage } from '../../../../../../shared/utils/community-contract';
 
 @Component({
   selector: 'app-create-community-post',
@@ -149,17 +150,17 @@ export class CreateCommunityPostComponent implements OnInit {
           this.toastService.success('Post created successfully!');
           const postId = res.data?.id || res.data;
           if (postId) {
-            this.router.navigate(['/public/posts/details', postId]);
+            this.router.navigate(['/community/post', postId]);
           } else {
             this.locationService.back();
           }
         } else {
-          this.toastService.error(res.error?.message || 'Failed to create post');
+          this.toastService.error(getCommunityErrorMessage(res, 'Failed to create the post.'));
         }
       },
-      error: () => {
+      error: (error) => {
         this.isPosting = false;
-        this.toastService.error('Network error, please try again.');
+        this.toastService.error(getCommunityErrorMessage(error, 'Network error, please try again.'));
       }
     });
   }

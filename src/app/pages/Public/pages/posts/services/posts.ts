@@ -133,7 +133,7 @@ export class PostsService {
     return this.http.post<ApiResponse<PostComment>>(`${this.baseUrl}/comment`, body);
   }
   searchLocations(query: string, limit: number = 20): Observable<ApiResponse<any[]>> {
-    const params = new HttpParams().set('Query', query).set('Limit', limit.toString());
+    const params = new HttpParams().set('query', query).set('limit', limit.toString());
     return this.http.get<ApiResponse<any[]>>(`${environment.apiBaseUrl}/locations/search`, { params });
   }
 

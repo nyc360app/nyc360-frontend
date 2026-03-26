@@ -25,6 +25,12 @@
 
           <div class="dropdown-menu-custom">
             <ng-container *ngFor="let child of btn.children">
+              <button *ngIf="child.opensVerification" type="button" class="dropdown-item-custom"
+                (click)="openVerificationRequest()">
+                <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
+                {{ child.label }}
+              </button>
+
               <a *ngIf="child.isAction" [routerLink]="hasContributorAccess() ? child.link : null"
                 [queryParams]="child.queryParams" class="dropdown-item-custom"
                 (click)="handleContributorAction($event)" [class.locked]="!hasContributorAccess()">
@@ -32,7 +38,8 @@
                 {{ child.label }}
               </a>
 
-              <a *ngIf="!child.isAction" [routerLink]="child.link" [queryParams]="child.queryParams"
+              <a *ngIf="!child.isAction && !child.opensVerification" [routerLink]="child.link"
+                [queryParams]="child.queryParams"
                 class="dropdown-item-custom">
                 <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
                 {{ child.label }}

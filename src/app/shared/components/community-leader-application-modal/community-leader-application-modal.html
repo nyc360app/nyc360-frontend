@@ -1,115 +1,168 @@
 <div class="leader-modal-backdrop" (click)="closeModal()">
   <div class="leader-modal-card" (click)="$event.stopPropagation()">
     <header class="modal-header">
-      <h2>Apply For Community Leader</h2>
-      <button type="button" class="close-btn" (click)="closeModal()" [disabled]="isSubmitting" aria-label="Close modal">
+      <h2>{{ modalTitle }}</h2>
+      <button type="button" class="close-btn" (click)="closeModal()" [disabled]="isBusy" aria-label="Close modal">
         <i class="bi bi-x-lg"></i>
       </button>
     </header>
 
-    <form [formGroup]="leaderApplicationForm" (ngSubmit)="submit()" class="modal-form" [attr.aria-busy]="isSubmitting">
+    <form [formGroup]="leaderApplicationForm" (ngSubmit)="submit()" class="modal-form" [attr.aria-busy]="isBusy">
       <div class="modal-body">
-      <section class="modal-section">
-        <h3><span class="step-dot">1</span>Applicant Information</h3>
 
-        <label>Full Name</label>
-        <input type="text" formControlName="fullName" placeholder="Jane Doe" />
-        <small class="field-error" *ngIf="hasControlError('fullName')">Enter your full name.</small>
+        <section class="modal-section role-section">
+          <h3>Contributor Role</h3>
 
-        <div class="inline-grid">
-          <div>
-            <label>Email Address</label>
-            <input type="email" formControlName="email" placeholder="jane@gmail.com" />
-            <small class="field-error" *ngIf="hasControlError('email')">Enter a valid email address.</small>
+          <label class="group-label">{{ roleSelectorLabel }}</label>
+
+          <div class="occupation-list" *ngIf="showOccupationSelector; else selectedOccupationCard">
+            <button
+              type="button"
+              class="occupation-card"
+              *ngFor="let occupation of occupationOptions"
+              [class.active]="selectedOccupation()?.id === occupation.id"
+              (click)="selectOccupation(occupation.id)">
+              {{ occupation.label }}
+            </button>
           </div>
-          <div>
-            <label>Phone Number</label>
-            <input type="text" formControlName="phoneNumber" placeholder="(555) 000 - 0000" />
-            <small class="field-error" *ngIf="hasControlError('phoneNumber')">Enter a valid phone number.</small>
+
+          <ng-template #selectedOccupationCard>
+            <div class="selected-role-chip">{{ selectedOccupation()?.label }}</div>
+          </ng-template>
+
+          <small class="field-error" *ngIf="hasControlError('occupationId')">Select a contributor role.</small>
+        </section>
+
+        <section class="modal-section">
+          <h3><span class="step-dot">1</span>Applicant Information</h3>
+
+          <label>Full Name</label>
+          <input type="text" formControlName="fullName" placeholder="Jane Doe" />
+          <small class="field-error" *ngIf="hasControlError('fullName')">Enter your full name.</small>
+
+          <div class="inline-grid">
+            <div>
+              <label>Email Address</label>
+              <input type="email" formControlName="email" placeholder="Jane@gmail.com" />
+              <small class="field-error" *ngIf="hasControlError('email')">Enter a valid email address.</small>
+            </div>
+            <div>
+              <label>Phone Number</label>
+              <input type="text" formControlName="phoneNumber" placeholder="(555) 000 - 0000" />
+              <small class="field-error" *ngIf="hasControlError('phoneNumber')">Enter a valid phone number.</small>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="modal-section">
-        <h3><span class="step-dot">2</span>Community Details</h3>
+        <section class="modal-section">
+          <h3><span class="step-dot">2</span>{{ detailsSectionTitle }}</h3>
 
-        <label>Community Name</label>
-        <input type="text" formControlName="communityName" placeholder="e.g. Upper West Side Neighbors" />
-        <small class="field-error" *ngIf="hasControlError('communityName')">Enter the community name.</small>
+          <label>{{ communityNameLabel }}</label>
+          <input type="text" formControlName="communityName" placeholder="e.g. Upper West Side Neighbors" />
+          <small class="field-error" *ngIf="hasControlError('communityName')">Enter the name for this request.</small>
 
-        <label>Borough / Neighborhood</label>
-        <select formControlName="location">
-          <option value="" disabled>Select a location</option>
-          <option *ngFor="let option of locationOptions" [value]="option">{{ option }}</option>
-        </select>
-        <small class="field-error" *ngIf="hasControlError('location')">Select a borough or neighborhood.</small>
+          <label>Borough / Neighborhood</label>
+          <div class="location-search-wrapper">
+            <div class="location-search-input">
+              <input
+                type="text"
+                formControlName="location"
+                placeholder="Search for a borough, neighborhood, or ZIP code"
+                (focus)="onLocationFocus()"
+                (blur)="onLocationBlur()"
+                [class.valid]="!!selectedLocation" />
 
-        <label>Profile / Social Link <span class="optional-label">(Optional)</span></label>
-        <input type="text" formControlName="profileLink" placeholder="LinkedIn, Instagram, website, or profile URL" />
-        <small class="field-error" *ngIf="hasControlError('profileLink')">Enter a full http:// or https:// URL.</small>
-      </section>
+              <i class="bi bi-search search-icon" *ngIf="!isSearchingLocation"></i>
+              <div class="spinner-sm" *ngIf="isSearchingLocation"></div>
+            </div>
 
-      <section class="modal-section">
-        <h3><span class="step-dot">3</span>Verification</h3>
+            <div class="search-results" *ngIf="showLocationResults">
+              <div class="result-item" *ngFor="let location of locationResults" (mousedown)="onLocationSelect(location)">
+                <div class="loc-icon">
+                  <i class="bi bi-geo-alt"></i>
+                </div>
+                <div class="loc-info">
+                  <strong>{{ location.neighborhood }}</strong>
+                  <span>{{ location.borough }}, {{ location.zipCode }}</span>
+                </div>
+              </div>
 
-        <label>Identity Verification (Upload ID or Utility Bill)</label>
-        <div class="drop-zone" [class.dragging]="isDraggingFile" [class.invalid]="hasControlError('verificationFile')"
-          (dragover)="onDragOver($event)"
-          (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-          <i class="bi bi-cloud-arrow-up"></i>
-          <p>{{ selectedVerificationFile ? selectedVerificationFile.name : 'Drag and drop here' }}</p>
-          <small>Supports JPEG, PNG, PDF. Max file size 5MB.</small>
-          <input #fileInput type="file" hidden accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)" />
-          <button type="button" (click)="fileInput.click()" [disabled]="isSubmitting">Select Files</button>
-        </div>
-        <small class="field-error" *ngIf="verificationFileErrorMessage">{{ verificationFileErrorMessage }}</small>
-        <small class="field-error" *ngIf="!verificationFileErrorMessage && hasControlError('verificationFile', 'required')">
-          Upload a verification document.
-        </small>
+              <div
+                class="no-result"
+                *ngIf="!locationResults.length && !isSearchingLocation && ((leaderApplicationForm.get('location')?.value || '').length >= 2)">
+                No locations found.
+              </div>
+            </div>
+          </div>
+          <small class="field-error" *ngIf="hasControlError('location', 'required')">Search and select a borough or neighborhood.</small>
+          <small class="field-error" *ngIf="hasControlError('location', 'invalidLocationSelection')">Choose a location from the search results.</small>
 
-      </section>
+          <label>{{ profileLinkLabel }} <span class="optional-label">(Optional)</span></label>
+          <input type="text" formControlName="profileLink" placeholder="LinkedIn, Instagram, website, or profile URL" />
+          <small class="field-error" *ngIf="hasControlError('profileLink')">Enter a full http:// or https:// URL.</small>
+        </section>
 
-      <section class="modal-section">
-        <h3><span class="step-dot">4</span>Motivation & Experience</h3>
+        <section class="modal-section">
+          <h3><span class="step-dot">3</span>Verification</h3>
 
-        <label>Why do you want to lead this community?</label>
-        <textarea rows="4" formControlName="motivation"></textarea>
-        <small class="field-error" *ngIf="hasControlError('motivation')">Tell us why you want to lead this community.</small>
+          <label>Identity Verification (Upload ID or Utility Bill)</label>
+          <div class="drop-zone" [class.dragging]="isDraggingFile" [class.invalid]="hasControlError('verificationFile')"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <i class="bi bi-cloud-arrow-up"></i>
+            <p>{{ selectedVerificationFile ? selectedVerificationFile.name : 'Drag and drop here' }}</p>
+            <small>Supports JPEG, PNG, PDF. Max file size 5MB.</small>
+            <input #fileInput type="file" hidden accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)" />
+            <button type="button" (click)="fileInput.click()" [disabled]="isBusy">Select Files</button>
+          </div>
+          <small class="field-error" *ngIf="verificationFileErrorMessage">{{ verificationFileErrorMessage }}</small>
+          <small class="field-error" *ngIf="!verificationFileErrorMessage && hasControlError('verificationFile', 'required')">
+            Upload a verification document.
+          </small>
 
-        <label>Describe any relevant community or leadership experience</label>
-        <textarea rows="4" formControlName="experience"></textarea>
-        <small class="field-error" *ngIf="hasControlError('experience')">Describe your relevant experience.</small>
+        </section>
 
-        <label class="group-label">Have you led a community group before?</label>
-        <div class="radio-group lead-history-options">
-          <label class="option-pill">
-            <input type="radio" formControlName="ledBefore" [value]="true" />
-            <span>Yes</span>
+        <section class="modal-section">
+          <h3><span class="step-dot">4</span>Motivation & Experience</h3>
+
+          <label>{{ motivationLabel }}</label>
+          <textarea rows="4" formControlName="motivation"></textarea>
+          <small class="field-error" *ngIf="hasControlError('motivation')">Tell us why you want this contributor role.</small>
+
+          <label>{{ experienceLabel }}</label>
+          <textarea rows="4" formControlName="experience"></textarea>
+          <small class="field-error" *ngIf="hasControlError('experience')">Describe your relevant experience.</small>
+
+          <label class="group-label">{{ leadHistoryLabel }}</label>
+          <div class="radio-group lead-history-options">
+            <label class="option-pill">
+              <input type="radio" formControlName="ledBefore" [value]="true" />
+              <span>Yes</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" formControlName="ledBefore" [value]="false" />
+              <span>No</span>
+            </label>
+          </div>
+          <small class="field-error" *ngIf="hasControlError('ledBefore')">Select whether you have led a community before.</small>
+
+          <label class="group-label">{{ availabilityLabel }}</label>
+          <div class="availability-grid availability-options">
+            <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="1-3 hours / week" /><span>1-3 hours / week</span></label>
+            <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="4-7 hours / week" /><span>4-7 hours / week</span></label>
+            <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="8-12 hours / week" /><span>8-12 hours / week</span></label>
+            <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="10+ hours / week" /><span>10+ hours / week</span></label>
+          </div>
+
+          <label class="agreement agreement-card">
+            <input type="checkbox" formControlName="agreedToGuidelines" />
+            <span>
+              I agree to the <strong>NYC360 Community Guidelines</strong> and understand that this contributor request
+              may be reviewed before access is approved.
+            </span>
           </label>
-          <label class="option-pill">
-            <input type="radio" formControlName="ledBefore" [value]="false" />
-            <span>No</span>
-          </label>
-        </div>
-        <small class="field-error" *ngIf="hasControlError('ledBefore')">Select whether you have led a community before.</small>
-
-        <label class="group-label">Weekly Moderation Availability</label>
-        <div class="availability-grid availability-options">
-          <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="1-3 hours / week" /><span>1-3 hours / week</span></label>
-          <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="4-7 hours / week" /><span>4-7 hours / week</span></label>
-          <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="8-12 hours / week" /><span>8-12 hours / week</span></label>
-          <label class="option-pill"><input type="radio" formControlName="weeklyAvailability" value="10+ hours / week" /><span>10+ hours / week</span></label>
-        </div>
-
-        <label class="agreement agreement-card">
-          <input type="checkbox" formControlName="agreedToGuidelines" />
-          <span>
-            I agree to the <strong>NYC360 Community Guidelines</strong> and understand that my role as a leader
-            involves maintaining a safe, inclusive, and productive environment for all members.
-          </span>
-        </label>
-        <small class="field-error" *ngIf="hasControlError('agreedToGuidelines')">You must agree to the community guidelines.</small>
-      </section>
+          <small class="field-error" *ngIf="hasControlError('agreedToGuidelines')">You must agree to the community guidelines.</small>
+        </section>
       </div>
 
       <footer class="modal-footer">
@@ -117,8 +170,8 @@
           <small>RESPONSE TIME</small>
           <strong>Avg. 4 hours</strong>
         </div>
-        <button type="submit" class="submit-btn" [disabled]="isSubmitting">
-          <ng-container *ngIf="!isSubmitting; else submittingState">
+        <button type="submit" class="submit-btn" [disabled]="isBusy">
+          <ng-container *ngIf="!isBusy; else submittingState">
             Submit Application <i class="bi bi-arrow-right"></i>
           </ng-container>
         </button>

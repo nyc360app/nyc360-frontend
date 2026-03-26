@@ -10,6 +10,7 @@ const loadCommunityProfile = () => import('../pages/Public/pages/communities/pag
 const loadCommunityManagement = () => import('../pages/Public/pages/communities/pages/community-management/community-management').then(m => m.CommunityManagementComponent);
 const loadCreateCommunityPost = () => import('../pages/Public/pages/communities/pages/create-community-post/create-community-post').then(m => m.CreateCommunityPostComponent);
 const loadMyCommunities = () => import('../pages/Public/pages/communities/pages/mycommunities/mycommunities').then(m => m.MycommunitiesComponent);
+const loadCommunityInquiries = () => import('../pages/Public/pages/communities/pages/community-inquiries/community-inquiries').then(m => m.CommunityInquiriesComponent);
 const loadCommunityPostDetails = () => import('../pages/Public/pages/communities/pages/post-details/post-details').then(m => m.PostDetailsComponent);
 const loadHousingHome = () => import('../pages/Public/pages/housing/pages/housing-home/housing-home').then(m => m.HousingHomeComponent);
 const loadHousingFeed = () => import('../pages/Public/pages/housing/pages/housing-feed/housing-feed').then(m => m.HousingFeedComponent);
@@ -37,6 +38,7 @@ const loadCategorySavedPosts = () => import('../pages/Public/pages/category-save
 const loadFeedLayout = () => import('../pages/Public/Widgets/feeds/feed-layout/feed-layout').then(m => m.FeedLayoutComponent);
 const loadPostForm = () => import('../pages/Public/pages/posts/post-form/post-form').then(m => m.PostFormComponent);
 const loadConnectRss = () => import('../pages/Public/pages/rss/connect-rss/connect-rss.component').then(m => m.ConnectRssComponent);
+const loadSpaceListingRequest = () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent);
 const loadForumQuestions = () => import('../pages/Public/pages/forums/pages/forum-questions/forum-questions').then(m => m.ForumQuestionsComponent);
 const loadCreateQuestion = () => import('../pages/Public/pages/forums/pages/create-question/create-question.component').then(m => m.CreateQuestionComponent);
 const loadQuestionDetails = () => import('../pages/Public/pages/forums/pages/question-details/question-details.component').then(m => m.QuestionDetailsComponent);
@@ -92,6 +94,12 @@ const buildGenericDepartmentRoutes = ({ categoryId, path, label }: GenericDepart
     canActivate: [authGuard],
     data: { breadcrumb: 'Connect RSS', categoryId, categoryPath: path },
     loadComponent: loadConnectRss
+  },
+  {
+    path: `${path}/listings/submit`,
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Add Listing', categoryPath: path },
+    loadComponent: loadSpaceListingRequest
   },
   {
     path: `${path}/create`,
@@ -153,6 +161,12 @@ const ROOT_DEPARTMENT_ROUTES: Routes = [
     loadComponent: loadConnectRss
   },
   {
+    path: 'community/listings/submit',
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Add Listing', categoryPath: 'community' },
+    loadComponent: loadSpaceListingRequest
+  },
+  {
     path: 'community/create/article',
     canActivate: [authGuard],
     data: { breadcrumb: 'Create Post', categoryId: CategoryEnum.Community, categoryPath: 'community' },
@@ -168,7 +182,7 @@ const ROOT_DEPARTMENT_ROUTES: Routes = [
     path: 'community/saved',
     canActivate: [authGuard],
     data: { breadcrumb: 'My Inquiries', categoryPath: 'community' },
-    loadComponent: loadCategorySavedPosts
+    loadComponent: loadCommunityInquiries
   },
   {
     path: 'community/dashboard',
@@ -178,7 +192,6 @@ const ROOT_DEPARTMENT_ROUTES: Routes = [
   },
   {
     path: 'community/explore',
-    canActivate: [authGuard],
     data: { breadcrumb: 'Explore' },
     loadComponent: loadCommunityDiscovery
   },
@@ -208,14 +221,12 @@ const ROOT_DEPARTMENT_ROUTES: Routes = [
   },
   {
     path: 'community/:slug',
-    canActivate: [authGuard],
     data: { breadcrumb: 'Community Profile' },
     loadComponent: loadCommunityProfile
   },
   {
     path: 'community',
     pathMatch: 'full',
-    canActivate: [authGuard],
     data: { breadcrumb: 'Communities' },
     loadComponent: loadCommunityHome
   },
@@ -242,6 +253,12 @@ const ROOT_DEPARTMENT_ROUTES: Routes = [
     canActivate: [authGuard],
     data: { breadcrumb: 'Connect RSS', categoryId: CategoryEnum.Housing, categoryPath: 'housing' },
     loadComponent: loadConnectRss
+  },
+  {
+    path: 'housing/listings/submit',
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Add Listing', categoryPath: 'housing' },
+    loadComponent: loadSpaceListingRequest
   },
   {
     path: 'housing/create/article',
@@ -351,6 +368,12 @@ const ROOT_DEPARTMENT_ROUTES: Routes = [
     canActivate: [authGuard],
     data: { breadcrumb: 'Connect RSS', categoryId: CategoryEnum.Professions, categoryPath: 'professions' },
     loadComponent: loadConnectRss
+  },
+  {
+    path: 'professions/listings/submit',
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Add Listing', categoryPath: 'professions' },
+    loadComponent: loadSpaceListingRequest
   },
   {
     path: 'professions/create/article',

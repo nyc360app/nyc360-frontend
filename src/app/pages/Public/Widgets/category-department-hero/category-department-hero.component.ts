@@ -12,6 +12,7 @@ interface HeroButtonChild {
   link: any[];
   icon?: string;
   isAction?: boolean;
+  opensVerification?: boolean;
   queryParams?: any;
 }
 
@@ -110,6 +111,11 @@ export class CategoryDepartmentHeroComponent implements OnInit, OnChanges {
     this.cdr.markForCheck();
   }
 
+  openVerificationRequest(): void {
+    this.showVerificationModal = true;
+    this.cdr.markForCheck();
+  }
+
   onVerified(): void {
     this.authService.fetchFullUserInfo().subscribe();
     this.closeModal();
@@ -161,9 +167,10 @@ export class CategoryDepartmentHeroComponent implements OnInit, OnChanges {
       if (link.isDropdown && link.children) {
         button.children = link.children.map((child: any): HeroButtonChild => ({
           label: child.label,
-          link: [child.route],
+          link: child.route ? [child.route] : [],
           icon: child.icon,
           isAction: !!child.isAction,
+          opensVerification: !!child.opensVerification,
           queryParams: child.route?.includes('/posts/create') || child.route?.includes('/rss/connect')
             ? { category: this.categoryId }
             : (child.queryParams || undefined)

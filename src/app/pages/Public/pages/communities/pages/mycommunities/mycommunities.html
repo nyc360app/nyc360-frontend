@@ -49,7 +49,7 @@
       <div class="comm-card" *ngFor="let comm of communities">
 
         <div class="card-head">
-          <img [src]="getAvatar(comm.avatarUrl)" class="comm-img" [routerLink]="['/public/community', comm.slug]"
+          <img [src]="getAvatar(comm.avatarUrl)" class="comm-img" [routerLink]="['/community', comm.slug]"
             [alt]="comm.name">
           <div class="badges">
             <span class="type-badge" *ngIf="comm.type">{{ getTypeName(comm.type) }}</span>
@@ -57,7 +57,7 @@
         </div>
 
         <div class="card-body">
-          <h3 [routerLink]="['/public/community', comm.slug]" [title]="comm.name">{{ comm.name }}</h3>
+          <h3 [routerLink]="['/community', comm.slug]" [title]="comm.name">{{ comm.name }}</h3>
 
           <p class="desc" title="{{comm.description}}">
             {{ (comm.description || 'No description available.') | slice:0:80 }}
@@ -73,7 +73,7 @@
           </div>
 
           <div class="actions">
-            <a [routerLink]="['/public/community', comm.slug]" class="btn-visit">
+            <a [routerLink]="['/community', comm.slug]" class="btn-visit">
               Visit
             </a>
             <button class="btn-leave" (click)="leaveCommunity(comm, $event)" [disabled]="comm.isLoadingJoin">

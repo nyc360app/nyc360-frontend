@@ -1,0 +1,319 @@
+<div class="space-listing-page" [style.--department-color]="departmentTheme?.color || '#333333'">
+  <section class="listing-hero">
+    <div class="container hero-inner">
+      <p class="eyebrow">{{ departmentTheme?.label || 'Department' }} / THE360 Space</p>
+      <h1>{{ pageTitle }}</h1>
+      <p class="hero-copy">{{ pageDescription }}</p>
+
+      <div class="hero-actions">
+        <a [routerLink]="departmentHomeRoute" class="hero-link">Back to {{ departmentTheme?.label || 'Department' }}</a>
+        <span class="hero-status">All submissions are reviewed before publication.</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="container listing-shell">
+    <div class="listing-grid">
+      <section class="listing-card form-card" *ngIf="showCommunityOrganizationLock">
+        <div class="section-copy">
+          <p class="section-kicker">D01.3 Gate Required</p>
+          <h2>Community organization listing is locked</h2>
+          <p *ngIf="!hasGate1Eligibility">
+            A verified Resident, Organization, or Business account is required first. After that, request the D01.3 Community Organization tag to submit this listing.
+          </p>
+          <p *ngIf="hasGate1Eligibility && !hasCommunityOrganizationAccess">
+            Your account is eligible for Community contributor flows, but it still needs the D01.3 Community Organization tag before this listing can be submitted.
+          </p>
+          <div class="section-divider"></div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" class="submit-btn" (click)="openCommunityOrganizationAccess()">
+            {{ hasGate1Eligibility ? 'Request D01.3 Access' : 'Go to Verification Settings' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="listing-card form-card" *ngIf="!showCommunityOrganizationLock">
+        <div class="section-copy">
+          <p class="section-kicker">Listing Request</p>
+          <h2>Submit the core details</h2>
+          <p>
+            Use the same request flow across departments. Your submission will be checked first, then published into
+            THE360 Space after approval.
+          </p>
+          <div class="section-divider"></div>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">1. Choose entity type</span>
+              <span class="section-subtitle">Tell us what you’re listing.</span>
+            </div>
+            <div class="field-grid type-grid">
+              <button
+                *ngFor="let option of availableEntityTypes"
+                type="button"
+                class="entity-pill"
+                [class.active]="selectedEntityType === option.value"
+                (click)="form.patchValue({ entityType: option.value })">
+                <span class="entity-label">{{ option.label }}</span>
+                <span class="entity-copy">{{ option.description }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">2. Core details</span>
+              <span class="section-subtitle">Give reviewers enough context to verify the listing.</span>
+            </div>
+
+            <div class="field-grid two-col">
+              <label class="field">
+                <span>Name *</span>
+                <input type="text" formControlName="name" placeholder="Listing name">
+                <small class="field-error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">
+                  Name is required and must be under 150 characters.
+                </small>
+              </label>
+
+              <label class="field">
+                <span>Contact Name</span>
+                <input type="text" formControlName="contactName" placeholder="Primary contact">
+                <small class="field-hint">Useful if the listing needs follow-up verification.</small>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Description *</span>
+              <textarea rows="5" formControlName="description"
+                placeholder="Describe what this location, place, business, or organization is about."></textarea>
+              <small class="field-error" *ngIf="form.get('description')?.touched && form.get('description')?.invalid">
+                Description is required and must be under 2000 characters.
+              </small>
+            </label>
+          </div>
+
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">3. Location details</span>
+              <span class="section-subtitle">Pick a neighborhood or borough to anchor the listing.</span>
+            </div>
+
+            <div class="field-grid two-col">
+              <div class="field field-search" (click)="$event.stopPropagation()">
+                <span>Neighborhood / Location *</span>
+                <input
+                  type="text"
+                  formControlName="locationSearch"
+                  placeholder="Search NYC neighborhood or borough"
+                  (input)="onLocationInput($any($event.target).value)">
+
+                <div class="search-results" *ngIf="showLocationDropdown">
+                  <button
+                    *ngFor="let loc of locationResults"
+                    type="button"
+                    class="search-result"
+                    (click)="selectLocation(loc)">
+                    <strong>{{ loc.neighborhoodNet || loc.neighborhood || ('Location #' + loc.id) }}</strong>
+                    <span>{{ loc.borough || 'NYC' }}<ng-container *ngIf="loc.zipCode">, {{ loc.zipCode }}</ng-container></span>
+                  </button>
+                </div>
+
+                <small class="field-error" *ngIf="form.get('locationId')?.touched && form.get('locationId')?.invalid">
+                  Select a location from the search results or type a neighborhood/borough manually.
+                </small>
+              </div>
+
+              <label class="field">
+                <span>ZIP Code *</span>
+                <input type="text" formControlName="zipCode" placeholder="10456">
+                <small class="field-error" *ngIf="form.get('zipCode')?.touched && form.get('zipCode')?.invalid">
+                  Enter a valid ZIP code (e.g., 10456 or 10456-1234).
+                </small>
+              </label>
+            </div>
+
+            <div class="field-grid two-col">
+              <label class="field">
+                <span>Street</span>
+                <input type="text" formControlName="street" placeholder="Grand Concourse">
+              </label>
+
+              <label class="field">
+                <span>Building Number</span>
+                <input type="text" formControlName="buildingNumber" placeholder="1234">
+              </label>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">4. Contact details</span>
+              <span class="section-subtitle">
+                {{ requiresContactMethod
+                  ? 'At least one contact method is required.'
+                  : 'Contact details are optional.' }}
+              </span>
+            </div>
+
+            <div class="contact-block" [class.contact-required]="requiresContactMethod">
+              <div class="contact-copy">
+                <p class="section-kicker">Contact Details</p>
+                <h3>{{ requiresContactMethod ? 'At least one contact method is required' : 'Contact details are optional' }}</h3>
+                <p>
+                  {{ requiresContactMethod
+                    ? 'Add at least one way for reviewers to confirm this listing.'
+                    : 'You can optionally add contact details to help reviewers verify the listing.' }}
+                </p>
+              </div>
+
+              <div class="field-grid three-col">
+                <label class="field">
+                  <span>Website</span>
+                  <input type="text" formControlName="website" placeholder="https://example.org">
+                  <small class="field-error" *ngIf="form.get('website')?.touched && form.get('website')?.invalid">
+                    Enter a valid website URL.
+                  </small>
+                </label>
+
+                <label class="field">
+                  <span>Phone Number</span>
+                  <input type="text" formControlName="phoneNumber" placeholder="+1-212-555-0182">
+                  <small class="field-error" *ngIf="form.get('phoneNumber')?.touched && form.get('phoneNumber')?.invalid">
+                    Enter a valid phone number.
+                  </small>
+                </label>
+
+                <label class="field">
+                  <span>Public Email</span>
+                  <input type="email" formControlName="publicEmail" placeholder="hello@example.org">
+                  <small class="field-error" *ngIf="form.get('publicEmail')?.touched && form.get('publicEmail')?.invalid">
+                    Enter a valid email address.
+                  </small>
+                </label>
+              </div>
+
+              <small class="field-error" *ngIf="showContactMethodError">
+                Add at least one contact method for place, business, or organization listings.
+              </small>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">5. Evidence & ownership</span>
+              <span class="section-subtitle">Add files to help reviewers verify this request faster.</span>
+            </div>
+
+            <label class="field">
+              <span>Submitter Note</span>
+              <textarea rows="4" formControlName="submitterNote"
+                placeholder="Anything reviewers should know before this is sent to THE360 Space."></textarea>
+            </label>
+
+            <label class="ownership-check">
+              <input type="checkbox" formControlName="isClaimingOwnership">
+              <span>I am claiming ownership or official stewardship of this listing.</span>
+            </label>
+
+            <div class="field-grid two-col">
+              <label class="field">
+                <span>Images</span>
+                <input type="file" multiple accept=".jpg,.jpeg,.png,.webp" (change)="onFilesSelected($event, 'images')">
+                <small class="field-hint" *ngIf="imageFiles.length">{{ imageFiles.length }} selected</small>
+              </label>
+
+              <label class="field">
+                <span>Supporting Documents</span>
+                <input type="file" multiple accept=".pdf" (change)="onFilesSelected($event, 'documents')">
+                <small class="field-hint" *ngIf="documentFiles.length">{{ documentFiles.length }} selected</small>
+              </label>
+            </div>
+
+            <div class="field-grid two-col">
+              <label class="field">
+                <span>Ownership Documents</span>
+                <input type="file" multiple accept=".pdf" (change)="onFilesSelected($event, 'ownership')">
+                <small class="field-hint" *ngIf="ownershipFiles.length">{{ ownershipFiles.length }} selected</small>
+                <small class="field-error" *ngIf="form.get('isClaimingOwnership')?.value && ownershipFiles.length === 0">
+                  Required when claiming ownership.
+                </small>
+              </label>
+
+              <label class="field">
+                <span>Proof Documents</span>
+                <input type="file" multiple accept=".pdf" (change)="onFilesSelected($event, 'proof')">
+                <small class="field-hint" *ngIf="proofFiles.length">{{ proofFiles.length }} selected</small>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <div class="selected-summary" *ngIf="selectedLocation || form.get('locationSearch')?.value">
+              <span class="summary-label">Selected area</span>
+              <strong>
+                {{ selectedLocation?.neighborhoodNet || selectedLocation?.neighborhood || form.get('locationSearch')?.value || ('Location #' + selectedLocation?.id) }}
+              </strong>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+              {{ isSubmitting ? 'Submitting...' : 'Submit for Review' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="listing-card info-card">
+        <div class="section-copy">
+          <p class="section-kicker">Review Flow</p>
+          <h2>What happens next</h2>
+        </div>
+
+        <ol class="info-steps">
+          <li>
+            <strong>Submit request</strong>
+            <span>Your listing is saved as a pending request under {{ departmentTheme?.label || 'the current department' }}.</span>
+          </li>
+          <li>
+            <strong>Verify details</strong>
+            <span>Reviewers confirm the location context and contact information.</span>
+          </li>
+          <li>
+            <strong>Publish to THE360 Space</strong>
+            <span>Approved requests are created in THE360 Space and linked back with a Space item ID.</span>
+          </li>
+        </ol>
+
+        <div class="entity-summary">
+          <span class="summary-label">Current type</span>
+          <strong>{{ selectedEntityMeta.label }}</strong>
+          <p>{{ selectedEntityMeta.description }}</p>
+        </div>
+
+        <div class="success-card" *ngIf="submissionResult">
+          <p class="section-kicker">Submitted</p>
+          <h3>{{ submissionResult.name }}</h3>
+          <p>Your request was created successfully and is waiting for review.</p>
+          <div class="success-meta">
+            <span>Request #{{ submissionResult.requestId }}</span>
+            <span>{{ submissionResult.status | titlecase }}</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<app-community-leader-application-modal
+  *ngIf="isVerificationModalOpen"
+  [fullName]="contributorApplicationFullName"
+  [email]="contributorApplicationEmail"
+  [phoneNumber]="contributorApplicationPhoneNumber"
+  [availableOccupations]="verificationModalOccupations"
+  [preferredOccupationId]="preferredOccupationId"
+  (close)="closeVerificationModal()"
+  (verified)="onVerified()">
+</app-community-leader-application-modal>

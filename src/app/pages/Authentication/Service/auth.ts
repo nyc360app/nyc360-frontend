@@ -221,6 +221,7 @@ export class AuthService {
   private mapToUserInfo(data: any): UserInfo {
     return {
       type: data.Type ?? data.type,
+      roles: this.mapRoles(data.Roles ?? data.roles),
       firstName: data.FirstName ?? data.firstName,
       lastName: data.LastName ?? data.lastName,
       headline: data.Headline ?? data.headline,
@@ -279,6 +280,30 @@ export class AuthService {
         industry: data.BusinessInfo.Industry ?? data.BusinessInfo.industry
       } : (data.businessInfo || null)
     };
+  }
+
+  private mapRoles(rawRoles: any): string[] {
+    const source = Array.isArray(rawRoles)
+      ? rawRoles
+      : rawRoles
+        ? [rawRoles]
+        : [];
+
+    return source
+      .map((role: any) => {
+        if (typeof role === 'string') {
+          return role.trim();
+        }
+
+        return String(
+          role?.Name
+          ?? role?.name
+          ?? role?.Role
+          ?? role?.role
+          ?? ''
+        ).trim();
+      })
+      .filter((role: string) => role.length > 0);
   }
 
   // ============================================================
@@ -495,4 +520,5 @@ export class AuthService {
       this.fullUserInfoSubject.next(null);
     }
   }
+
 }

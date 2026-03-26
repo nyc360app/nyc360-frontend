@@ -18,8 +18,8 @@ export class CreateCommunityService {
    */
   searchLocations(query: string, limit: number = 20): Observable<ApiResponse<LocationSearchResult[]>> {
     const params = new HttpParams()
-      .set('Query', query)
-      .set('Limit', limit);
+      .set('query', query)
+      .set('limit', String(limit));
 
     return this.http.get<ApiResponse<LocationSearchResult[]>>(`${this.baseUrl}/locations/search`, { params });
   }
@@ -30,9 +30,9 @@ export class CreateCommunityService {
    */
   searchTags(query: string, page: number = 1, pageSize: number = 20): Observable<ApiResponse<import('../models/createcommunty').Tag[]>> {
     const params = new HttpParams()
-      .set('SearchTerm', query)
-      .set('Page', page)
-      .set('PageSize', pageSize);
+      .set('searchTerm', query)
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
 
     return this.http.get<ApiResponse<import('../models/createcommunty').Tag[]>>(`${this.baseUrl}/tags/list`, { params });
   }
@@ -44,24 +44,22 @@ export class CreateCommunityService {
   createCommunity(data: any, avatar?: File, cover?: File): Observable<ApiResponse<string>> {
     const formData = new FormData();
 
-    formData.append('Name', data.name);
-    formData.append('Description', data.description);
-    formData.append('Slug', data.slug || '');
-    formData.append('Type', data.type.toString());
-    formData.append('IsPrivate', data.isPrivate ? 'true' : 'false');
+    formData.append('name', data.name);
+    formData.append('description', data.description);
 
-    if (data.locationId) {
-      formData.append('LocationId', data.locationId.toString());
+    if (data.slug) {
+      formData.append('slug', data.slug);
     }
 
-    if (avatar) formData.append('AvatarImage', avatar);
-    if (cover) formData.append('CoverImage', cover);
+    formData.append('type', String(data.type));
+    formData.append('isPrivate', data.isPrivate ? 'true' : 'false');
 
-    console.log('Submitting community create request:', {
-      name: data.name,
-      type: data.type,
-      locationId: data.locationId
-    });
+    if (data.locationId) {
+      formData.append('locationId', String(data.locationId));
+    }
+
+    if (avatar) formData.append('avatarImage', avatar);
+    if (cover) formData.append('coverImage', cover);
 
     return this.http.post<ApiResponse<string>>(`${this.baseUrl}/communities/create`, formData);
   }

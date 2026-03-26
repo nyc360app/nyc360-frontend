@@ -27,29 +27,24 @@ export class CommunityPostService {
     communityId: number;
     title: string;
     content: string;
-    tags: string[];      // مصفوفة نصوص
-    attachments: File[]; // مصفوفة ملفات
+    tags: string[];
+    attachments: File[];
   }): Observable<ApiResponse<any>> {
-    
     const formData = new FormData();
 
-    // إضافة البيانات الأساسية
-    formData.append('CommunityId', data.communityId.toString());
-    formData.append('Title', data.title || '');
-    formData.append('Content', data.content || '');
+    formData.append('communityId', String(data.communityId));
+    formData.append('title', data.title || '');
+    formData.append('content', data.content || '');
 
-    // ✅ إضافة التاجات (تكرار المفتاح 'Tags' لكل قيمة)
-    // Backend expects: Tags -> array<string>
     if (data.tags && data.tags.length > 0) {
       data.tags.forEach(tag => {
-        formData.append('Tags', tag);
+        formData.append('tags', tag);
       });
     }
 
-    // ✅ إضافة الصور
     if (data.attachments && data.attachments.length > 0) {
       data.attachments.forEach(file => {
-        formData.append('Attachments', file);
+        formData.append('attachments', file);
       });
     }
 

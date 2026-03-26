@@ -56,14 +56,14 @@
                         <div class="stat-card">
                             <i class="bi bi-shield-check"></i>
                             <div class="stat-info">
-                                <span class="stat-value">{{ community.type === 5 ? 'Public' : 'Community' }}</span>
+                                <span class="stat-value">{{ communityTypeLabel }}</span>
                                 <span class="stat-label">Type</span>
                             </div>
                         </div>
                         <div class="stat-card">
                             <i class="bi bi-bookmark-star"></i>
                             <div class="stat-info">
-                                <span class="stat-value">Owner</span>
+                                <span class="stat-value">{{ currentRoleLabel }}</span>
                                 <span class="stat-label">Your Role</span>
                             </div>
                         </div>
@@ -102,21 +102,24 @@
                                 <div class="member-info">
                                     <h4>{{ member.name || 'Unknown User' }}</h4>
                                     <div class="member-meta">
-                                        <span class="role-badge" [class.owner]="member.role === 'Owner'"
-                                            [class.mod]="member.role === 'Moderator'">
-                                            {{ member.role }}
+                                        <span class="role-badge" [class.owner]="getMemberRoleLabel(member) === 'Leader'"
+                                            [class.mod]="getMemberRoleLabel(member) === 'Moderator'">
+                                            {{ getMemberRoleLabel(member) }}
                                         </span>
                                         <span class="joined">Joined {{ member.joinedAt | date:'mediumDate' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="member-actions" *ngIf="member.userId !== ownerId">
-                                <!-- Promote / Demote Toggle -->
-                                <button type="button" *ngIf="member.role === 'Member'" class="action-btn promote"
+                                <button type="button" *ngIf="getMemberRoleLabel(member) === 'Member'" class="action-btn promote"
                                     (click)="onPromoteToModerator(member.userId)" title="Promote to Moderator">
                                     <i class="bi bi-arrow-up-circle"></i>
                                 </button>
-                                <button type="button" *ngIf="member.role === 'Moderator' || member.role === 'Admin'"
+                                <button type="button" *ngIf="getMemberRoleLabel(member) === 'Member'" class="action-btn promote"
+                                    (click)="onAssignVolunteer(member.userId)" title="Assign Volunteer">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                                <button type="button" *ngIf="getMemberRoleLabel(member) === 'Moderator' || getMemberRoleLabel(member) === 'Volunteer'"
                                     class="action-btn demote" (click)="onDemoteToMember(member.userId)"
                                     title="Demote to Member">
                                     <i class="bi bi-arrow-down-circle"></i>
@@ -177,9 +180,7 @@
                         <div class="form-group">
                             <label for="type">Community Type</label>
                             <select id="type" [(ngModel)]="editForm.type" name="type">
-                                <option [value]="1">Standard Community</option>
-                                <option [value]="2">Organization</option>
-                                <option [value]="5">Public Resources</option>
+                                <option *ngFor="let type of communityTypes" [value]="type.id">{{ type.name }}</option>
                             </select>
                         </div>
 

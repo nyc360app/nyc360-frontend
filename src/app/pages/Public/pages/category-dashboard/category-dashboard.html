@@ -93,14 +93,14 @@
             </div>
 
             <div class="header-actions">
-                <button class="btn-refresh" (click)="refreshCurrentView()">
+                <button *ngIf="!showCommunityDashboardLocked" class="btn-refresh" (click)="refreshCurrentView()">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
-                <a *ngIf="(activeView === 'dashboard' || activeView === 'list') && (!isNewsCategory || canCreateNewsContent)" [routerLink]="createArticleLink"
+                <a *ngIf="!showCommunityDashboardLocked && (activeView === 'dashboard' || activeView === 'list') && (!isNewsCategory || canCreateNewsContent)" [routerLink]="createArticleLink"
                     class="btn-create-p">
                     <i class="bi bi-plus-lg"></i> <span>{{ newsCreateButtonLabel }}</span>
                 </a>
-                <button *ngIf="(activeView === 'dashboard' || activeView === 'list') && isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
+                <button *ngIf="!showCommunityDashboardLocked && (activeView === 'dashboard' || activeView === 'list') && isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
                     <i class="bi bi-lock-fill"></i> <span>News Access Required</span>
                 </button>
             </div>
@@ -112,8 +112,14 @@
 
         <div *ngIf="!isLoading" class="view-content animate-in">
 
+            <div *ngIf="showCommunityDashboardLocked" class="empty-state">
+                <i class="bi bi-lock-fill"></i>
+                <p>You must be an approved community contributor to access this dashboard.</p>
+                <a routerLink="/community" class="btn-create-p">Back to Contributor Activities</a>
+            </div>
+
             <!-- DASHBOARD VIEW -->
-            <div *ngIf="activeView === 'dashboard'" class="dashboard-view">
+            <div *ngIf="!showCommunityDashboardLocked && activeView === 'dashboard'" class="dashboard-view">
                 <div class="stats-grid">
                     <div class="stat-card">
                         <span class="label">Contributions</span>
@@ -217,7 +223,7 @@
             </div>
 
             <!-- LIST VIEW -->
-            <div *ngIf="activeView === 'list'" class="list-view">
+            <div *ngIf="!showCommunityDashboardLocked && activeView === 'list'" class="list-view">
                 <div class="list-container">
                     <div class="list-header-row">
                         <h2>Articles History</h2>
@@ -267,7 +273,7 @@
                 </div>
             </div>
 
-            <div *ngIf="activeView === 'submissions'" class="publisher-queue-view">
+            <div *ngIf="!showCommunityDashboardLocked && activeView === 'submissions'" class="publisher-queue-view">
                 <div class="queue-toolbar">
                     <label class="toolbar-search-field">
                         <i class="bi bi-search"></i>
@@ -318,7 +324,7 @@
                 </div>
             </div>
 
-            <div *ngIf="activeView === 'rssRequests'" class="publisher-queue-view">
+            <div *ngIf="!showCommunityDashboardLocked && activeView === 'rssRequests'" class="publisher-queue-view">
                 <div class="queue-toolbar">
                     <label class="toolbar-select-field">
                         <span>Request Status</span>
@@ -382,7 +388,7 @@
                 </div>
             </div>
 
-            <div *ngIf="activeView === 'rssSources'" class="publisher-queue-view">
+            <div *ngIf="!showCommunityDashboardLocked && activeView === 'rssSources'" class="publisher-queue-view">
                 <div class="queue-toolbar queue-toolbar-split">
                     <p class="toolbar-hint">Publisher-managed sources used by the News ingestion pipeline.</p>
                     <button type="button" class="btn-create-p" (click)="openCreateRssSourceModal()">

@@ -1,0 +1,272 @@
+<div class="luxury-dashboard">
+  <div class="container-fluid py-4 px-md-5">
+    <div class="header-section d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-icon back-btn" routerLink="/admin/dashboard">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div>
+          <h1 class="gold-title merriweather-font mb-0">SPACE LISTING REQUESTS</h1>
+          <p class="text-muted small mb-0">Shared moderation queue for department listing submissions</p>
+        </div>
+      </div>
+
+      <div class="stats-mini glass-panel px-4 py-2 d-flex align-items-center gap-4">
+        <div class="stat-item">
+          <span class="label text-muted small uppercase">Pending</span>
+          <h4 class="value mb-0 gold-text">{{ totalCount }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-panel glass-panel mb-4 p-3">
+      <div class="row g-3 align-items-center">
+        <div class="col-lg-4">
+          <div class="search-box">
+            <i class="bi bi-search text-gold"></i>
+            <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="applyFilters()"
+              placeholder="Search by name, contact, or request note">
+          </div>
+        </div>
+
+        <div class="col-md-4 col-lg-3">
+          <select class="luxury-select" [(ngModel)]="selectedDepartment" (change)="applyFilters()">
+            <option *ngFor="let department of departments" [value]="department">
+              {{ department === 'all' ? 'All Departments' : (department | titlecase) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-4 col-lg-3">
+          <select class="luxury-select" [(ngModel)]="selectedEntityType" (change)="applyFilters()">
+            <option *ngFor="let entityType of entityTypes" [value]="entityType">
+              {{ entityType === 'all' ? 'All Listing Types' : (entityType | titlecase) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-4 col-lg-2 text-md-end">
+          <div class="filter-actions">
+            <button class="btn-luxury-outline w-100" (click)="applyFilters()">
+              <i class="bi bi-search me-2"></i> SEARCH
+            </button>
+            <button class="btn-luxury-soft w-100" (click)="resetFilters()">
+              <i class="bi bi-x-circle me-2"></i> RESET
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+      <div class="progress" style="height: 3px; border-radius: 0; background: transparent;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-gold" style="width: 100%;"></div>
+      </div>
+    </div>
+
+    <div *ngIf="hasInitialized && requests.length === 0 && !isLoading" class="empty-state glass-panel text-center py-5">
+      <div class="empty-icon-wrapper mb-4">
+        <i class="bi bi-buildings text-gold"></i>
+      </div>
+      <h3 class="text-dark merriweather-font">No pending Space listings</h3>
+      <p class="text-muted">New CTA Option 2 submissions will appear here for SuperAdmin review.</p>
+      <button class="btn-luxury-gold mt-3 px-4" (click)="loadRequests()">Check Again</button>
+    </div>
+
+    <div class="requests-grid" *ngIf="requests.length > 0">
+      <div class="queue-summary glass-panel">
+        <div>
+          <span class="detail-label mb-1">Queue Window</span>
+          <strong>Showing {{ getTotalRangeStart() }}-{{ getTotalRangeEnd() }} of {{ totalCount }} pending requests</strong>
+        </div>
+        <button class="btn-luxury-outline" (click)="loadRequests(currentPage)">
+          <i class="bi bi-arrow-clockwise me-2"></i> Refresh Queue
+        </button>
+      </div>
+
+      <article class="request-card glass-panel" *ngFor="let request of requests; trackBy: trackByRequestId">
+        <div class="request-top">
+          <div>
+            <div class="eyebrow-row">
+              <span class="badge-chip">{{ getRequestDepartment(request) | titlecase }}</span>
+              <span class="badge-chip muted">{{ getRequestEntityType(request) | titlecase }}</span>
+              <span class="badge-chip status">{{ getRequestStatus(request) | titlecase }}</span>
+              <span class="badge-chip ownership" *ngIf="isOwnershipClaim(request)">Ownership Claim</span>
+            </div>
+            <h3>{{ getRequestName(request) }}</h3>
+            <p class="request-meta">
+              Submitted by {{ getRequestSubmitter(request) }}
+              <span *ngIf="getRequestSubmittedAt(request)">• {{ getRequestSubmittedAt(request) | date:'MMM d, y, h:mm a' }}</span>
+            </p>
+          </div>
+
+          <button class="btn-luxury-gold" (click)="openResolveModal(request)">
+            Review
+          </button>
+        </div>
+
+        <p class="request-description">{{ getRequestDescription(request) }}</p>
+
+        <div class="request-details">
+          <div class="detail-box" *ngIf="getRequestAddress(request)">
+            <span class="detail-label">Address Context</span>
+            <strong>{{ getRequestAddress(request) }}</strong>
+          </div>
+
+          <div class="detail-box" *ngIf="getContactLinks(request).length > 0">
+            <span class="detail-label">Contact</span>
+            <div class="contact-stack">
+              <span *ngFor="let item of getContactLinks(request)">{{ item }}</span>
+            </div>
+          </div>
+
+          <div class="detail-box note-box" *ngIf="getRequestSubmitterNote(request)">
+            <span class="detail-label">Submitter Note</span>
+            <p>{{ getRequestSubmitterNote(request) }}</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="pagination-footer-luxury mt-5 d-flex justify-content-center" *ngIf="totalPages > 1">
+      <div class="pagination-controls d-flex align-items-center gap-4 bg-white p-2 px-3 rounded-pill shadow-sm">
+        <button class="btn-circle luxury" [disabled]="currentPage === 1" (click)="loadRequests(currentPage - 1)">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="page-numbers">
+          <span class="current">{{ currentPage }}</span>
+          <span class="sep">/</span>
+          <span class="total">{{ totalPages }}</span>
+        </div>
+        <button class="btn-circle luxury" [disabled]="currentPage === totalPages" (click)="loadRequests(currentPage + 1)">
+          <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="resolve-overlay" *ngIf="selectedRequest" (click)="closeResolveModal()">
+    <div class="resolve-modal glass-panel-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header-luxury border-bottom p-4 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+          <div class="modal-icon"><i class="bi bi-buildings-fill"></i></div>
+          <h3 class="mb-0 gold-text merriweather-font">Review Space Listing</h3>
+        </div>
+        <button class="btn-close-custom bg-transparent border-0" (click)="closeResolveModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body p-4">
+        <div class="detail-box note-box mb-4" *ngIf="detailsError">
+          <span class="detail-label">Details Error</span>
+          <p class="text-danger mb-0">{{ detailsError }}</p>
+        </div>
+
+        <div class="detail-box mb-4" *ngIf="isLoadingDetails">
+          <span class="detail-label">Loading</span>
+          <p class="mb-0">Fetching listing details…</p>
+        </div>
+
+        <div class="target-info-card mb-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <span class="detail-label">Department</span>
+              <strong>{{ getRequestDepartment(selectedRequest) | titlecase }}</strong>
+            </div>
+            <div class="col-md-6">
+              <span class="detail-label">Listing Type</span>
+              <strong>{{ getRequestEntityType(selectedRequest) | titlecase }}</strong>
+            </div>
+            <div class="col-md-6" *ngIf="isOwnershipClaim(selectedRequest)">
+              <span class="detail-label">Ownership</span>
+              <strong>Claimed by submitter</strong>
+            </div>
+            <div class="col-md-6">
+              <span class="detail-label">Status</span>
+              <strong>{{ getRequestStatus(selectedRequest) | titlecase }}</strong>
+            </div>
+            <div class="col-md-6" *ngIf="getRequestSubmittedAt(selectedRequest)">
+              <span class="detail-label">Submitted</span>
+              <strong>{{ getRequestSubmittedAt(selectedRequest) | date:'MMM d, y, h:mm a' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="request-summary mb-4">
+          <h4>{{ getRequestName(selectedRequest) }}</h4>
+          <p>{{ getRequestDescription(selectedRequest) }}</p>
+        </div>
+
+        <div class="detail-box note-box mb-4" *ngIf="getRequestSubmitterNote(selectedRequest)">
+          <span class="detail-label">Submitter Note</span>
+          <p>{{ getRequestSubmitterNote(selectedRequest) }}</p>
+        </div>
+
+        <div class="detail-stack mb-4" *ngIf="getRequestAddress(selectedRequest) || getContactLinks(selectedRequest).length > 0">
+          <div class="detail-box" *ngIf="getRequestAddress(selectedRequest)">
+            <span class="detail-label">Address Context</span>
+            <strong>{{ getRequestAddress(selectedRequest) }}</strong>
+          </div>
+
+          <div class="detail-box" *ngIf="getContactLinks(selectedRequest).length > 0">
+            <span class="detail-label">Contact Details</span>
+            <div class="contact-stack">
+              <span *ngFor="let item of getContactLinks(selectedRequest)">{{ item }}</span>
+            </div>
+          </div>
+
+          <div class="detail-box" *ngIf="getRequestContactName(selectedRequest)">
+            <span class="detail-label">Contact Name</span>
+            <strong>{{ getRequestContactName(selectedRequest) }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-box mb-4" *ngIf="getAttachmentCounts(selectedRequest).length > 0">
+          <span class="detail-label">Attachments</span>
+          <div class="contact-stack">
+            <span *ngFor="let entry of getAttachmentCounts(selectedRequest)">
+              {{ entry.label }}: {{ entry.count }}
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="mb-2 fw-bold text-dark d-flex justify-content-between">
+            <span>Moderation Note</span>
+            <span class="text-muted small fw-normal">(Optional)</span>
+          </label>
+          <textarea class="form-control luxury-textarea w-100" rows="4" [(ngModel)]="moderationNote"
+            placeholder="Add reviewer notes before approving or rejecting..."></textarea>
+        </div>
+
+        <div class="audit-warning p-3 rounded d-flex gap-3 align-items-center">
+          <div class="warning-icon"><i class="bi bi-info-circle-fill"></i></div>
+          <p class="mb-0 x-small text-muted">
+            Approval should only be granted once the location context and ownership/contact information are verified.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer-luxury p-4 border-top d-flex gap-3">
+        <button class="btn btn-link text-muted text-decoration-none fw-bold" (click)="closeResolveModal()"
+          [disabled]="isProcessingAction">
+          CANCEL
+        </button>
+
+        <div class="ms-auto d-flex gap-3">
+          <button class="btn btn-danger px-4 rounded-3" [disabled]="isProcessingAction" (click)="handleResolve(false)">
+            <span *ngIf="!isProcessingAction">REJECT</span>
+            <span *ngIf="isProcessingAction" class="spinner-border spinner-border-sm"></span>
+          </button>
+
+          <button class="btn btn-luxury-gold px-4 rounded-3" [disabled]="isProcessingAction" (click)="handleResolve(true)">
+            <span *ngIf="!isProcessingAction">APPROVE</span>
+            <span *ngIf="isProcessingAction" class="spinner-border spinner-border-sm"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

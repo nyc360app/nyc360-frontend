@@ -12,6 +12,12 @@ import { ToastService } from '../../../../../../shared/services/toast.service';
 import { buildCommunityD01BadgeOptions, isCommunityLeaderTag } from '../../../../../../shared/utils/community-badge-policy';
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 import { CommunityLeaderApplicationPayload } from '../../models/community-leader-application';
+import {
+  getCommunityErrorMessage,
+  hasCommunityCreateAccess,
+  hasCommunityStaffBypass
+} from '../../../../../../shared/utils/community-contract';
+import { resolveCommunityMediaUrl } from '../../../../../../shared/utils/community-media';
 
 
 @Component({
@@ -42,22 +48,25 @@ export class CommunityComponent implements OnInit {
   userTags: any[] = []; // Tags for permission check
   communityPublicBadgeTags: any[] = buildCommunityD01BadgeOptions([]);
   verificationModalOccupations: any[] = [];
-  currentUserInfo: UserInfo | null = null;
+  currentUserInfo: UserInfo | null = this.authService.getFullUserInfo();
   isVerificationModalOpen = false;
   isLeaderApplicationModalOpen = false;
   communitySearchTerm = '';
   private brokenCommunityAvatarIds = new Set<number>();
 
   get hasCommunityLeaderAccess(): boolean {
-    // 1. Check if SuperAdmin
-    if (this.authService.hasRole('SuperAdmin')) return true;
+    if (this.authService.hasRole('Admin') || this.authService.hasRole('SuperAdmin') || hasCommunityStaffBypass(this.currentUserInfo)) return true;
 
-    // 2. Check approved tags from authenticated user profile only.
     if (this.currentUserInfo && this.currentUserInfo.tags) {
       return this.currentUserInfo.tags.some((t: any) => isCommunityLeaderTag(t));
     }
 
     return false;
+  }
+
+  get hasCreateCommunityAccess(): boolean {
+    if (this.authService.hasRole('Admin') || this.authService.hasRole('SuperAdmin') || hasCommunityStaffBypass(this.currentUserInfo)) return true;
+    return hasCommunityCreateAccess(this.currentUserInfo?.tags || []);
   }
 
   openVerificationModal(preferredOccupationName: string | null = null) {
@@ -278,7 +287,7 @@ export class CommunityComponent implements OnInit {
 
   // دالة الانضمام
   joinCommunity(comm: CommunitySuggestion) {
-    if (comm.isJoined) return; // منع التكرار
+    if (comm.isJoined || comm.isJoinRequested) return;
 
     comm.isLoadingJoin = true; // تفعيل اللودينج
 
@@ -287,17 +296,16 @@ export class CommunityComponent implements OnInit {
       next: (res) => {
         comm.isLoadingJoin = false;
         if (res.isSuccess) {
-          comm.isJoined = true; // تغيير الحالة لـ Joined
-          comm.memberCount++; // زيادة العداد
-          this.toastService.success(`You joined ${comm.name}.`);
+          comm.isJoinRequested = true;
+          this.toastService.success(`Your join request for ${comm.name} was sent.`);
         } else {
-          this.toastService.error(res.error?.message || 'Could not join this community.');
+          this.toastService.error(getCommunityErrorMessage(res, 'Could not join this community.'));
         }
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (error) => {
         comm.isLoadingJoin = false;
-        this.toastService.error('Network error. Please try again.');
+        this.toastService.error(getCommunityErrorMessage(error, 'Network error. Please try again.'));
         this.cdr.detectChanges();
       }
     });
@@ -326,13 +334,11 @@ export class CommunityComponent implements OnInit {
   }
 
   getCommunityRoute(comm: CommunitySuggestion): any[] | null {
-    return this.cleanText(comm?.slug) ? ['/public/community', comm.slug] : null;
+    return this.cleanText(comm?.slug) ? ['/community', comm.slug] : null;
   }
 
   resolveCommunityAvatar(url?: string): string {
-    if (!url) return 'assets/images/default-group.png';
-    if (url.includes('http')) return url;
-    return `${environment.apiBaseUrl2}/communities/${url}`;
+    return resolveCommunityMediaUrl(url, 'assets/images/default-group.png');
   }
 
   resolvePostImage(url?: string): string {
@@ -361,6 +367,7 @@ export class CommunityComponent implements OnInit {
       memberCount: Math.max(0, Number(item?.memberCount || 0)),
       isPrivate: !!item?.isPrivate,
       isJoined: !!item?.isJoined,
+      isJoinRequested: !!item?.isJoinRequested,
       isLoadingJoin: false
     };
   }

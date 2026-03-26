@@ -1,9 +1,4 @@
-// ✅ 1. Enum for Roles (Matching Backend)
-export enum CommunityRole {
-  Owner = 1,
-  Moderator = 2,
-  Member = 3
-}
+import { CommunityRole } from '../../../../../shared/utils/community-contract';
 
 // ✅ 2. Community Basic Details
 export interface CommunityDetails {
@@ -12,9 +7,11 @@ export interface CommunityDetails {
   slug: string;
   description: string;
   type: number;
-  imageUrl: string; 
-  coverUrl: string; 
+  imageUrl: string;
+  coverUrl: string;
   memberCount: number;
+  isPrivate?: boolean;
+  anyoneCanPost?: boolean;
 }
 
 // ✅ 3. Post Author Interface
@@ -45,7 +42,7 @@ export interface CommunityMember {
   userId: number;
   name: string;
   avatarUrl: string | null;
-  role: string; // The list API usually returns role name "Admin", "Member"
+  role: number | string;
   joinedAt: string;
 }
 
@@ -61,8 +58,7 @@ export interface CommunityProfileData {
     totalPages: number;// Added for pagination
   } | null;
   ownerId: number;
-  // This is the current user's role (1, 2, 3)
-  memberRole: number | null; 
+  memberRole: number | null;
 }
 
 // ✅ 7. Generic API Response Wrapper
@@ -77,6 +73,17 @@ export interface CreatePostRequest {
   communityId: number;
   content: string;
   location?: string;
-  // Using 'any' here because when sending FormData, we append files manually
-  attachments?: File[] | any; 
+  attachments?: File[] | any;
 }
+
+export interface PagedCommunityMembersResponse {
+  isSuccess: boolean;
+  data: CommunityMember[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  error: any;
+}
+
+export { CommunityRole };

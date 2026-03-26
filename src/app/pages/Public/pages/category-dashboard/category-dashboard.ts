@@ -13,6 +13,7 @@ import { CategoryDepartmentHeroComponent } from '../../Widgets/category-departme
 import { HousingDepartmentHeroComponent } from '../../Widgets/housing-department-hero/housing-department-hero.component';
 import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../shared/services/news.service';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { hasCommunityContributorAccess, hasCommunityStaffBypass } from '../../../../shared/utils/community-contract';
 
 @Component({
     selector: 'app-category-dashboard',
@@ -69,6 +70,10 @@ export class CategoryDashboardComponent implements OnInit {
             this.currentUsername = user.fullName || user.username || 'Contributor';
         }
 
+        if (this.authService.isLoggedIn() && !this.authService.getFullUserInfo()) {
+            this.authService.fetchFullUserInfo().subscribe({ error: () => undefined });
+        }
+
         this.route.params.subscribe(() => this.resolveCategoryFromRoute());
         this.route.data.subscribe(() => this.resolveCategoryFromRoute());
     }
@@ -123,6 +128,14 @@ export class CategoryDashboardComponent implements OnInit {
     }
 
     loadData() {
+        if (this.showCommunityDashboardLocked) {
+            this.analytics = null;
+            this.posts = [];
+            this.isLoading = false;
+            this.cdr.detectChanges();
+            return;
+        }
+
         this.isLoading = true;
         this.postsService.getMyCategoryAnalysis(this.activeCategoryId).subscribe({
             next: (res: ApiResponse<any>) => {
@@ -196,6 +209,21 @@ export class CategoryDashboardComponent implements OnInit {
 
     get isCommunityCategory(): boolean {
         return this.categoryTheme?.path === 'community';
+    }
+
+    get hasCommunityDashboardAccess(): boolean {
+        if (!this.isCommunityCategory) {
+            return true;
+        }
+
+        return this.authService.hasRole('Admin')
+            || this.authService.hasRole('SuperAdmin')
+            || hasCommunityStaffBypass(this.authService.getFullUserInfo())
+            || hasCommunityContributorAccess(this.authService.getFullUserInfo()?.tags || []);
+    }
+
+    get showCommunityDashboardLocked(): boolean {
+        return this.isCommunityCategory && !this.hasCommunityDashboardAccess;
     }
 
     get isCultureCategory(): boolean {

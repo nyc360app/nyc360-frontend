@@ -11,7 +11,12 @@ import {
     CommunityType,
     DisbandRequestStatus,
     PagedResponse,
-    CommunityMemberDto
+    CommunityMemberDto,
+    CommunityLeaderApplicationListResponse,
+    CommunityLeaderApplicationDetailsResponse,
+    ReviewCommunityLeaderApplicationRequest,
+    CommunityLeaderApplicationReviewResponse,
+    CommunityLeaderApplicationStatus
 } from '../models/community-dashboard.model';
 
 @Injectable({ providedIn: 'root' })
@@ -84,13 +89,48 @@ export class CommunityDashboardService {
 
     searchCommunityMembers(communityId: number, query: string, page: number = 1, pageSize: number = 20): Observable<PagedResponse<CommunityMemberDto>> {
         let params = new HttpParams()
-            .set('Page', page.toString())
-            .set('PageSize', pageSize.toString());
+            .set('page', page.toString())
+            .set('pageSize', pageSize.toString());
 
         if (query) {
-            params = params.set('SearchTerm', query);
+            params = params.set('searchTerm', query);
         }
 
         return this.http.get<PagedResponse<CommunityMemberDto>>(`${environment.apiBaseUrl}/communities/${communityId}/members/search`, { params });
+    }
+
+    getLeaderApplications(
+        page: number = 1,
+        pageSize: number = 10,
+        status: CommunityLeaderApplicationStatus = 'Pending'
+    ): Observable<CommunityLeaderApplicationListResponse> {
+        let params = new HttpParams()
+            .set('page', page.toString())
+            .set('pageSize', pageSize.toString());
+
+        if (status) {
+            params = params.set('status', status);
+        }
+
+        return this.http.get<CommunityLeaderApplicationListResponse>(
+            `${this.baseUrl}/leader-applications/pending`,
+            { params }
+        );
+    }
+
+    getLeaderApplicationDetails(applicationId: number): Observable<CommunityLeaderApplicationDetailsResponse> {
+        return this.http.get<CommunityLeaderApplicationDetailsResponse>(
+            `${this.baseUrl}/leader-applications/${applicationId}`
+        );
+    }
+
+    reviewLeaderApplication(
+        applicationId: number,
+        payload: ReviewCommunityLeaderApplicationRequest
+    ): Observable<CommunityLeaderApplicationReviewResponse> {
+        return this.http.put<CommunityLeaderApplicationReviewResponse>(
+            `${this.baseUrl}/leader-applications/${applicationId}/review`,
+            payload
+        );
     }
 }

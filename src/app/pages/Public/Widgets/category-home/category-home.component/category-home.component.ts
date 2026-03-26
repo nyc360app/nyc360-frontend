@@ -19,6 +19,7 @@ export interface HeaderButtonChild {
   link: any[];
   icon?: string;
   isAction?: boolean;
+  opensVerification?: boolean;
   queryParams?: any;
 }
 
@@ -159,9 +160,10 @@ export class CategoryHomeComponent implements OnInit {
 
             return {
               label: child.label,
-              link: [child.route],
+              link: child.route ? [child.route] : [],
               icon: child.icon,
               isAction: child.isAction || false,
+              opensVerification: !!child.opensVerification,
               queryParams
             };
           });
@@ -287,6 +289,11 @@ export class CategoryHomeComponent implements OnInit {
       this.showVerificationModal = true;
       this.cdr.detectChanges();
     }
+  }
+
+  openVerificationRequest() {
+    this.showVerificationModal = true;
+    this.cdr.detectChanges();
   }
 
   onVerified() {

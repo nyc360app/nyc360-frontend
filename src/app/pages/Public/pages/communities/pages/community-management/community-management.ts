@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../../../environments/environment';
-import { AuthService } from '../../../../../Authentication/Service/auth';
+import { COMMUNITY_TYPES_LIST, getCommunityTypeLabel } from '../../models/createcommunty';
 import { CommunityProfileService } from '../../services/community-profile';
 import { CommunityDetails, CommunityMember, CommunityRole } from '../../models/community-profile';
 import { ToastService } from '../../../../../../shared/services/toast.service';
+import { getCommunityErrorMessage, getCommunityRoleLabel } from '../../../../../../shared/utils/community-contract';
+import { resolveCommunityMediaUrl } from '../../../../../../shared/utils/community-media';
 
 interface ManagementTab {
     id: string;
@@ -26,7 +28,6 @@ export class CommunityManagementComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private profileService = inject(CommunityProfileService);
-    private authService = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
     private toastService = inject(ToastService);
     protected readonly environment = environment;
@@ -68,6 +69,7 @@ export class CommunityManagementComponent implements OnInit {
 
     avatarFile: File | null = null;
     coverFile: File | null = null;
+    readonly communityTypes = COMMUNITY_TYPES_LIST;
 
     // Tabs Configuration
     tabs: ManagementTab[] = [
@@ -78,12 +80,16 @@ export class CommunityManagementComponent implements OnInit {
     ];
 
     // Getters
-    get isOwner(): boolean {
-        return this.memberRole === CommunityRole.Owner;
+    get isLeader(): boolean {
+        return this.memberRole === CommunityRole.Leader;
     }
 
-    get isAdminOrOwner(): boolean {
-        return this.memberRole === CommunityRole.Owner || this.memberRole === CommunityRole.Moderator;
+    get currentRoleLabel(): string {
+        return getCommunityRoleLabel(this.memberRole);
+    }
+
+    get communityTypeLabel(): string {
+        return getCommunityTypeLabel(this.community?.type);
     }
 
     ngOnInit() {
@@ -104,9 +110,9 @@ export class CommunityManagementComponent implements OnInit {
                     this.memberRole = res.data.memberRole ? Number(res.data.memberRole) : null;
 
                     // Redirect if not owner
-                    if (!this.isOwner) {
+                    if (!this.isLeader) {
                         this.toastService.error('You do not have permission to manage this community.');
-                        this.router.navigate(['/public/community', this.slug]);
+                        this.router.navigate(['/community', this.slug]);
                         return;
                     }
 
@@ -116,7 +122,7 @@ export class CommunityManagementComponent implements OnInit {
                         description: this.community.description || '',
                         type: this.community.type,
                         locationId: 0, // Default or from data if available
-                        isPrivate: false, // Default or from data if available
+                        isPrivate: !!this.community.isPrivate,
                         requiresApproval: false // Default or from data if available
                     };
                 }
@@ -148,8 +154,9 @@ export class CommunityManagementComponent implements OnInit {
                 }
                 this.cdr.detectChanges();
             },
-            error: () => {
+            error: (error) => {
                 this.isMembersLoading = false;
+                this.toastService.error(getCommunityErrorMessage(error, 'Unable to load community members.'));
                 this.cdr.detectChanges();
             }
         });
@@ -165,12 +172,12 @@ export class CommunityManagementComponent implements OnInit {
                     this.members = this.members.filter(m => m.userId !== memberId);
                     this.toastService.success('Member removed successfully.');
                 } else {
-                    this.toastService.error(res.error?.message || 'Failed to remove member.');
+                    this.toastService.error(getCommunityErrorMessage(res, 'Failed to remove member.'));
                 }
                 this.cdr.detectChanges();
             },
-            error: () => {
-                this.toastService.error('Error removing member.');
+            error: (error) => {
+                this.toastService.error(getCommunityErrorMessage(error, 'Error removing member.'));
                 this.cdr.detectChanges();
             }
         });
@@ -178,6 +185,10 @@ export class CommunityManagementComponent implements OnInit {
 
     onPromoteToModerator(memberId: number) {
         this.onUpdateRole(memberId, CommunityRole.Moderator, 'Promoted to Moderator');
+    }
+
+    onAssignVolunteer(memberId: number) {
+        this.onUpdateRole(memberId, CommunityRole.Volunteer, 'Assigned as Volunteer');
     }
 
     onDemoteToMember(memberId: number) {
@@ -194,15 +205,15 @@ export class CommunityManagementComponent implements OnInit {
                     // Update member role in the list locally
                     const member = this.members.find(m => m.userId === memberId);
                     if (member) {
-                        member.role = newRole === CommunityRole.Moderator ? 'Moderator' : 'Member';
+                        member.role = newRole;
                     }
                 } else {
-                    this.toastService.error(res.error?.message || 'Failed to update role');
+                    this.toastService.error(getCommunityErrorMessage(res, 'Failed to update role.'));
                 }
                 this.cdr.detectChanges();
             },
-            error: (err) => {
-                this.toastService.error('Error updating member role');
+            error: (error) => {
+                this.toastService.error(getCommunityErrorMessage(error, 'Error updating member role.'));
                 this.cdr.detectChanges();
             }
         });
@@ -248,13 +259,13 @@ export class CommunityManagementComponent implements OnInit {
                         this.community = { ...this.community, ...res.data };
                     }
                 } else {
-                    this.toastService.error(res.error?.message || 'Update failed');
+                    this.toastService.error(getCommunityErrorMessage(res, 'Update failed.'));
                 }
                 this.cdr.detectChanges();
             },
-            error: (err) => {
+            error: (error) => {
                 this.isSaving = false;
-                this.toastService.error('Error updating community info');
+                this.toastService.error(getCommunityErrorMessage(error, 'Error updating community info.'));
                 this.cdr.detectChanges();
             }
         });
@@ -292,16 +303,15 @@ export class CommunityManagementComponent implements OnInit {
                 if (res.isSuccess) {
                     this.showDisbandModal = false;
                     this.toastService.success('Community has been disbanded.');
-                    this.router.navigate(['/public/community']);
+                    this.router.navigate(['/community']);
                 } else {
-                    this.toastService.error(res.error?.message || 'Failed to disband community.');
+                    this.toastService.error(getCommunityErrorMessage(res, 'Failed to disband community.'));
                 }
                 this.cdr.detectChanges();
             },
-            error: (err) => {
-                console.error('Disband Network/API error:', err);
+            error: (error) => {
                 this.isDisbanding = false;
-                this.toastService.error('Error connecting to server to disband community');
+                this.toastService.error(getCommunityErrorMessage(error, 'Error connecting to server to disband community.'));
                 this.cdr.detectChanges();
             }
         });
@@ -346,21 +356,19 @@ export class CommunityManagementComponent implements OnInit {
 
         this.profileService.transferOwnership(this.community.id, this.selectedNewOwner.userId).subscribe({
             next: (res) => {
-                console.log('Transfer Response:', res);
                 this.isTransferring = false;
                 if (res.isSuccess) {
                     this.toastService.success('Ownership transferred successfully!');
                     this.showTransferModal = false;
-                    this.router.navigate(['/public/community', this.slug]);
+                    this.router.navigate(['/community', this.slug]);
                 } else {
-                    this.toastService.error(res.error?.message || 'Failed to transfer ownership');
+                    this.toastService.error(getCommunityErrorMessage(res, 'Failed to transfer ownership.'));
                 }
                 this.cdr.detectChanges();
             },
-            error: (err) => {
-                console.error('Transfer API Error:', err);
+            error: (error) => {
                 this.isTransferring = false;
-                this.toastService.error('Error transferring ownership');
+                this.toastService.error(getCommunityErrorMessage(error, 'Error transferring ownership.'));
                 this.cdr.detectChanges();
             }
         });
@@ -368,9 +376,7 @@ export class CommunityManagementComponent implements OnInit {
 
     // --- Helpers ---
     resolveCommunityImage(url?: string): string {
-        if (!url) return 'assets/images/placeholder-cover.jpg';
-        if (url.includes('http')) return url;
-        return `${environment.apiBaseUrl2}/communities/${url}`;
+        return resolveCommunityMediaUrl(url, 'assets/images/placeholder-cover.jpg');
     }
 
     resolveUserAvatar(url?: string | null): string {
@@ -379,7 +385,11 @@ export class CommunityManagementComponent implements OnInit {
         return `${environment.apiBaseUrl2}/avatars/${url}`;
     }
 
+    getMemberRoleLabel(member: CommunityMember): string {
+        return getCommunityRoleLabel(member.role);
+    }
+
     goBack() {
-        this.router.navigate(['/public/community', this.slug]);
+        this.router.navigate(['/community', this.slug]);
     }
 }

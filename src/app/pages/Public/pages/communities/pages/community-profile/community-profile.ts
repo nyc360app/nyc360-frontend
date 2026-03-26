@@ -10,13 +10,14 @@ import { CommunityDetails, CommunityMember, Post } from '../../models/community-
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { PostService } from '../../services/post'; // Added
 import { InteractionType, PostComment } from '../../models/post-details'; // Added
-
-// Enum Matching Backend
-export enum CommunityRole {
-  Owner = 1,
-  Moderator = 2,
-  Member = 3
-}
+import { getCommunityTypeLabel } from '../../models/createcommunty';
+import {
+  CommunityRole,
+  getCommunityErrorMessage,
+  getCommunityRoleLabel,
+  normalizeCommunityRole
+} from '../../../../../../shared/utils/community-contract';
+import { resolveCommunityMediaUrl } from '../../../../../../shared/utils/community-media';
 
 // Extends Post locally to support UI states
 interface ExtendedPost extends Omit<Post, 'stats'> {
@@ -54,11 +55,12 @@ export class CommunityProfileComponent implements OnInit {
 
   // Roles & Permissions
   ownerId: number = 0;
-  memberRole: number | null = null; // 1=Owner, 2=Mod, 3=Member, null=Not Joined
+  memberRole: number | null = null;
+  hasPendingJoinRequest = false;
   currentUserId: string | null = null; // Added
 
   // UI State
-  activeTab: string = 'discussion';
+  activeTab: string = 'feed';
   isLoading = false;
   isMembersLoading = false;
   isJoinLoading = false;
@@ -68,15 +70,69 @@ export class CommunityProfileComponent implements OnInit {
 
   // Getters for Logic
   get isJoined(): boolean {
-    return !!this.memberRole && this.memberRole > 0;
+    return this.normalizedMemberRole !== null;
   }
 
-  get isOwner(): boolean {
-    return this.memberRole === CommunityRole.Owner;
+  get normalizedMemberRole(): CommunityRole | null {
+    return normalizeCommunityRole(this.memberRole);
   }
 
-  get isAdminOrOwner(): boolean {
-    return this.memberRole === CommunityRole.Owner || this.memberRole === CommunityRole.Moderator;
+  get isLeader(): boolean {
+    return this.normalizedMemberRole === CommunityRole.Leader;
+  }
+
+  get isModerator(): boolean {
+    return this.normalizedMemberRole === CommunityRole.Moderator;
+  }
+
+  get isVolunteer(): boolean {
+    return this.normalizedMemberRole === CommunityRole.Volunteer;
+  }
+
+  get canManageCommunity(): boolean {
+    return this.isLeader;
+  }
+
+  get canManageRequests(): boolean {
+    return this.isLeader;
+  }
+
+  get canModerateCommunity(): boolean {
+    return this.isLeader || this.isModerator;
+  }
+
+  get canPublishInCommunity(): boolean {
+    if (!this.isJoined || !this.community) return false;
+
+    if (this.community.anyoneCanPost !== false) {
+      return true;
+    }
+
+    return this.isLeader || this.isVolunteer;
+  }
+
+  get publishAccessHint(): string {
+    if (this.isModerator) {
+      return 'Moderators can moderate discussions, but they cannot publish in this community.';
+    }
+
+    return 'Only the community leader or approved volunteers can publish in this community.';
+  }
+
+  get currentRoleLabel(): string {
+    return getCommunityRoleLabel(this.memberRole);
+  }
+
+  get communityTypeLabel(): string {
+    return getCommunityTypeLabel(this.community?.type);
+  }
+
+  get isFeedRestricted(): boolean {
+    return !!this.community?.isPrivate && !this.isJoined;
+  }
+
+  get isMembersRestricted(): boolean {
+    return !!this.community?.isPrivate && !this.isJoined;
   }
 
   ngOnInit() {
@@ -102,6 +158,7 @@ export class CommunityProfileComponent implements OnInit {
           this.community = data.community;
           this.ownerId = data.ownerId;
           this.memberRole = data.memberRole ? Number(data.memberRole) : null;
+          this.hasPendingJoinRequest = !!(data.pendingJoinRequest || data.hasPendingJoinRequest);
 
           if (data.posts && Array.isArray(data.posts.data)) {
             // Map to ExtendedPost
@@ -135,33 +192,47 @@ export class CommunityProfileComponent implements OnInit {
         this.isMembersLoading = false;
         if (res.isSuccess && Array.isArray(res.data)) {
           this.members = res.data;
+        } else if (res.isSuccess && Array.isArray((res as any).data)) {
+          this.members = (res as any).data;
         }
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.isMembersLoading = false;
+        this.toastService.error(getCommunityErrorMessage(error, 'Unable to load community members.'));
         this.cdr.detectChanges();
       }
     });
   }
 
+  showFeedTab(): void {
+    this.activeTab = 'feed';
+  }
+
+  showAboutTab(): void {
+    this.activeTab = 'about';
+  }
+
   // --- Actions ---
 
   onJoinCommunity() {
-    if (!this.community || this.isJoined) return;
+    if (!this.community || this.isJoined || this.hasPendingJoinRequest) return;
 
     this.isJoinLoading = true;
     this.profileService.joinCommunity(this.community.id).subscribe({
       next: (res) => {
         this.isJoinLoading = false;
         if (res.isSuccess) {
-          this.memberRole = CommunityRole.Member; // Default role
-          if (this.community) this.community.memberCount++;
-          this.toastService.success('You have joined the community!');
+          this.hasPendingJoinRequest = true;
+          this.toastService.success('Your join request was sent to the community leader.');
         } else {
-          this.toastService.error((res as any).message || 'Failed to join.');
+          this.toastService.error(getCommunityErrorMessage(res, 'Failed to send the join request.'));
         }
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (error) => {
         this.isJoinLoading = false;
-        this.toastService.error('An error occurred.');
+        this.toastService.error(getCommunityErrorMessage(error, 'An error occurred while joining the community.'));
       }
     });
   }
@@ -174,20 +245,24 @@ export class CommunityProfileComponent implements OnInit {
       next: (res) => {
         this.isJoinLoading = false;
         if (res.isSuccess) {
-          this.memberRole = null; // Reset role
-          if (this.community) this.community.memberCount--;
-          this.toastService.success('You have left the community.');
+          this.memberRole = null;
+          this.hasPendingJoinRequest = false;
+          this.toastService.success('Your community request was removed.');
         } else {
-          this.toastService.error('Failed to leave community.');
+          this.toastService.error(getCommunityErrorMessage(res, 'Failed to leave the community.'));
         }
         this.cdr.detectChanges();
       },
-      error: () => this.isJoinLoading = false
+      error: (error) => {
+        this.isJoinLoading = false;
+        this.toastService.error(getCommunityErrorMessage(error, 'Unable to leave the community.'));
+        this.cdr.detectChanges();
+      }
     });
   }
 
   onRemoveMember(memberId: number) {
-    if (!this.community || !confirm('Are you sure you want to remove this member?')) return;
+    if (!this.community || !this.isLeader || !confirm('Are you sure you want to remove this member?')) return;
 
     this.profileService.removeMember(this.community.id, memberId).subscribe({
       next: (res) => {
@@ -195,12 +270,12 @@ export class CommunityProfileComponent implements OnInit {
           this.members = this.members.filter(m => m.userId !== memberId);
           this.toastService.success('Member removed successfully.');
         } else {
-          this.toastService.error(res.error?.message || 'Failed to remove member.');
+          this.toastService.error(getCommunityErrorMessage(res, 'Failed to remove the member.'));
         }
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.toastService.error('Error removing member.');
+      error: (error) => {
+        this.toastService.error(getCommunityErrorMessage(error, 'Error removing member.'));
         this.cdr.detectChanges();
       }
     });
@@ -369,9 +444,7 @@ export class CommunityProfileComponent implements OnInit {
   }
 
   resolveCommunityImage(url?: string): string {
-    if (!url) return 'assets/images/placeholder-cover.jpg';
-    if (url.includes('http')) return url;
-    return `${environment.apiBaseUrl2}/communities/${url}`;
+    return resolveCommunityMediaUrl(url, 'assets/images/placeholder-cover.jpg');
   }
 
   resolvePostImage(url?: string): string {
@@ -406,6 +479,10 @@ export class CommunityProfileComponent implements OnInit {
   getAuthorName(author: any): string {
     if (!author) return 'NYC360 Member';
     return typeof author === 'string' ? author : author.name;
+  }
+
+  getMemberRoleLabel(member: CommunityMember): string {
+    return getCommunityRoleLabel(member.role);
   }
 
   private cleanText(value: string | null | undefined): string {

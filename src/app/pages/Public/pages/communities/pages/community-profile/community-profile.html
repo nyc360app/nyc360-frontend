@@ -31,7 +31,9 @@
         <div class="text-details">
           <h1>{{ community.name }}</h1>
           <p class="meta">
-            <span class="badge-type">{{ community.type === 5 ? 'Public Resources' : 'Community' }}</span>
+            <span class="badge-type">{{ communityTypeLabel }}</span>
+            &bull;
+            <span>{{ community.isPrivate ? 'Private Community' : 'Public Community' }}</span>
             &bull;
             <span><i class="bi bi-people-fill"></i> {{ community.memberCount }} Members</span>
           </p>
@@ -40,22 +42,26 @@
         <div class="action-box">
 
           <!-- Management Button (Owner Only) -->
-          <button *ngIf="isOwner" class="btn-action btn-manage"
-            [routerLink]="['/public/community', community.slug, 'manage']">
+          <button *ngIf="canManageCommunity" class="btn-action btn-manage"
+            [routerLink]="['/community', community.slug, 'manage']">
             <i class="bi bi-gear-fill"></i> Manage
           </button>
 
-          <button *ngIf="!isJoined" class="btn-action btn-join" (click)="onJoinCommunity()" [disabled]="isJoinLoading">
+          <button *ngIf="!isJoined && !hasPendingJoinRequest" class="btn-action btn-join" (click)="onJoinCommunity()" [disabled]="isJoinLoading">
             <span *ngIf="isJoinLoading" class="spinner-border spinner-border-sm"></span>
             <span *ngIf="!isJoinLoading"><i class="bi bi-person-plus-fill"></i> Join Community</span>
+          </button>
+
+          <button *ngIf="!isJoined && hasPendingJoinRequest" class="btn-action btn-status" (click)="onLeaveCommunity()">
+            <i class="bi bi-hourglass-split"></i> Request Pending
           </button>
 
           <div *ngIf="isJoined" class="joined-dropdown">
             <button class="btn-action btn-status">
               <i class="bi bi-check-circle-fill"></i>
-              {{ isOwner ? 'Owner' : (memberRole === 2 ? 'Moderator' : 'Member') }}
+              {{ currentRoleLabel }}
             </button>
-            <button *ngIf="!isOwner" class="btn-leave-sm" (click)="onLeaveCommunity()" title="Leave Community">
+            <button *ngIf="!isLeader" class="btn-leave-sm" (click)="onLeaveCommunity()" title="Leave Community">
               <i class="bi bi-box-arrow-right"></i>
             </button>
           </div>
@@ -72,9 +78,10 @@
 
       <div class="nav-tabs-wrapper">
         <div class="nav-tabs">
-          <button [class.active]="activeTab === 'discussion'" (click)="activeTab = 'discussion'">Discussion</button>
+          <button [class.active]="activeTab === 'feed'" (click)="showFeedTab()">Feed</button>
           <button [class.active]="activeTab === 'members'" (click)="loadMembers()">Members</button>
-          <button *ngIf="isAdminOrOwner" [class.active]="activeTab === 'requests'" (click)="activeTab = 'requests'">
+          <button [class.active]="activeTab === 'about'" (click)="showAboutTab()">About</button>
+          <button *ngIf="canManageRequests" [class.active]="activeTab === 'requests'" (click)="activeTab = 'requests'">
             Requests <span class="badge-dot"></span>
           </button>
         </div>
@@ -97,20 +104,36 @@
         <hr>
 
         <div class="meta-list">
-          <div class="meta-item"><i class="bi bi-calendar3"></i> Created in 2026</div>
-          <div class="meta-item" *ngIf="isJoined"><i class="bi bi-shield-check"></i> You are a member</div>
+          <div class="meta-item"><i class="bi bi-bookmark-star"></i> {{ communityTypeLabel }}</div>
+          <div class="meta-item"><i class="bi bi-globe2"></i> {{ community.isPrivate ? 'Private membership approval required' : 'Visible across Explore and discovery' }}</div>
+          <div class="meta-item"><i class="bi bi-pencil-square"></i> {{ community.anyoneCanPost === false ? 'Only leaders and volunteers can publish' : 'Members can publish in this community' }}</div>
+          <div class="meta-item" *ngIf="isJoined"><i class="bi bi-shield-check"></i> You are {{ currentRoleLabel | lowercase }}</div>
+        </div>
+
+        <hr *ngIf="canManageCommunity || canModerateCommunity">
+
+        <div class="meta-list" *ngIf="canManageCommunity || canModerateCommunity">
+          <div class="meta-item" *ngIf="canManageCommunity"><i class="bi bi-gear-fill"></i> Leader tools: manage members, assign roles, review requests</div>
+          <div class="meta-item" *ngIf="isModerator"><i class="bi bi-shield-exclamation"></i> Moderator tools: lock discussions, review reports, remove harmful content</div>
         </div>
       </div>
     </aside>
 
     <main class="main-content">
 
-      <ng-container *ngIf="activeTab === 'discussion'">
+      <ng-container *ngIf="activeTab === 'feed'">
 
-        <div class="create-post-box" *ngIf="isJoined">
-          <div class="input-trigger" [routerLink]="['/public/community', community.id, 'create-post']">
-            <span>Start a discussion...</span>
+        <div class="create-post-box" *ngIf="canPublishInCommunity">
+          <div class="input-trigger" [routerLink]="['/community', community.id, 'create-post']">
+            <span>{{ isLeader ? 'Create an announcement or community update...' : 'Share an approved community update...' }}</span>
             <i class="bi bi-pencil-square ms-auto"></i>
+          </div>
+        </div>
+
+        <div class="create-post-box locked-post-box" *ngIf="isJoined && !canPublishInCommunity">
+          <div class="input-trigger disabled">
+            <span>{{ publishAccessHint }}</span>
+            <i class="bi bi-lock-fill ms-auto"></i>
           </div>
         </div>
 
@@ -230,8 +253,12 @@
         <ng-template #emptyState>
           <div class="empty-feed">
             <i class="bi bi-chat-square-quote"></i>
-            <h3>Start the Conversation</h3>
-            <p>No posts yet. Be the first to share something!</p>
+            <h3>{{ isFeedRestricted ? 'Private Community Feed' : 'Start the Conversation' }}</h3>
+            <p>
+              {{ isFeedRestricted
+                ? 'Join this community to view member posts, announcements, and internal updates.'
+                : 'No posts yet. Be the first approved contributor to share something.' }}
+            </p>
           </div>
         </ng-template>
       </ng-container>
@@ -243,21 +270,27 @@
             <span class="count">{{ members.length }} members</span>
           </div>
 
-          <div class="members-list" *ngIf="!isMembersLoading; else loader">
+          <div class="restricted-panel" *ngIf="isMembersRestricted">
+            <i class="bi bi-shield-lock"></i>
+            <h4>Members list is private</h4>
+            <p>Approved members can view the community directory once their join request is accepted.</p>
+          </div>
+
+          <div class="members-list" *ngIf="!isMembersLoading && !isMembersRestricted; else loader">
             <div class="member-row" *ngFor="let member of members">
               <div class="mem-left">
                 <img [src]="resolveUserAvatar(member.avatarUrl)" class="mem-avatar">
                 <div class="mem-info">
                   <h4>{{ member.name || 'Unknown User' }}</h4>
                   <div class="badges">
-                    <span class="role-badge" [class.admin]="member.role === 'Admin' || member.role === 'Owner'">
-                      {{ member.role }}
+                    <span class="role-badge" [class.admin]="getMemberRoleLabel(member) === 'Leader'">
+                      {{ getMemberRoleLabel(member) }}
                     </span>
                     <span class="joined-date">Joined {{ member.joinedAt | date:'MMM yyyy' }}</span>
                   </div>
                 </div>
               </div>
-              <div class="mem-actions" *ngIf="isAdminOrOwner && member.userId !== ownerId">
+              <div class="mem-actions" *ngIf="isLeader && member.userId !== ownerId">
                 <button class="btn-remove" (click)="onRemoveMember(member.userId)" title="Remove Member">
                   <i class="bi bi-person-x-fill"></i> Remove
                 </button>
@@ -265,14 +298,44 @@
             </div>
           </div>
           <ng-template #loader>
-            <div class="spinner-center">
+            <div class="spinner-center" *ngIf="!isMembersRestricted">
               <div class="spinner"></div>
             </div>
           </ng-template>
         </div>
       </ng-container>
 
-      <ng-container *ngIf="activeTab === 'requests' && isAdminOrOwner">
+      <ng-container *ngIf="activeTab === 'about'">
+        <section class="about-panel">
+          <div class="section-head">
+            <h3>About This Community</h3>
+          </div>
+
+          <div class="about-grid">
+            <div class="about-card">
+              <span class="about-label">Description</span>
+              <p>{{ community.description || 'This community has not added an overview yet.' }}</p>
+            </div>
+
+            <div class="about-card">
+              <span class="about-label">Community Type</span>
+              <p>{{ communityTypeLabel }}</p>
+            </div>
+
+            <div class="about-card">
+              <span class="about-label">Visibility</span>
+              <p>{{ community.isPrivate ? 'Private community. Membership requires approval.' : 'Public community. Anyone can request to join.' }}</p>
+            </div>
+
+            <div class="about-card">
+              <span class="about-label">Publishing Rules</span>
+              <p>{{ community.anyoneCanPost === false ? 'Only the leader and approved volunteers can publish posts.' : 'Joined members can publish community posts.' }}</p>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <ng-container *ngIf="activeTab === 'requests' && canManageRequests">
         <app-community-requests [communityId]="community.id"></app-community-requests>
       </ng-container>
 

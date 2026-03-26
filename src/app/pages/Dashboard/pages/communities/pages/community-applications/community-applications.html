@@ -1,0 +1,261 @@
+<div class="luxury-dashboard animate__animated animate__fadeIn">
+  <div class="container-fluid py-4 px-md-5">
+    <div class="header-section d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div class="title-area">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn-icon back-btn" routerLink="/admin/dashboard">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <div>
+            <h1 class="gold-title merriweather-font mb-0">COMMUNITY LEADER APPLICATIONS</h1>
+            <p class="text-muted small mb-0">D01.1 dedicated review queue for Community Leader approvals.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-mini glass-panel px-4 py-2 d-flex align-items-center gap-4">
+        <div class="stat-item">
+          <span class="label text-muted small uppercase">Total</span>
+          <h4 class="value mb-0 gold-text">{{ totalCount }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-panel glass-panel mb-4 p-3">
+      <div class="row g-3 align-items-center">
+        <div class="col-lg-5">
+          <div class="search-box">
+            <i class="bi bi-search text-gold"></i>
+            <input type="text" [(ngModel)]="searchTerm" placeholder="Search applicant, community, email, or location...">
+          </div>
+        </div>
+
+        <div class="col-lg-3">
+          <label class="field-label">Status</label>
+          <select class="form-select luxury-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusChange()">
+            <option *ngFor="let status of statuses" [ngValue]="status">{{ status }}</option>
+          </select>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="supplementary-note">
+            D01.2 Create Community and D01.3 Community Organization listing reviews still live in
+            <a routerLink="/admin/tags/verifications">Tag Verifications</a>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="position-fixed top-0 start-0 w-100" style="z-index: 9999; height: 3px;">
+      <div class="progress" style="height: 3px; border-radius: 0; background: transparent;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-gold"
+          style="width: 100%; background-color: #c5a059;">
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="hasInitialized && filteredRequests.length === 0 && !isLoading"
+      class="empty-state glass-panel text-center py-5 animate__animated animate__fadeIn">
+      <div class="icon-box mb-4">
+        <div class="empty-icon-wrapper">
+          <i class="bi bi-person-badge text-gold" style="font-size: 3rem;"></i>
+        </div>
+      </div>
+      <h3 class="text-dark merriweather-font">No Leader Applications Found</h3>
+      <p class="text-muted">There are no Community Leader applications matching the current status and search filters.</p>
+      <button class="btn-luxury-gold mt-3 px-4" (click)="loadRequests(currentPage)">
+        Refresh Queue
+      </button>
+    </div>
+
+    <div class="table-responsive glass-panel animate__animated animate__fadeIn" *ngIf="filteredRequests.length > 0">
+      <table class="luxury-table">
+        <thead>
+          <tr>
+            <th>Applicant</th>
+            <th>Community</th>
+            <th>Location</th>
+            <th>Led Before</th>
+            <th>Status</th>
+            <th>Submitted At</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let req of filteredRequests">
+            <td>
+              <div class="user-stack">
+                <div class="fw-bold text-dark">{{ req.applicantName }}</div>
+                <div class="text-gold small">@{{ req.applicantUsername }}</div>
+                <div class="text-muted small">{{ req.email }}</div>
+              </div>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ req.communityName }}</div>
+            </td>
+            <td>
+              <span class="text-muted small">{{ req.location }}</span>
+            </td>
+            <td>
+              <span class="status-chip" [class.approved]="req.ledBefore" [class.pending]="!req.ledBefore">
+                {{ req.ledBefore ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-chip"
+                [class.pending]="req.status === 'Pending'"
+                [class.approved]="req.status === 'Approved'"
+                [class.rejected]="req.status === 'Rejected'">
+                {{ req.status }}
+              </span>
+            </td>
+            <td>
+              <span class="text-muted small">{{ req.submittedAt | date:'MMM d, y, h:mm a' }}</span>
+            </td>
+            <td class="text-end">
+              <button class="btn btn-luxury-gold px-3" (click)="openDetails(req)">
+                <i class="bi bi-eye me-1"></i> DETAILS
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-footer-luxury mt-5 d-flex justify-content-center" *ngIf="totalPages > 1">
+      <div class="pagination-controls d-flex align-items-center gap-4 bg-white p-2 px-3 rounded-pill shadow-sm">
+        <button class="btn-circle luxury" [disabled]="currentPage === 1" (click)="loadRequests(currentPage - 1)">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="page-numbers">
+          <span class="current">{{ currentPage }}</span>
+          <span class="sep">/</span>
+          <span class="total">{{ totalPages }}</span>
+        </div>
+        <button class="btn-circle luxury" [disabled]="currentPage === totalPages" (click)="loadRequests(currentPage + 1)">
+          <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="details-overlay animate__animated animate__fadeIn" *ngIf="selectedRequest" (click)="closeDetails()">
+    <aside class="details-drawer shadow-lg" (click)="$event.stopPropagation()">
+      <div class="drawer-header border-bottom p-4 d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="mb-1 gold-text merriweather-font">Leader Application Details</h3>
+          <p class="text-muted small mb-0">Review D01.1 and decide whether to grant Community Leader access.</p>
+        </div>
+        <button class="btn-close-custom bg-transparent border-0" (click)="closeDetails()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="drawer-body p-4" *ngIf="!isLoadingDetails && selectedRequestDetails as details; else leaderDetailsLoading">
+        <div class="overview-card">
+          <div class="overview-grid">
+            <div>
+              <small class="text-muted d-block">Applicant</small>
+              <strong>{{ details.applicantName }}</strong>
+              <div class="text-gold small">@{{ details.applicantUsername }}</div>
+            </div>
+            <div>
+              <small class="text-muted d-block">Community</small>
+              <strong>{{ details.communityName }}</strong>
+              <div class="text-muted small">{{ details.location }}</div>
+            </div>
+            <div>
+              <small class="text-muted d-block">Email</small>
+              <strong>{{ details.email }}</strong>
+            </div>
+            <div>
+              <small class="text-muted d-block">Phone Number</small>
+              <strong>{{ details.phoneNumber || 'Not provided' }}</strong>
+            </div>
+            <div>
+              <small class="text-muted d-block">Led Before</small>
+              <strong>{{ details.ledBefore ? 'Yes' : 'No' }}</strong>
+            </div>
+            <div>
+              <small class="text-muted d-block">Weekly Availability</small>
+              <strong>{{ details.weeklyAvailability }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="details.profileLink">
+          <label class="label-muted small uppercase fw-bold mb-2 d-block">Profile Link</label>
+          <a class="external-link" [href]="details.profileLink" target="_blank" rel="noopener noreferrer">
+            {{ details.profileLink }}
+          </a>
+        </div>
+
+        <div class="detail-section">
+          <label class="label-muted small uppercase fw-bold mb-2 d-block">Motivation</label>
+          <div class="detail-copy">{{ details.motivation }}</div>
+        </div>
+
+        <div class="detail-section">
+          <label class="label-muted small uppercase fw-bold mb-2 d-block">Experience</label>
+          <div class="detail-copy">{{ details.experience }}</div>
+        </div>
+
+        <div class="detail-section">
+          <label class="label-muted small uppercase fw-bold mb-2 d-block">Verification File</label>
+          <ng-container *ngIf="details.verificationFileUrl; else noVerificationFile">
+            <a class="doc-pill" [href]="getVerificationFileUrl(details.verificationFileUrl)" target="_blank" rel="noopener noreferrer">
+              <i class="bi bi-file-earmark-arrow-down"></i>
+              <span>Open verification document</span>
+            </a>
+          </ng-container>
+          <ng-template #noVerificationFile>
+            <span class="text-muted small">No verification file attached.</span>
+          </ng-template>
+        </div>
+
+        <div class="detail-section">
+          <label class="mb-2 fw-bold text-dark d-flex justify-content-between">
+            <span>Admin Notes</span>
+            <span class="text-muted small fw-normal">(Optional)</span>
+          </label>
+          <textarea
+            class="form-control luxury-textarea w-100"
+            rows="4"
+            [(ngModel)]="adminComment"
+            placeholder="Provide details about your approval or rejection..."
+          ></textarea>
+        </div>
+
+        <div class="detail-note">
+          Approving here grants the D01.1 Community Leader badge on the backend.
+        </div>
+      </div>
+
+      <ng-template #leaderDetailsLoading>
+        <div class="drawer-loading p-4">
+          <div class="placeholder-card" *ngFor="let _ of [1, 2, 3]"></div>
+        </div>
+      </ng-template>
+
+      <div class="drawer-footer p-4 border-top d-flex gap-3">
+        <button class="btn btn-link text-muted text-decoration-none fw-bold" (click)="closeDetails()" [disabled]="isProcessingAction">
+          CANCEL
+        </button>
+        <div class="ms-auto d-flex gap-3">
+          <button class="btn btn-danger px-4 rounded-3"
+            [disabled]="isProcessingAction || isLoadingDetails || !selectedRequest"
+            (click)="handleResolve(false)">
+            <span *ngIf="!isProcessingAction">REJECT</span>
+            <span *ngIf="isProcessingAction" class="spinner-border spinner-border-sm"></span>
+          </button>
+          <button class="btn btn-luxury-gold px-4 rounded-3"
+            [disabled]="isProcessingAction || isLoadingDetails || !selectedRequest"
+            (click)="handleResolve(true)">
+            <span *ngIf="!isProcessingAction">APPROVE</span>
+            <span *ngIf="isProcessingAction" class="spinner-border spinner-border-sm"></span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

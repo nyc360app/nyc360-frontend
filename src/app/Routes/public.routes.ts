@@ -18,6 +18,7 @@ export const PUBLIC_ROUTES: Routes = [
       { path: 'posts/edit/:id', data: { breadcrumb: 'Edit Post' }, loadComponent: () => import('../pages/Public/pages/posts/post-form/post-form').then(m => m.PostFormComponent) },
 
       // Community
+      { path: 'community/listings/submit', data: { breadcrumb: 'Add Listing', categoryPath: 'community' }, loadComponent: () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent) },
       { path: 'community', data: { breadcrumb: 'Communities' }, loadComponent: () => import('../pages/Public/pages/communities/pages/community/community').then(m => m.CommunityComponent) },
       { path: 'create-community', data: { breadcrumb: 'Create Community' }, loadComponent: () => import('../pages/Public/pages/communities/pages/create-community/create-community').then(m => m.CreateCommunityComponent) },
       { path: 'community/:slug', data: { breadcrumb: 'Community Profile' }, loadComponent: () => import('../pages/Public/pages/communities/pages/community-profile/community-profile').then(m => m.CommunityProfileComponent) },
@@ -29,6 +30,7 @@ export const PUBLIC_ROUTES: Routes = [
 
       // Jobs
       { path: 'profession/feed', data: { breadcrumb: 'Profession' }, loadComponent: () => import('../pages/Public/pages/jobs/pages/profession-feed/profession-feed').then(m => m.ProfessionFeedComponent) },
+      { path: 'professions/listings/submit', data: { breadcrumb: 'Add Listing', categoryPath: 'professions' }, loadComponent: () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent) },
       { path: 'profession/my-applications', data: { breadcrumb: 'My Applications' }, loadComponent: () => import('../pages/Public/pages/jobs/pages/my-applications.component/my-applications.component').then(m => m.MyApplicationsComponent) },
       { path: 'create-offer', data: { breadcrumb: 'Create Offer' }, loadComponent: () => import('../pages/Public/pages/jobs/pages/create-offer/create-offer').then(m => m.CreateOfferComponent) },
       { path: 'job-profile/:id', data: { breadcrumb: 'Job Details' }, loadComponent: () => import('../pages/Public/pages/jobs/pages/job-profile/job-profile').then(m => m.JobProfileComponent) },
@@ -56,6 +58,7 @@ export const PUBLIC_ROUTES: Routes = [
       { path: 'housing/create/renting', data: { breadcrumb: 'List for Rent' }, loadComponent: () => import('../pages/Public/pages/housing/pages/create-housing/create-housing').then(m => m.CreateHousingComponent) },
       { path: 'housing/create/sale', data: { breadcrumb: 'List for Sale' }, loadComponent: () => import('../pages/Public/pages/housing/pages/create-sale/create-sale.component').then(m => m.CreateSaleComponent) },
       { path: 'housing/create', redirectTo: 'housing/create/renting', pathMatch: 'full' },
+      { path: 'housing/listings/submit', data: { breadcrumb: 'Add Listing', categoryPath: 'housing' }, loadComponent: () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent) },
       { path: 'housing/listing-authorization', data: { breadcrumb: 'Listing Authorization' }, loadComponent: () => import('../pages/Public/pages/housing/pages/listing-authorization/listing-authorization.component').then(m => m.ListingAuthorizationComponent) },
       { path: 'housing/details/:id', data: { breadcrumb: 'Listing Details' }, loadComponent: () => import('../pages/Public/pages/housing/pages/housing-details/housing-details').then(m => m.HousingDetailsComponent) },
       { path: 'housing/agent/requests', redirectTo: 'housing/agent/dashboard/requests', pathMatch: 'full' },
@@ -76,6 +79,11 @@ export const PUBLIC_ROUTES: Routes = [
       { path: 'housing', redirectTo: 'housing/home', pathMatch: 'full' },
 
       // Category
+      {
+        path: 'category/:categoryPath/listings/submit',
+        data: { breadcrumb: 'Add Listing' },
+        loadComponent: () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent)
+      },
       {
         path: 'category/:categoryPath',
         data: { breadcrumb: 'Category' },
@@ -111,6 +119,7 @@ export const PUBLIC_ROUTES: Routes = [
 
       // RSS
       { path: 'rss/connect', data: { breadcrumb: 'Connect RSS' }, loadComponent: () => import('../pages/Public/pages/rss/connect-rss/connect-rss.component').then(m => m.ConnectRssComponent) },
+      { path: 'space/listings/submit', data: { breadcrumb: 'Add Listing', categoryPath: 'news' }, loadComponent: () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent) },
 
       // Forums
       {

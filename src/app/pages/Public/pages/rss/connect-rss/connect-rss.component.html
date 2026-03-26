@@ -1,87 +1,241 @@
-<div class="rss-connect-container">
-    <div class="rss-card">
-        <div class="header">
-            <h2><i class="fa fa-rss"></i> Connect RSS Feed</h2>
-            <p>Integrate your favorite content sources seamlessly into NYC360</p>
-
-            <!-- Category Badge -->
-            <div class="category-badge" *ngIf="categoryInfo()"
-                [style.background]="'linear-gradient(135deg, ' + categoryInfo().color + ' 0%, ' + categoryInfo().color + 'dd 100%)'">
-                <i [class]="categoryInfo().biIcon"></i>
-                <span>{{ categoryName() }}</span>
+<div class="rss-connect-shell">
+    <div class="rss-connect-card">
+        <header class="rss-connect-header">
+            <div class="header-copy">
+                <span class="eyebrow">Trusted Source Intake</span>
+                <h1>Connect RSS Feed</h1>
+                <p>
+                    Submit a verified RSS source for review. Once approved, new articles can be imported automatically
+                    into the selected division.
+                </p>
             </div>
-        </div>
+
+            <div class="category-badge" *ngIf="categoryInfo()"
+                [style.--badge-color]="categoryInfo()?.color || '#f97316'">
+                <i [class]="categoryInfo()?.biIcon"></i>
+                <span>{{ categoryName() }} Division</span>
+            </div>
+        </header>
 
         <ng-container *ngIf="!isNewsCategory() || hasNewsRssAccess(); else newsRssLocked">
-        <form [formGroup]="rssForm" (ngSubmit)="onSubmit()">
+            <form class="rss-connect-form" [formGroup]="rssForm" (ngSubmit)="onSubmit()">
+                <section class="form-section">
+                    <div class="section-heading">
+                        <span class="step-index">1</span>
+                        <div>
+                            <h2>Feed Setup</h2>
+                            <p>Provide the live RSS endpoint and content language.</p>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label for="url">
-                    <i class="fa fa-link"></i> RSS Feed URL
-                </label>
-                <input type="url" id="url" formControlName="Url" placeholder="https://example.com/feed.xml"
-                    autocomplete="off">
-                <div class="error" *ngIf="rssForm.get('Url')?.touched && rssForm.get('Url')?.invalid">
-                    Please enter a valid URL (starting with http:// or https://)
+                    <label class="field">
+                        <span class="field-label">RSS Feed URL <strong>*</strong></span>
+                        <input type="url" formControlName="Url" placeholder="https://example.com/rss"
+                            autocomplete="off" (blur)="onFeedUrlBlur()">
+                        <small class="field-hint">Automatically import new articles from this feed when published.</small>
+                        <small class="field-error" *ngIf="hasControlError('Url')">
+                            Enter a valid RSS feed URL starting with `http://` or `https://`.
+                        </small>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">RSS Feed Language <strong>*</strong></span>
+                        <div class="select-wrap">
+                            <select formControlName="Language">
+                                <option value="" disabled>Select the primary language used in this RSS feed</option>
+                                <option *ngFor="let language of languageOptions" [value]="language">{{ language }}</option>
+                            </select>
+                        </div>
+                        <small class="field-error" *ngIf="hasControlError('Language')">
+                            Select the primary publishing language for this feed.
+                        </small>
+                    </label>
+                </section>
+
+                <section class="form-section">
+                    <div class="section-heading">
+                        <span class="step-index">2</span>
+                        <div>
+                            <h2>Feed Source Identity</h2>
+                            <p>Show who publishes the feed and how the source should be represented.</p>
+                        </div>
+                    </div>
+
+                    <div class="logo-uploader"
+                        [class.dragging]="isDraggingLogo()"
+                        [class.has-preview]="selectedLogoPreviewUrl()"
+                        (dragover)="onLogoDragOver($event)"
+                        (dragleave)="onLogoDragLeave($event)"
+                        (drop)="onLogoDrop($event)">
+                        <input #logoInput type="file" hidden accept=".jpg,.jpeg,.png,.webp" (change)="onLogoSelected($event)">
+
+                        <ng-container *ngIf="selectedLogoPreviewUrl(); else emptyLogoState">
+                            <div class="logo-preview">
+                                <img [src]="selectedLogoPreviewUrl()!" alt="RSS source logo preview">
+                            </div>
+                            <div class="logo-copy">
+                                <strong>{{ selectedLogoFileName() }}</strong>
+                                <span>Logo selected for the source preview.</span>
+                            </div>
+                            <div class="logo-actions">
+                                <button type="button" class="ghost-btn" (click)="logoInput.click()">Replace</button>
+                                <button type="button" class="ghost-btn danger" (click)="removeSelectedLogo()">Remove</button>
+                            </div>
+                        </ng-container>
+
+                        <ng-template #emptyLogoState>
+                            <div class="logo-icon">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                            </div>
+                            <div class="logo-copy">
+                                <strong>Drag and drop here</strong>
+                                <span>Upload the official logo or profile image of the RSS source.</span>
+                                <small>Supports JPG, PNG, WEBP. Max file size 10MB.</small>
+                            </div>
+                            <button type="button" class="select-btn" (click)="logoInput.click()">Select Files</button>
+                        </ng-template>
+                    </div>
+
+                    <small class="field-error standalone-error" *ngIf="logoFileError()">{{ logoFileError() }}</small>
+
+                    <label class="field">
+                        <span class="field-label">RSS Feed Source Name <strong>*</strong></span>
+                        <input type="text" formControlName="Name" placeholder="Example: CNN" autocomplete="off">
+                        <small class="field-error" *ngIf="hasControlError('Name')">
+                            Enter the public name of the RSS source.
+                        </small>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">RSS Feed Source Website <strong>*</strong></span>
+                        <input type="url" formControlName="SourceWebsite" placeholder="Example: https://example.com"
+                            autocomplete="off">
+                        <small class="field-error" *ngIf="hasControlError('SourceWebsite')">
+                            Enter the official website URL for this source.
+                        </small>
+                    </label>
+
+                    <div class="field">
+                        <span class="field-label">Source Credibility <strong>*</strong></span>
+                        <div class="credibility-options">
+                            <button type="button" *ngFor="let option of credibilityOptions"
+                                class="credibility-pill"
+                                [class.active]="rssForm.get('SourceCredibility')?.value === option"
+                                (click)="selectCredibility(option)">
+                                {{ option }}
+                            </button>
+                        </div>
+                        <small class="field-hint">Select only one option that best represents this source.</small>
+                        <small class="field-error" *ngIf="hasControlError('SourceCredibility')">
+                            Select the credibility classification for this source.
+                        </small>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="section-heading">
+                        <span class="step-index">3</span>
+                        <div>
+                            <h2>Editorial Summary</h2>
+                            <p>Give reviewers context about the source and what it publishes.</p>
+                        </div>
+                    </div>
+
+                    <label class="field">
+                        <span class="field-label">RSS Feed Source Description <strong>*</strong></span>
+                        <textarea formControlName="Description" rows="6"
+                            placeholder="Briefly describe the RSS source and the type of content it publishes."></textarea>
+                        <small class="field-error" *ngIf="hasControlError('Description')">
+                            Add a clear description with at least 20 characters.
+                        </small>
+                    </label>
+                </section>
+
+                <section class="form-section division-section">
+                    <div class="division-head">
+                        <div class="division-title">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <span>RSS Feed Division Tag</span>
+                        </div>
+                        <p>Select the division where this RSS feed should be reviewed and published.</p>
+                    </div>
+
+                    <div class="division-tags-viewport">
+                        <div class="division-tags-scroll" role="tablist" aria-label="RSS feed division tags">
+                            <button type="button" *ngFor="let tag of divisionTags"
+                                class="division-chip"
+                                [class.active]="isTagActive(tag.id)"
+                                [style.--tag-color]="tag.color"
+                                (click)="selectDivisionTag(tag.id)">
+                                {{ tag.label }}
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section compliance-section">
+                    <label class="agreement-card">
+                        <input type="checkbox" formControlName="AgreementAccepted">
+                        <span>
+                            I agree that the RSS feed I am submitting belongs to a legitimate source or is publicly
+                            available for syndication. I confirm that the content does not violate copyright laws,
+                            platform policies, or contain misleading, harmful, or unlawful material. I understand that
+                            submitted RSS feeds may be reviewed, approved, edited, or removed by the Global Truth Watch
+                            Team if they do not meet our standards.
+                        </span>
+                    </label>
+                    <small class="field-error" *ngIf="hasControlError('AgreementAccepted')">
+                        You must confirm the submission guidelines before continuing.
+                    </small>
+
+                    <div class="warning-banner">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>Only submit RSS feeds from trusted and publicly available news sources.</span>
+                    </div>
+                </section>
+
+                <div class="message error-msg" *ngIf="errorMessage()">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>{{ errorMessage() }}</span>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="name">
-                    <i class="fa fa-tag"></i> Feed Name
-                </label>
-                <input type="text" id="name" formControlName="Name" placeholder="e.g. NYC Housing News"
-                    autocomplete="off">
-                <div class="error" *ngIf="rssForm.get('Name')?.touched && rssForm.get('Name')?.invalid">
-                    Name is required
+                <div class="message success-msg" *ngIf="successMessage()">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>{{ successMessage() }}</span>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="description">
-                    <i class="fa fa-align-left"></i> Description
-                </label>
-                <textarea id="description" formControlName="Description" rows="4"
-                    placeholder="Briefly describe what this feed covers..."></textarea>
-                <div class="error" *ngIf="rssForm.get('Description')?.touched && rssForm.get('Description')?.invalid">
-                    Description is required
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="imageUrl">
-                    <i class="fa fa-image"></i> Image URL (Optional)
-                </label>
-                <input type="url" id="imageUrl" formControlName="ImageUrl" placeholder="https://example.com/logo.png"
-                    autocomplete="off">
-            </div>
-
-            <div class="message error-msg" *ngIf="errorMessage()">
-                <i class="fa fa-exclamation-circle"></i> {{ errorMessage() }}
-            </div>
-            <div class="message success-msg" *ngIf="successMessage()">
-                <i class="fa fa-check-circle"></i> {{ successMessage() }}
-            </div>
-
-            <button type="submit" [disabled]="isSubmitting() || rssForm.invalid" class="submit-btn">
-                <span *ngIf="!isSubmitting()">
-                    <i class="fa fa-plug"></i> Connect Feed
-                </span>
-                <span *ngIf="isSubmitting()" class="loader"></span>
-            </button>
-
-        </form>
+                <footer class="form-footer">
+                    <p>Submitted RSS feeds will be reviewed by our editorial team before activation.</p>
+                    <button type="submit" class="submit-btn" [disabled]="isSubmitting() || rssForm.invalid">
+                        <ng-container *ngIf="!isSubmitting(); else submittingState">
+                            <span>Connect RSS Feed</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </ng-container>
+                    </button>
+                </footer>
+            </form>
         </ng-container>
 
         <ng-template #newsRssLocked>
-            <div class="message error-msg" *ngIf="newsRssAccessResolved(); else resolvingNewsAccess">
-                <i class="fa fa-lock"></i> You need Publisher-level News RSS access to connect a feed.
-            </div>
-            <ng-template #resolvingNewsAccess>
-                <div class="message">
-                    <i class="fa fa-spinner fa-spin"></i> Checking your News RSS access...
+            <section class="locked-state" *ngIf="newsRssAccessResolved(); else resolvingNewsAccess">
+                <div class="locked-icon">
+                    <i class="bi bi-lock-fill"></i>
                 </div>
+                <h2>News RSS Access Required</h2>
+                <p>You need Publisher-level News RSS access before you can connect a feed in the News division.</p>
+            </section>
+            <ng-template #resolvingNewsAccess>
+                <section class="locked-state loading-state">
+                    <div class="spinner"></div>
+                    <h2>Checking RSS Access</h2>
+                    <p>We are verifying your News RSS permissions.</p>
+                </section>
             </ng-template>
         </ng-template>
     </div>
 </div>
+
+<ng-template #submittingState>
+    <span class="spinner small"></span>
+    <span>Submitting...</span>
+</ng-template>

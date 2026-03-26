@@ -89,10 +89,11 @@
             {{ getExcerpt(comm.description, 96) }}
           </p>
 
-          <button class="btn-join" [class.joined]="comm.isJoined" (click)="joinCommunity(comm)"
-            [disabled]="comm.isLoadingJoin || comm.isJoined">
-            <ng-container *ngIf="!comm.isJoined && !comm.isLoadingJoin">Join Community</ng-container>
+          <button class="btn-join" [class.joined]="comm.isJoined || comm.isJoinRequested" (click)="joinCommunity(comm)"
+            [disabled]="comm.isLoadingJoin || comm.isJoined || comm.isJoinRequested">
+            <ng-container *ngIf="!comm.isJoined && !comm.isJoinRequested && !comm.isLoadingJoin">Join Community</ng-container>
             <ng-container *ngIf="comm.isLoadingJoin">Joining...</ng-container>
+            <ng-container *ngIf="comm.isJoinRequested"><i class="bi bi-hourglass-split"></i> Request Pending</ng-container>
             <ng-container *ngIf="comm.isJoined"><i class="bi bi-check-lg"></i> Joined</ng-container>
           </button>
         </div>
@@ -153,10 +154,15 @@
 
 
     <section class="create-cta">
-      <h2>Don’t find a community for your needs?</h2>
-      <p>Take the lead in your neighborhood. Start a new discussion group focused on the topics that matter most to you
+      <h2>{{ hasCreateCommunityAccess ? 'Ready to launch a new community?' : 'Need a new community hub?' }}</h2>
+      <p>
+        {{ hasCreateCommunityAccess
+          ? 'Open the verified community creation flow and publish a new neighborhood, civic, or support-based community.'
+          : 'Community creation is protected by the D01.2 gate. Request access through Contributor Activities, then return here to create it.' }}
       </p>
-      <button class="btn-create" routerLink="/public/create-community">Create a Community</button>
+      <button class="btn-create" routerLink="/community/create/community">
+        {{ hasCreateCommunityAccess ? 'Create Community' : 'Request Create Community Access' }}
+      </button>
     </section>
 
   </div>

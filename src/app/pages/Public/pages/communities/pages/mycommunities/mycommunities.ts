@@ -8,6 +8,8 @@ import { MyCommunity } from '../../models/mycommuinties';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
+import { getCommunityErrorMessage } from '../../../../../../shared/utils/community-contract';
+import { resolveCommunityMediaUrl } from '../../../../../../shared/utils/community-media';
 
 @Component({
   selector: 'app-mycommunities',
@@ -36,8 +38,6 @@ export class MycommunitiesComponent implements OnInit {
   totalCount: number = 0;
   totalPages: number = 1;
 
-  imgBaseUrl = 'https://nyc360.runasp.net/communities/';
-
   // Mapping types (same as discovery for consistency)
   communityTypes = [
     { id: 1, name: 'District' },
@@ -63,10 +63,10 @@ export class MycommunitiesComponent implements OnInit {
     this.loaderService.show();
 
     this.communityService.getMyCommunities({
-      Search: this.searchText,
-      Type: this.selectedType || undefined,
-      Page: this.currentPage,
-      PageSize: this.pageSize
+      search: this.searchText,
+      type: this.selectedType || undefined,
+      page: this.currentPage,
+      pageSize: this.pageSize
     }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
@@ -83,7 +83,7 @@ export class MycommunitiesComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         this.loaderService.hide();
-        console.error('Error fetching communities:', err);
+        this.toastService.error(getCommunityErrorMessage(err, 'Unable to load your communities right now.'));
         this.communities = [];
       }
     });
@@ -110,9 +110,7 @@ export class MycommunitiesComponent implements OnInit {
   }
 
   getAvatar(url: string | null | undefined): string {
-    if (!url) return 'assets/images/default-group.png'; // Fallback
-    if (url.includes('http')) return url;
-    return this.imgBaseUrl + url;
+    return resolveCommunityMediaUrl(url, 'assets/images/default-group.png');
   }
 
   getTypeName(typeId: number): string {
@@ -132,13 +130,13 @@ export class MycommunitiesComponent implements OnInit {
           this.communities = this.communities.filter(c => c.id !== comm.id);
           this.toastService.success('You have left the community.');
         } else {
-          this.toastService.error('Failed to leave community.');
+          this.toastService.error(getCommunityErrorMessage(res, 'Failed to leave the community.'));
         }
         comm.isLoadingJoin = false;
       },
-      error: () => {
+      error: (error) => {
         comm.isLoadingJoin = false;
-        this.toastService.error('An error occurred.');
+        this.toastService.error(getCommunityErrorMessage(error, 'An error occurred while leaving the community.'));
       }
     })
   }

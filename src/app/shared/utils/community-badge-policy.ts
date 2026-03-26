@@ -30,7 +30,7 @@ const COMMUNITY_D01_TAG_IDS = {
   organization: 2002
 } as const;
 
-const COMMUNITY_D01_LABELS = {
+export const COMMUNITY_D01_LABELS = {
   leader: 'Apply for Community Leader Badges',
   create: 'Apply for Create a Community',
   organization: 'List Community Organization in Space'
@@ -81,6 +81,14 @@ function pickById(options: BadgeOption[], id: number): BadgeOption | null {
   return options.find((option) => option.id === id) || null;
 }
 
+function getDefaultCommunityD01BadgeOptions(): BadgeOption[] {
+  return [
+    { id: COMMUNITY_D01_TAG_IDS.leader, name: COMMUNITY_D01_LABELS.leader },
+    { id: COMMUNITY_D01_TAG_IDS.create, name: COMMUNITY_D01_LABELS.create },
+    { id: COMMUNITY_D01_TAG_IDS.organization, name: COMMUNITY_D01_LABELS.organization }
+  ];
+}
+
 export function isInternalCommunityMembershipTag(tag: TagLike | null | undefined): boolean {
   if (!tag) return false;
 
@@ -110,12 +118,59 @@ export function isCommunityLeaderTag(tag: TagLike | null | undefined): boolean {
   return COMMUNITY_LEADER_TAG_NAMES.some((name) => normalized.includes(name));
 }
 
+export function isCommunityCreateTag(tag: TagLike | null | undefined): boolean {
+  if (!tag) return false;
+
+  const tagId = getTagId(tag);
+  if (tagId === COMMUNITY_D01_TAG_IDS.create) {
+    return true;
+  }
+
+  const normalized = normalizeTagName(getTagName(tag));
+  if (!normalized) return false;
+
+  return COMMUNITY_D01_ALIASES.create.some((name) => normalized.includes(name));
+}
+
+export function isCommunityOrganizationTag(tag: TagLike | null | undefined): boolean {
+  if (!tag) return false;
+
+  const tagId = getTagId(tag);
+  if (tagId === COMMUNITY_D01_TAG_IDS.organization) {
+    return true;
+  }
+
+  const normalized = normalizeTagName(getTagName(tag));
+  if (!normalized) return false;
+
+  return COMMUNITY_D01_ALIASES.organization.some((name) => normalized.includes(name));
+}
+
+export function isAnyCommunityContributorTag(tag: TagLike | null | undefined): boolean {
+  return isCommunityLeaderTag(tag) || isCommunityCreateTag(tag) || isCommunityOrganizationTag(tag);
+}
+
+export function hasCommunityLeaderTag(tags: TagLike[] | null | undefined): boolean {
+  return Array.isArray(tags) && tags.some((tag) => isCommunityLeaderTag(tag));
+}
+
+export function hasCommunityCreateTag(tags: TagLike[] | null | undefined): boolean {
+  return Array.isArray(tags) && tags.some((tag) => isCommunityCreateTag(tag));
+}
+
+export function hasCommunityOrganizationTag(tags: TagLike[] | null | undefined): boolean {
+  return Array.isArray(tags) && tags.some((tag) => isCommunityOrganizationTag(tag));
+}
+
+export function hasAnyCommunityContributorTag(tags: TagLike[] | null | undefined): boolean {
+  return Array.isArray(tags) && tags.some((tag) => isAnyCommunityContributorTag(tag));
+}
+
 /**
  * Builds community verification options in fixed order/labels, while preserving backend tag IDs.
  */
 export function buildCommunityD01BadgeOptions(tags: TagLike[] | null | undefined): BadgeOption[] {
   const incoming = toBadgeOptions(tags);
-  if (!incoming.length) return [];
 
   const usedIds = new Set<number>();
 
@@ -132,17 +187,20 @@ export function buildCommunityD01BadgeOptions(tags: TagLike[] | null | undefined
 
   const results: BadgeOption[] = [];
 
-  if (leader) {
-    results.push({ id: leader.id, name: COMMUNITY_D01_LABELS.leader });
-  }
+  results.push({
+    id: leader?.id ?? COMMUNITY_D01_TAG_IDS.leader,
+    name: COMMUNITY_D01_LABELS.leader
+  });
 
-  if (create) {
-    results.push({ id: create.id, name: COMMUNITY_D01_LABELS.create });
-  }
+  results.push({
+    id: create?.id ?? COMMUNITY_D01_TAG_IDS.create,
+    name: COMMUNITY_D01_LABELS.create
+  });
 
-  if (organization) {
-    results.push({ id: organization.id, name: COMMUNITY_D01_LABELS.organization });
-  }
+  results.push({
+    id: organization?.id ?? COMMUNITY_D01_TAG_IDS.organization,
+    name: COMMUNITY_D01_LABELS.organization
+  });
 
-  return results;
+  return results.length ? results : getDefaultCommunityD01BadgeOptions();
 }

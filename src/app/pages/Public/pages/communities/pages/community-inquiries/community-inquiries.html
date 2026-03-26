@@ -1,0 +1,91 @@
+<div class="community-inquiries-page">
+  <app-community-department-hero
+    title="My Inquiries"
+    description="Track your community join requests and jump back into the communities you already belong to."
+    [showDefaultSearch]="false">
+    <div hero-search-slot class="community-inquiries-hero-filter-bar">
+      <div class="search-input">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          placeholder="Search communities or requests..."
+          [(ngModel)]="searchText">
+      </div>
+    </div>
+  </app-community-department-hero>
+
+  <div class="container inquiries-shell">
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner-border" role="status"></div>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+      <section class="inquiries-section">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Join Requests</p>
+            <h2>Community membership status</h2>
+          </div>
+          <button type="button" class="refresh-btn" (click)="loadData()">Refresh</button>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredRequests.length === 0">
+          <i class="bi bi-inboxes"></i>
+          <p>No community requests found.</p>
+        </div>
+
+        <div class="request-grid" *ngIf="filteredRequests.length > 0">
+          <article class="request-card" *ngFor="let request of filteredRequests">
+            <div class="request-card-head">
+              <div>
+                <h3>{{ request.communityName || 'Community Request' }}</h3>
+                <p *ngIf="request.requestedAt">Submitted {{ request.requestedAt | date:'mediumDate' }}</p>
+              </div>
+              <span class="status-pill" [ngClass]="getStatusClass(request.status)">
+                {{ getRequestStatusLabel(request.status) }}
+              </span>
+            </div>
+
+            <div class="request-meta">
+              <span *ngIf="request.memberRole">Role: {{ getRequestRoleLabel(request.memberRole) }}</span>
+              <span *ngIf="request.reviewedAt">Reviewed {{ request.reviewedAt | date:'mediumDate' }}</span>
+            </div>
+
+            <a
+              *ngIf="request.communitySlug"
+              class="request-link"
+              [routerLink]="['/community', request.communitySlug]">
+              Open Community
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <section class="inquiries-section">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">My Communities</p>
+            <h2>Quick access</h2>
+          </div>
+          <a routerLink="/community/my-communities" class="view-all-link">View all</a>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredCommunities.length === 0">
+          <i class="bi bi-people"></i>
+          <p>You have not joined any communities yet.</p>
+        </div>
+
+        <div class="community-grid" *ngIf="filteredCommunities.length > 0">
+          <article class="community-card" *ngFor="let community of filteredCommunities">
+            <div class="community-card-head">
+              <h3>{{ community.name }}</h3>
+              <span>{{ community.memberCount }} members</span>
+            </div>
+            <p>{{ community.description || 'No description available yet.' }}</p>
+            <a [routerLink]="['/community', community.slug]" class="request-link">Visit community</a>
+          </article>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+</div>

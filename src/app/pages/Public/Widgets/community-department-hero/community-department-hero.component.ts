@@ -5,16 +5,22 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { CommunityService } from '../../pages/communities/services/community';
 import { CommunityLeaderApplicationModalComponent } from '../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
-import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { buildCommunityD01BadgeOptions, isCommunityLeaderTag } from '../../../../shared/utils/community-badge-policy';
-import { CommunityLeaderApplicationPayload } from '../../pages/communities/models/community-leader-application';
+import { BadgeOption, buildCommunityD01BadgeOptions } from '../../../../shared/utils/community-badge-policy';
+import {
+  hasCommunityStaffBypass,
+  hasCommunityContributorAccess as hasCommunityContributorAccessTag,
+  hasCommunityCreateAccess as hasCommunityCreateAccessTag,
+  hasCommunityLeaderAccess as hasCommunityLeaderAccessTag,
+  hasCommunityOrganizationAccess as hasCommunityOrganizationAccessTag,
+  isCommunityGate1Eligible
+} from '../../../../shared/utils/community-contract';
 import { getDepartmentExploreRoute } from '../feeds/models/categories';
 
 @Component({
   selector: 'app-community-department-hero',
   standalone: true,
-  imports: [CommonModule, RouterModule, VerificationModalComponent, CommunityLeaderApplicationModalComponent],
+  imports: [CommonModule, RouterModule, CommunityLeaderApplicationModalComponent],
   templateUrl: './community-department-hero.component.html',
   styleUrls: ['./community-department-hero.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -35,12 +41,10 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   isActivityDropdownOpen = false;
   private activityDropdownCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
-  currentUserInfo: any | null = null;
-  communityPublicBadgeTags: any[] = buildCommunityD01BadgeOptions([]);
-  verificationModalOccupations: any[] = [];
-  isVerificationModalOpen = false;
+  currentUserInfo: any | null = this.authService.getFullUserInfo();
+  communityPublicBadgeTags: BadgeOption[] = buildCommunityD01BadgeOptions([]);
   isLeaderApplicationModalOpen = false;
-  isSubmittingLeaderApplication = false;
+  preferredApplicationOccupationId: number | null = null;
 
   ngOnInit(): void {
     this.authService.fullUserInfo$
@@ -50,9 +54,13 @@ export class CommunityDepartmentHeroComponent implements OnInit {
         this.cdr.markForCheck();
       });
 
-    this.communityService.getCommunityHome(1, 1).subscribe({
-      next: (res: any) => {
-        this.communityPublicBadgeTags = buildCommunityD01BadgeOptions(res?.data?.tags || []);
+    if (this.authService.isLoggedIn() && !this.authService.getFullUserInfo()) {
+      this.authService.fetchFullUserInfo().subscribe({ error: () => undefined });
+    }
+
+    this.communityService.getCommunityBadgeOptions().subscribe({
+      next: (options) => {
+        this.communityPublicBadgeTags = options;
         this.cdr.markForCheck();
       },
       error: () => {
@@ -63,13 +71,29 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   }
 
   get hasCommunityLeaderAccess(): boolean {
-    if (this.authService.hasRole('SuperAdmin')) return true;
+    return this.hasStaffBypass || hasCommunityLeaderAccessTag(this.currentUserInfo?.tags || []);
+  }
 
-    if (this.currentUserInfo?.tags) {
-      return this.currentUserInfo.tags.some((tag: any) => isCommunityLeaderTag(tag));
-    }
+  get hasCreateCommunityAccess(): boolean {
+    return this.hasStaffBypass || hasCommunityCreateAccessTag(this.currentUserInfo?.tags || []);
+  }
 
-    return false;
+  get hasOrganizationListingAccess(): boolean {
+    return this.hasStaffBypass || hasCommunityOrganizationAccessTag(this.currentUserInfo?.tags || []);
+  }
+
+  get hasCommunityContributorAccess(): boolean {
+    return this.hasStaffBypass || hasCommunityContributorAccessTag(this.currentUserInfo?.tags || []);
+  }
+
+  get hasStaffBypass(): boolean {
+    return this.authService.hasRole('Admin')
+      || this.authService.hasRole('SuperAdmin')
+      || hasCommunityStaffBypass(this.currentUserInfo);
+  }
+
+  get hasGate1Eligibility(): boolean {
+    return this.hasStaffBypass || isCommunityGate1Eligible(this.currentUserInfo);
   }
 
   get leaderApplicationFullName(): string {
@@ -93,80 +117,50 @@ export class CommunityDepartmentHeroComponent implements OnInit {
     });
   }
 
-  openVerificationModal(preferredOccupationName: string | null = null): void {
-    this.verificationModalOccupations = this.prioritizeVerificationOccupations(preferredOccupationName);
-    if (!this.verificationModalOccupations.length) {
-      this.toastService.error('Community verification roles are not configured on the backend yet.');
-      this.cdr.markForCheck();
-      return;
-    }
-    this.isVerificationModalOpen = true;
-    this.isActivityDropdownOpen = false;
+  openLeaderApplicationModal(): void {
+    this.openContributorApplicationModal(null);
   }
 
-  openLeaderApplicationModal(): void {
-    this.isVerificationModalOpen = false;
-    this.verificationModalOccupations = [];
-    this.isSubmittingLeaderApplication = false;
+  openLeaderPublishingAccessModal(): void {
+    this.openContributorApplicationModal('Apply for Community Leader Badges');
+  }
+
+  openCreateCommunityAccessModal(): void {
+    this.openContributorApplicationModal('Apply for Create a Community');
+  }
+
+  openOrganizationListingAccessModal(): void {
+    this.openContributorApplicationModal('List Community Organization in Space');
+  }
+
+  private openContributorApplicationModal(preferredOccupationName: string | null): void {
+    if (!this.hasGate1Eligibility) {
+      this.toastService.info('A verified Resident, Organization, or Business account is required before requesting D01 Community contributor access.');
+      this.router.navigate(['/public/profile/settings']);
+      this.isActivityDropdownOpen = false;
+      return;
+    }
+
+    if (!this.communityPublicBadgeTags.length) {
+      this.toastService.error('Community contributor roles are not configured on the backend yet.');
+      this.isActivityDropdownOpen = false;
+      return;
+    }
+
+    this.preferredApplicationOccupationId = this.resolvePreferredOccupationId(preferredOccupationName);
     this.isLeaderApplicationModalOpen = true;
     this.isActivityDropdownOpen = false;
   }
 
-  openVerificationFromDropdown(preferredOccupationName: string | null = null): void {
-    const normalized = this.normalizeOccupationNameForMatch(preferredOccupationName);
-    if (!normalized || normalized.includes('leader')) {
-      this.openLeaderApplicationModal();
-      return;
-    }
-
-    this.openVerificationModal(preferredOccupationName);
-  }
-
-  closeVerificationModal(): void {
-    this.isVerificationModalOpen = false;
-    this.verificationModalOccupations = [];
-    this.cdr.markForCheck();
-  }
-
   onVerified(): void {
     this.authService.fetchFullUserInfo().subscribe();
-    this.closeVerificationModal();
+    this.closeLeaderApplicationModal();
   }
 
   closeLeaderApplicationModal(): void {
-    this.isSubmittingLeaderApplication = false;
+    this.preferredApplicationOccupationId = null;
     this.isLeaderApplicationModalOpen = false;
     this.cdr.markForCheck();
-  }
-
-  onLeaderApplicationSubmitted(payload: CommunityLeaderApplicationPayload): void {
-    if (this.isSubmittingLeaderApplication) return;
-
-    this.isSubmittingLeaderApplication = true;
-    this.cdr.markForCheck();
-
-    this.communityService.submitCommunityLeaderApplication(payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res: any) => {
-          this.isSubmittingLeaderApplication = false;
-
-          if (res?.isSuccess || res?.IsSuccess) {
-            const status = String(res?.data?.status || 'Pending').trim();
-            this.toastService.success(`Community leader application submitted. Status: ${status}.`);
-            this.closeLeaderApplicationModal();
-            return;
-          }
-
-          this.toastService.error(this.getLeaderApplicationErrorMessage(res));
-          this.cdr.markForCheck();
-        },
-        error: (error: any) => {
-          this.isSubmittingLeaderApplication = false;
-          this.toastService.error(this.getLeaderApplicationErrorMessage(error));
-          this.cdr.markForCheck();
-        }
-      });
   }
 
   toggleActivityDropdown(event: Event): void {
@@ -205,38 +199,6 @@ export class CommunityDepartmentHeroComponent implements OnInit {
     }
   }
 
-  private prioritizeVerificationOccupations(preferredOccupationName: string | null): any[] {
-    const source = Array.isArray(this.communityPublicBadgeTags) ? [...this.communityPublicBadgeTags] : [];
-    if (!source.length) return source;
-
-    const preferred = this.normalizeOccupationNameForMatch(preferredOccupationName);
-    if (!preferred) return source;
-
-    const preferredTokens = preferred.split(' ').filter((token) => token.length > 2);
-    if (!preferredTokens.length) return source;
-
-    let bestIndex = -1;
-    let bestScore = 0;
-
-    source.forEach((occupation, index) => {
-      const normalizedName = this.normalizeOccupationNameForMatch(occupation?.name ?? occupation?.Name);
-      const score = preferredTokens.reduce((sum, token) => (
-        normalizedName.includes(token) ? sum + 1 : sum
-      ), 0);
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestIndex = index;
-      }
-    });
-
-    if (bestIndex <= 0) return source;
-
-    const [preferredItem] = source.splice(bestIndex, 1);
-    source.unshift(preferredItem);
-    return source;
-  }
-
   private normalizeOccupationNameForMatch(value: string | null | undefined): string {
     return String(value || '')
       .toLowerCase()
@@ -245,21 +207,15 @@ export class CommunityDepartmentHeroComponent implements OnInit {
       .trim();
   }
 
-  private getLeaderApplicationErrorMessage(source: any): string {
-    if (source?.status === 401) {
-      return 'Please log in to submit a community leader application.';
-    }
+  private resolvePreferredOccupationId(preferredOccupationName: string | null | undefined): number | null {
+    const normalized = this.normalizeOccupationNameForMatch(preferredOccupationName);
+    if (!normalized) return null;
 
-    if (source?.status === 403) {
-      return 'Your account is not allowed to submit a community leader application.';
-    }
+    const match = this.communityPublicBadgeTags.find((occupation) =>
+      this.normalizeOccupationNameForMatch(occupation?.name).includes(normalized)
+      || normalized.includes(this.normalizeOccupationNameForMatch(occupation?.name))
+    );
 
-    return source?.error?.error?.Message
-      || source?.error?.Error?.Message
-      || source?.error?.message
-      || source?.error?.Message
-      || source?.Error?.Message
-      || source?.message
-      || 'Unable to submit the community leader application.';
+    return match?.id ?? null;
   }
 }

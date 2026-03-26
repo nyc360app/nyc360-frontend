@@ -12,6 +12,7 @@ interface HeroButtonChild {
   link: any[];
   icon?: string;
   isAction?: boolean;
+  opensVerification?: boolean;
   queryParams?: any;
 }
 
@@ -109,12 +110,6 @@ export class NewsDepartmentHeroComponent implements OnInit {
   }
 
   isActionVisible(child: HeroButtonChild): boolean {
-    if (!child?.isAction) return true;
-
-    if (this.isRssAction(child)) {
-      return this.canConnectRss;
-    }
-
     return true;
   }
 
@@ -129,6 +124,11 @@ export class NewsDepartmentHeroComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
+    this.showVerificationModal = true;
+    this.cdr.markForCheck();
+  }
+
+  openVerificationRequest(): void {
     this.showVerificationModal = true;
     this.cdr.markForCheck();
   }
@@ -164,9 +164,10 @@ export class NewsDepartmentHeroComponent implements OnInit {
       if (link.isDropdown && link.children) {
         button.children = link.children.map((child: any): HeroButtonChild => ({
           label: child.label,
-          link: [child.route],
+          link: child.route ? [child.route] : [],
           icon: child.icon,
           isAction: !!child.isAction,
+          opensVerification: !!child.opensVerification,
           queryParams: child.route?.includes('/posts/create') || child.route?.includes('/rss/connect')
             ? { category: this.categoryId }
             : (child.queryParams || undefined)

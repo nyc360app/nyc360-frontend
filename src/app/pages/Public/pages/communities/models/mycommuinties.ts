@@ -23,8 +23,22 @@ export interface ApiResponse<T> {
 }
 
 export interface MyCommunitiesParams {
-  Search?: string;
-  Type?: number;
+  search?: string;
+  type?: number;
+  locationId?: number;
+  page?: number;
+  pageSize?: number;
   Page?: number;
   PageSize?: number;
+}
+
+export interface CommunityMyRequest {
+  communityId: number;
+  communityName?: string;
+  communitySlug?: string;
+  status?: string;
+  requestedAt?: string;
+  reviewedAt?: string | null;
+  memberRole?: number | string | null;
+  isPrivate?: boolean;
 }

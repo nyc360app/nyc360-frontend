@@ -102,3 +102,47 @@ export interface ProcessDisbandRequestRequest {
     approved: boolean;
     adminNotes?: string;
 }
+
+export type CommunityLeaderApplicationStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface CommunityLeaderApplicationSummaryDto {
+    applicationId: number;
+    userId: number;
+    applicantName: string;
+    applicantUsername: string;
+    email: string;
+    communityName: string;
+    location: string;
+    ledBefore: boolean;
+    status: CommunityLeaderApplicationStatus;
+    submittedAt: string;
+}
+
+export interface CommunityLeaderApplicationDetailsDto extends CommunityLeaderApplicationSummaryDto {
+    phoneNumber: string;
+    profileLink?: string | null;
+    motivation: string;
+    experience: string;
+    weeklyAvailability: string;
+    agreedToGuidelines: boolean;
+    verificationFileUrl?: string | null;
+    adminNotes?: string | null;
+    reviewedAt?: string | null;
+}
+
+export interface ReviewCommunityLeaderApplicationRequest {
+    approved: boolean;
+    adminNotes?: string;
+    adminComment?: string;
+}
+
+export interface CommunityLeaderApplicationReviewResultDto {
+    applicationId: number;
+    status: CommunityLeaderApplicationStatus;
+    adminNotes?: string | null;
+    reviewedAt?: string | null;
+}
+
+export type CommunityLeaderApplicationListResponse = StandardResponse<PagedResponse<CommunityLeaderApplicationSummaryDto>>;
+export type CommunityLeaderApplicationDetailsResponse = StandardResponse<CommunityLeaderApplicationDetailsDto>;
+export type CommunityLeaderApplicationReviewResponse = StandardResponse<CommunityLeaderApplicationReviewResultDto>;

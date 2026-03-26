@@ -1,8 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, CommunityProfileData, CommunityMember } from '../models/community-profile';
+import {
+  ApiResponse,
+  CommunityProfileData,
+  CommunityMember,
+  PagedCommunityMembersResponse
+} from '../models/community-profile';
 import { environment } from '../../../../../environments/environment';
+import { CommunityRequestDto, RequestApiResponse } from '../models/community-requests';
 
 @Injectable({
   providedIn: 'root'
@@ -10,55 +16,90 @@ import { environment } from '../../../../../environments/environment';
 export class CommunityProfileService {
 
   private http = inject(HttpClient);
-  // تأكد إن المسار الأساسي مظبوط على /api/communities
   private apiUrl = `${environment.apiBaseUrl}/communities`;
 
-  // 1. Get Community Profile by Slug
-  getCommunityBySlug(slug: string): Observable<ApiResponse<CommunityProfileData>> {
-    return this.http.get<ApiResponse<CommunityProfileData>>(`${this.apiUrl}/${slug}`);
+  getCommunityBySlug(
+    slug: string,
+    page: number = 1,
+    pageSize: number = 20
+  ): Observable<ApiResponse<CommunityProfileData>> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+
+    return this.http.get<ApiResponse<CommunityProfileData>>(`${this.apiUrl}/${slug}`, { params });
   }
 
-  // 2. Get Members
-  getCommunityMembers(communityId: number): Observable<ApiResponse<CommunityMember[]>> {
-    return this.http.get<ApiResponse<CommunityMember[]>>(`${this.apiUrl}/${communityId}/members`);
+  getCommunityMembers(
+    communityId: number,
+    page: number = 1,
+    pageSize: number = 20
+  ): Observable<PagedCommunityMembersResponse> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+
+    return this.http.get<PagedCommunityMembersResponse>(`${this.apiUrl}/${communityId}/members`, { params });
   }
 
-  // 3. Join Community (✅ دي الدالة اللي كانت ناقصة)
   joinCommunity(communityId: number): Observable<ApiResponse<any>> {
-    const body = { CommunityId: communityId };
+    const body = { communityId };
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/join`, body);
   }
 
-  // 4. Leave Community (✅ دي الدالة اللي كانت ناقصة)
   leaveCommunity(communityId: number): Observable<ApiResponse<any>> {
-    const body = { CommunityId: communityId };
+    const body = { communityId };
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/leave`, body);
   }
 
-  // 5. Remove Member
   removeMember(communityId: number, memberId: number): Observable<ApiResponse<any>> {
     return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${communityId}/members/${memberId}`);
   }
 
-  // 6. Update Member Role
   updateMemberRole(communityId: number, targetUserId: number, newRole: number): Observable<ApiResponse<any>> {
-    const body = { NewRole: newRole };
+    const body = { communityId, targetUserId, newRole };
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${communityId}/members/${targetUserId}/role`, body);
   }
 
-  // 7. Transfer Ownership
   transferOwnership(communityId: number, newOwnerId: number): Observable<ApiResponse<string>> {
-    const body = { NewOwnerId: newOwnerId };
+    const body = { communityId, newOwnerId };
     return this.http.post<ApiResponse<string>>(`${this.apiUrl}/${communityId}/transfer-ownership`, body);
   }
 
-  // 8. Disband Community
   disbandCommunity(communityId: number): Observable<ApiResponse<any>> {
     return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${communityId}/disband`);
   }
 
-  // 9. Update Community Info
   updateCommunity(communityId: number, formData: FormData): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${communityId}/update`, formData);
+  }
+
+  getRequests(communityId: number): Observable<RequestApiResponse<CommunityRequestDto[]>> {
+    return this.http.get<RequestApiResponse<CommunityRequestDto[]>>(`${this.apiUrl}/${communityId}/requests`);
+  }
+
+  approveRequest(communityId: number, targetUserId: number): Observable<RequestApiResponse<any>> {
+    return this.http.post<RequestApiResponse<any>>(`${this.apiUrl}/${communityId}/requests/${targetUserId}/approve`, {});
+  }
+
+  rejectRequest(communityId: number, targetUserId: number): Observable<RequestApiResponse<any>> {
+    return this.http.post<RequestApiResponse<any>>(`${this.apiUrl}/${communityId}/requests/${targetUserId}/reject`, {});
+  }
+
+  searchCommunityMembers(
+    communityId: number,
+    searchTerm: string,
+    page: number = 1,
+    pageSize: number = 20
+  ): Observable<PagedCommunityMembersResponse> {
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+
+    if (searchTerm.trim()) {
+      params = params.set('searchTerm', searchTerm.trim());
+    }
+
+    return this.http.get<PagedCommunityMembersResponse>(`${this.apiUrl}/${communityId}/members/search`, { params });
   }
 }

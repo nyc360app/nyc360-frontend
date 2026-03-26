@@ -28,7 +28,7 @@
         <span>Contributor Dashboard</span>
       </a>
 
-      <div class="nav-dropdown-complex" (mouseenter)="openActivityDropdown()"
+      <div class="nav-dropdown-wrapper" (mouseenter)="openActivityDropdown()"
         (mouseleave)="scheduleCloseActivityDropdown()">
         <button class="nav-btn dropdown-toggle-btn" type="button" (click)="toggleActivityDropdown($event)"
           [class.active]="isActivityDropdownOpen">
@@ -36,54 +36,72 @@
           <span>Contributor Activities</span>
           <i class="bi bi-chevron-down dropdown-caret"></i>
         </button>
-        <div class="dropdown-menu-main" [class.show]="isActivityDropdownOpen" (click)="$event.stopPropagation()">
-          <button type="button" class="simple-item activity-pill" (click)="openLeaderApplicationModal()">
-            Apply For Community Leader
-          </button>
-
-          <a routerLink="/community/create/community" class="simple-item activity-pill" (click)="closeActivityDropdown()">
-            Creating a Community
-          </a>
-
-          <button type="button" class="simple-item activity-pill"
-            (click)="openVerificationFromDropdown('List Community Organization in THE360 SPACE')">
-            List Community Organization in SPACE
-          </button>
-
-          <ng-container *ngIf="hasCommunityLeaderAccess; else lockedNews">
-            <a routerLink="/community/create/article" class="simple-item activity-pill"
-              (click)="closeActivityDropdown()">
-              Publish News Article
-            </a>
+        <div class="dropdown-menu-custom" [class.show]="isActivityDropdownOpen" (click)="$event.stopPropagation()">
+          <ng-container *ngIf="!hasCommunityContributorAccess; else contributorReadyState">
+            <button type="button" class="dropdown-item-custom" (click)="openLeaderApplicationModal()">
+              <i class="bi bi-stars" aria-hidden="true"></i>
+              Start Community Journey
+            </button>
           </ng-container>
-          <ng-template #lockedNews>
-            <div class="locked-tooltip-wrap">
-              <button type="button" class="simple-item locked-row" disabled aria-disabled="true">
-                <i class="bi bi-lock-fill" aria-hidden="true"></i>
-                <span>Publish News Article</span>
-              </button>
-              <div class="locked-tooltip" role="tooltip">
-                Requires Community Leader badge approval.
-              </div>
+          <ng-template #contributorReadyState>
+            <div class="dropdown-item-custom status-item">
+              <i class="bi bi-patch-check-fill" aria-hidden="true"></i>
+              Community Contributor Access Active
             </div>
           </ng-template>
 
-          <ng-container *ngIf="hasCommunityLeaderAccess; else lockedRSS">
-            <a routerLink="/community/rss/connect" class="simple-item activity-pill"
+          <ng-container *ngIf="hasOrganizationListingAccess; else lockedOrganizationListing">
+            <a routerLink="/community/listings/submit" class="dropdown-item-custom" (click)="closeActivityDropdown()">
+              <i class="bi bi-geo-alt" aria-hidden="true"></i>
+              List Community Organization in THE360 SPACE
+            </a>
+          </ng-container>
+          <ng-template #lockedOrganizationListing>
+            <button type="button" class="dropdown-item-custom locked" (click)="openOrganizationListingAccessModal()">
+              <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              <span>List Community Organization in THE360 SPACE</span>
+            </button>
+          </ng-template>
+
+          <ng-container *ngIf="hasCommunityLeaderAccess; else lockedPublishing">
+            <a routerLink="/community/create/article" class="dropdown-item-custom"
               (click)="closeActivityDropdown()">
+              <i class="bi bi-pencil-square" aria-hidden="true"></i>
+              Write Community News or Announcement
+            </a>
+          </ng-container>
+          <ng-template #lockedPublishing>
+            <button type="button" class="dropdown-item-custom locked" (click)="openLeaderPublishingAccessModal()">
+              <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              <span>Write Community News or Announcement</span>
+            </button>
+          </ng-template>
+
+          <ng-container *ngIf="hasCommunityLeaderAccess; else lockedRSS">
+            <a routerLink="/community/rss/connect" class="dropdown-item-custom"
+              (click)="closeActivityDropdown()">
+              <i class="bi bi-rss" aria-hidden="true"></i>
               Connect RSS Feed
             </a>
           </ng-container>
           <ng-template #lockedRSS>
-            <div class="locked-tooltip-wrap">
-              <button type="button" class="simple-item locked-row" disabled aria-disabled="true">
-                <i class="bi bi-lock-fill" aria-hidden="true"></i>
-                <span>Connect RSS Feed</span>
-              </button>
-              <div class="locked-tooltip" role="tooltip">
-                Requires Community Leader badge approval.
-              </div>
-            </div>
+            <button type="button" class="dropdown-item-custom locked" (click)="openLeaderPublishingAccessModal()">
+              <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              <span>Connect RSS Feed</span>
+            </button>
+          </ng-template>
+
+          <ng-container *ngIf="hasCreateCommunityAccess; else lockedCreateCommunity">
+            <a routerLink="/community/create/community" class="dropdown-item-custom" (click)="closeActivityDropdown()">
+              <i class="bi bi-people-fill" aria-hidden="true"></i>
+              Create Community
+            </a>
+          </ng-container>
+          <ng-template #lockedCreateCommunity>
+            <button type="button" class="dropdown-item-custom locked" (click)="openCreateCommunityAccessModal()">
+              <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              <span>Create Community</span>
+            </button>
           </ng-template>
         </div>
       </div>
@@ -95,12 +113,9 @@
     </div>
   </header>
 
-  <app-verification-modal *ngIf="isVerificationModalOpen" [categoryName]="'Community'" [categoryId]="4"
-    [extraOccupations]="verificationModalOccupations" (close)="closeVerificationModal()" (verified)="onVerified()">
-  </app-verification-modal>
-
   <app-community-leader-application-modal *ngIf="isLeaderApplicationModalOpen" [fullName]="leaderApplicationFullName"
-    [email]="leaderApplicationEmail" [phoneNumber]="leaderApplicationPhoneNumber" [isSubmitting]="isSubmittingLeaderApplication"
-    (close)="closeLeaderApplicationModal()" (submitApplication)="onLeaderApplicationSubmitted($event)">
+    [email]="leaderApplicationEmail" [phoneNumber]="leaderApplicationPhoneNumber"
+    [availableOccupations]="communityPublicBadgeTags" [preferredOccupationId]="preferredApplicationOccupationId"
+    (close)="closeLeaderApplicationModal()" (verified)="onVerified()">
   </app-community-leader-application-modal>
 </section>

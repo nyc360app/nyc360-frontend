@@ -4,7 +4,26 @@
   </app-community-department-hero>
 
   <div class="community-create-wrap" style="width:min(calc(100% - 28px), 700px); max-width:700px; margin:28px auto 0;">
-    <form [formGroup]="form" (ngSubmit)="submit()" class="community-create-form">
+    <section *ngIf="showLockedState" class="community-access-lock">
+      <p class="lock-kicker">D01.2 Gate Required</p>
+      <h2>Create Community is locked for this account</h2>
+      <p *ngIf="!hasGate1Eligibility">
+        A verified Resident, Organization, or Business account is required first. After that, request the D01.2 Create a Community contributor tag to unlock community creation.
+      </p>
+      <p *ngIf="hasGate1Eligibility && !hasCreateGateAccess">
+        Your account is eligible for Community contributor flows, but it still needs the D01.2 Create a Community contributor tag before this form can be submitted.
+      </p>
+      <div class="lock-actions">
+        <button type="button" class="btn-submit" (click)="openCreateAccessModal()">
+          {{ hasGate1Eligibility ? 'Request D01.2 Access' : 'Go to Verification Settings' }}
+        </button>
+        <button type="button" class="btn-cancel" routerLink="/community">
+          Back to Community
+        </button>
+      </div>
+    </section>
+
+    <form *ngIf="!showLockedState" [formGroup]="form" (ngSubmit)="submit()" class="community-create-form">
       <div class="community-create-grid">
         <section class="form-card card-basics">
           <h3><i class="bi bi-info-circle-fill"></i> Basics</h3>
@@ -24,7 +43,7 @@
           </div>
 
           <div class="form-group">
-            <label>Slug (URL) <span class="req">*</span></label>
+            <label>Slug (URL)</label>
             <div class="input-wrapper">
               <span class="prefix">nyc360.com/c/</span>
               <input type="text" formControlName="slug" placeholder="west-village-book-club" />
@@ -33,38 +52,6 @@
               Use only lowercase letters, numbers, and hyphens.
             </div>
           </div>
-        </section>
-
-        <section class="form-card card-division">
-          <h3><i class="bi bi-info-circle-fill"></i> Community Division Tag</h3>
-          <div class="division-tags">
-            <button
-              type="button"
-              [class]="'division-tag ' + getDivisionTagClass(tag)"
-              *ngFor="let tag of divisionTags"
-              [class.active]="selectedDivisionTag === tag"
-              (click)="onDivisionTagSelect(tag)"
-            >
-              {{ tag }}
-            </button>
-          </div>
-          <p class="card-hint">Communities must include specific division tags to improve discoverability.</p>
-        </section>
-
-        <section class="form-card card-category">
-          <h3><i class="bi bi-info-circle-fill"></i> Community Category</h3>
-          <div class="pill-list">
-            <button
-              type="button"
-              class="pill-btn"
-              *ngFor="let category of communityCategories"
-              [class.active]="selectedCommunityCategory === category"
-              (click)="onCommunityCategorySelect(category)"
-            >
-              {{ category }}
-            </button>
-          </div>
-          <p class="card-hint">Select your community category.</p>
         </section>
 
         <section class="form-card card-type">
@@ -100,7 +87,7 @@
 
         <section class="form-card location-card card-location">
           <h3><i class="bi bi-geo-alt-fill"></i> Location</h3>
-          <p class="hint">Search for a Borough, Neighborhood, or ZIP code.</p>
+          <p class="hint">Optional. Search for a Borough, Neighborhood, or ZIP code if this community is location-based.</p>
 
           <div class="search-wrapper">
             <input
@@ -133,8 +120,8 @@
             </div>
           </div>
 
-          <div class="error" *ngIf="form.get('locationId')?.touched && form.get('locationId')?.invalid">
-            Location is required. Please select from the list.
+          <div class="error" *ngIf="locationSearchControl.value && !selectedLocation">
+            Pick a location from the search results or clear the field.
           </div>
         </section>
 
@@ -196,12 +183,28 @@
         {{ errorSummary }}
       </div>
 
+      <div class="submission-note" *ngIf="!errorSummary">
+        <i class="bi bi-shield-check"></i>
+        Duplicate names, spam patterns, and invalid locations are reviewed before a community is created.
+      </div>
+
       <div class="actions-row">
-        <button type="button" class="btn-cancel" routerLink="/public/community">Cancel</button>
+        <button type="button" class="btn-cancel" routerLink="/community">Cancel</button>
         <button type="submit" class="btn-submit" [disabled]="isSubmitting">
           {{ isSubmitting ? 'Creating...' : 'Create Community' }}
         </button>
       </div>
     </form>
   </div>
+
+  <app-community-leader-application-modal
+    *ngIf="isVerificationModalOpen"
+    [fullName]="contributorApplicationFullName"
+    [email]="contributorApplicationEmail"
+    [phoneNumber]="contributorApplicationPhoneNumber"
+    [availableOccupations]="verificationModalOccupations"
+    [preferredOccupationId]="preferredOccupationId"
+    (close)="closeVerificationModal()"
+    (verified)="onVerified()">
+  </app-community-leader-application-modal>
 </div>

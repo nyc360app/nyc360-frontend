@@ -87,6 +87,11 @@ export function getDepartmentRssConnectRoute(path: string | null | undefined): s
   return normalized ? `/${normalized}/rss/connect` : '/public/rss/connect';
 }
 
+export function getDepartmentListingSubmitRoute(path: string | null | undefined): string {
+  const normalized = normalizeDepartmentPath(path);
+  return normalized ? `/${normalized}/listings/submit` : '/public/space/listings/submit';
+}
+
 export function getDepartmentDiscussionsRoute(path: string | null | undefined): string {
   const normalized = normalizeDepartmentPath(path);
   return normalized ? `/${normalized}/discussions` : '/public/forums';
@@ -102,6 +107,106 @@ export function getDepartmentQuestionDetailsRoute(path: string | null | undefine
   return normalized ? `/${normalized}/discussions/questions/${questionId}` : `/public/forums/questions/${questionId}`;
 }
 
+function getDepartmentJourneyLabel(path: string): string {
+  const normalized = normalizeDepartmentPath(path);
+
+  switch (normalized) {
+    case 'community':
+      return 'Start Community Journey';
+    case 'culture':
+      return 'Start Culture Journey';
+    case 'education':
+      return 'Start Education Journey';
+    case 'health':
+      return 'Start Health Journey';
+    case 'housing':
+      return 'Start Housing Journey';
+    case 'legal':
+      return 'Start Legal Journey';
+    case 'lifestyle':
+      return 'Start Lifestyle Journey';
+    case 'news':
+      return 'Start News Journey';
+    case 'professions':
+      return 'Start Professional Journey';
+    case 'social':
+      return 'Start Social Impact Journey';
+    case 'transportation':
+      return 'Start Transportation Journey';
+    case 'tv':
+      return 'Start TV Journey';
+    default:
+      return 'Start Your Journey';
+  }
+}
+
+function getDepartmentTakeAction(path: string): { label: string; route: string } {
+  const normalized = normalizeDepartmentPath(path);
+
+  switch (normalized) {
+    case 'community':
+      return { label: 'Create Community', route: '/community/create/community' };
+    case 'culture':
+      return { label: 'Create Cultural Project', route: '/public/coming-soon' };
+    case 'education':
+      return { label: 'Create Education Program', route: '/public/coming-soon' };
+    case 'health':
+      return { label: 'Create Health Program', route: '/public/coming-soon' };
+    case 'housing':
+      return { label: 'Create Housing Listing', route: '/housing/create/renting' };
+    case 'legal':
+      return { label: 'Create Legal Program', route: '/public/coming-soon' };
+    case 'lifestyle':
+      return { label: 'Create Lifestyle Program', route: '/public/coming-soon' };
+    case 'news':
+      return { label: 'Create Poll', route: '/public/coming-soon' };
+    case 'professions':
+      return { label: 'Create Job Post', route: '/professions/offers/create' };
+    case 'social':
+      return { label: 'Create Social Campaign', route: '/public/coming-soon' };
+    case 'transportation':
+      return { label: 'Report Issue / Update', route: '/public/coming-soon' };
+    case 'tv':
+      return { label: 'Go Live / Upload Video', route: '/public/coming-soon' };
+    default:
+      return { label: 'Take Action', route: '/public/coming-soon' };
+  }
+}
+
+function buildContributorActivityChildren(path: string) {
+  const takeAction = getDepartmentTakeAction(path);
+
+  return [
+    {
+      label: getDepartmentJourneyLabel(path),
+      icon: 'bi-stars',
+      opensVerification: true
+    },
+    {
+      label: 'Add a Location or Organization',
+      route: getDepartmentListingSubmitRoute(path),
+      icon: 'bi-geo-alt-fill'
+    },
+    {
+      label: 'Write Post or Article',
+      route: getDepartmentArticleCreateRoute(path),
+      icon: 'bi-pencil-square',
+      isAction: true
+    },
+    {
+      label: 'Import RSS Feed',
+      route: getDepartmentRssConnectRoute(path),
+      icon: 'bi-rss',
+      isAction: true
+    },
+    {
+      label: takeAction.label,
+      route: takeAction.route,
+      icon: 'bi-lightning-charge-fill'
+    }
+  ];
+}
+
 function buildStandardTopLinks(path: string) {
   return [
     { label: 'Explore', route: getDepartmentExploreRoute(path), icon: 'bi-rss' },
@@ -111,10 +216,7 @@ function buildStandardTopLinks(path: string) {
       label: 'Contributor Activity',
       icon: 'bi-activity',
       isDropdown: true,
-      children: [
-        { label: 'Publish News Article', route: getDepartmentArticleCreateRoute(path), icon: 'bi-pencil-square', isAction: true },
-        { label: 'Connect RSS Feed', route: getDepartmentRssConnectRoute(path), icon: 'bi-broadcast', isAction: true }
-      ]
+      children: buildContributorActivityChildren(path)
     }
   ];
 }
@@ -128,11 +230,7 @@ function buildHousingTopLinks() {
       label: 'Contributor Activity',
       icon: 'bi-activity',
       isDropdown: true,
-      children: [
-        { label: 'Publish News Article', route: getDepartmentArticleCreateRoute('housing'), icon: 'bi-pencil-square', isAction: true },
-        { label: 'Connect RSS Feed', route: getDepartmentRssConnectRoute('housing'), icon: 'bi-broadcast', isAction: true },
-        { label: 'House Listing', route: '/housing/create/renting', icon: 'bi-key' }
-      ]
+      children: buildContributorActivityChildren('housing')
     }
   ];
 }
@@ -146,10 +244,7 @@ function buildProfessionsTopLinks() {
       label: 'Contributor Activity',
       icon: 'bi-activity',
       isDropdown: true,
-      children: [
-        { label: 'Publish News Article', route: getDepartmentArticleCreateRoute('professions'), icon: 'bi-pencil-square', isAction: true },
-        { label: 'Connect RSS Feed', route: getDepartmentRssConnectRoute('professions'), icon: 'bi-broadcast', isAction: true }
-      ]
+      children: buildContributorActivityChildren('professions')
     }
   ];
 }

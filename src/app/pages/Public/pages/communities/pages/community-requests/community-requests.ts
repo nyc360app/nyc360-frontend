@@ -7,6 +7,7 @@ import { CommunityRequestDto } from '../../models/community-requests';
 import { environment } from '../../../../../../environments/environment';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { GlobalLoaderService } from '../../../../../../shared/components/global-loader/global-loader.service';
+import { getCommunityErrorMessage } from '../../../../../../shared/utils/community-contract';
 
 @Component({
   selector: 'app-community-requests',
@@ -37,9 +38,10 @@ export class CommunityRequestsComponent implements OnInit {
         this.loaderService.hide();
         if (res.isSuccess) this.requests = res.data || [];
       },
-      error: () => {
+      error: (error) => {
         this.isLoading = false;
         this.loaderService.hide();
+        this.toastService.error(getCommunityErrorMessage(error, 'Unable to load membership requests.'));
       }
     });
   }
@@ -55,14 +57,14 @@ export class CommunityRequestsComponent implements OnInit {
           this.requests = this.requests.filter(r => r.userId !== req.userId);
           this.toastService.success(`Request ${action === 'approve' ? 'approved' : 'rejected'} successfully.`);
         } else {
-          this.toastService.error(`Failed to ${action} request.`);
+          this.toastService.error(getCommunityErrorMessage(res, `Failed to ${action} request.`));
         }
       },
-      error: () => this.toastService.error('An error occurred.')
+      error: (error) => this.toastService.error(getCommunityErrorMessage(error, 'An error occurred.'))
     });
   }
 
-  resolveAvatar(url: string): string {
+  resolveAvatar(url: string | null | undefined): string {
     if (!url) return 'assets/images/default-avatar.png';
     return url.includes('http') ? url : `${environment.apiBaseUrl2}/avatars/${url}`;
   }

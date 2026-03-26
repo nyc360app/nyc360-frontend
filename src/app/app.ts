@@ -23,7 +23,7 @@ export class App {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         // Only show loader for 'Main' entry pages (Outer pages)
-        const mainPaths = ['', '/', '/public/home', '/public/housing/home', '/public/events/home', '/public/community'];
+        const mainPaths = ['', '/', '/public/home', '/public/housing/home', '/public/events/home', '/public/community', '/community'];
         const isDepartmentRoot = /^\/(community|culture|education|health|housing|lifestyle|legal|news|professions|social|transportation|tv)$/.test(event.url);
         const isMainPage = mainPaths.some(path => event.url === path) || event.url.startsWith('/public/category/') || isDepartmentRoot;
 

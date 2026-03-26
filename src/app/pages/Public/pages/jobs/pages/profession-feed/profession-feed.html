@@ -41,39 +41,56 @@
                  padding: 8px 0;
                  border: 1px solid rgba(0,0,0,0.05);">
 
-            <!-- Publish News -->
+            <button type="button" class="simple-item" (click)="openVerificationModal()"
+              style="display: flex; align-items: center; padding: 12px 20px; color: #333; background: transparent; border: 0; width: 100%; text-align: left;">
+              <i class="bi bi-stars me-2" style="color: #00695C;"></i>Start Professional Journey
+            </button>
+
+            <a routerLink="/professions/listings/submit" class="simple-item"
+              style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;"
+              (click)="isActivityDropdownOpen = false">
+              <i class="bi bi-geo-alt-fill me-2" style="color: #00695C;"></i>Add a Location or Organization
+            </a>
+
             <ng-container *ngIf="hasProfessionAccess; else lockedNews">
               <a routerLink="/professions/create/article" class="simple-item"
-                style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
-                <i class="bi bi-newspaper me-2" style="color: #00695C;"></i>Publish News Article
+                style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;"
+                (click)="isActivityDropdownOpen = false">
+                <i class="bi bi-newspaper me-2" style="color: #00695C;"></i>Write Post or Article
               </a>
             </ng-container>
             <ng-template #lockedNews>
               <div class="simple-item locked" (click)="openVerificationModal()"
                 style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; color: #aaa; cursor: pointer;">
                 <div class="d-flex align-items-center">
-                  <i class="bi bi-newspaper me-2"></i>Publish News Article
+                  <i class="bi bi-newspaper me-2"></i>Write Post or Article
                 </div>
                 <i class="bi bi-lock-fill ms-2" style="font-size: 0.9em; opacity: 0.6;"></i>
               </div>
             </ng-template>
 
-            <!-- Connect RSS -->
             <ng-container *ngIf="hasProfessionAccess; else lockedRSS">
               <a routerLink="/professions/rss/connect" class="simple-item"
-                style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;">
-                <i class="bi bi-rss me-2" style="color: #00695C;"></i> Connect RSS Feed
+                style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;"
+                (click)="isActivityDropdownOpen = false">
+                <i class="bi bi-rss me-2" style="color: #00695C;"></i>Import RSS Feed
               </a>
             </ng-container>
             <ng-template #lockedRSS>
               <div class="simple-item locked" (click)="openVerificationModal()"
                 style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; color: #aaa; cursor: pointer;">
                 <div class="d-flex align-items-center">
-                  <i class="bi bi-rss me-2"></i> Connect RSS Feed
+                  <i class="bi bi-rss me-2"></i>Import RSS Feed
                 </div>
                 <i class="bi bi-lock-fill ms-2" style="font-size: 0.9em; opacity: 0.6;"></i>
               </div>
             </ng-template>
+
+            <a routerLink="/professions/offers/create" class="simple-item"
+              style="display: flex; align-items: center; padding: 12px 20px; color: #333; text-decoration: none;"
+              (click)="isActivityDropdownOpen = false">
+              <i class="bi bi-briefcase-fill me-2" style="color: #00695C;"></i>Create Job Post
+            </a>
 
           </div>
         </div>
@@ -212,7 +229,8 @@
   </div>
 
   <!-- Verification Modal -->
-  <app-verification-modal *ngIf="isVerificationModalOpen" (close)="closeVerificationModal()" (verified)="onVerified()">
+  <app-verification-modal *ngIf="isVerificationModalOpen" [categoryName]="'Professions'" [categoryId]="8"
+    [extraOccupations]="userTags" (close)="closeVerificationModal()" (verified)="onVerified()">
   </app-verification-modal>
 
 </div>

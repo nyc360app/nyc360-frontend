@@ -4,13 +4,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Authentication/Service/auth';
 import { VerificationModalComponent } from '../../../../shared/components/verification-modal/verification-modal';
-import { getDepartmentArticleCreateRoute, getDepartmentDashboardRoute, getDepartmentDiscussionsRoute, getDepartmentExploreRoute, getDepartmentRssConnectRoute, getDepartmentSavedRoute } from '../feeds/models/categories';
+import { getDepartmentArticleCreateRoute, getDepartmentDashboardRoute, getDepartmentDiscussionsRoute, getDepartmentExploreRoute, getDepartmentListingSubmitRoute, getDepartmentRssConnectRoute, getDepartmentSavedRoute } from '../feeds/models/categories';
 
 interface HeroButtonChild {
   label: string;
   link: any[];
   icon?: string;
   isAction?: boolean;
+  opensVerification?: boolean;
   queryParams?: any;
 }
 
@@ -61,19 +62,30 @@ export class HousingDepartmentHeroComponent implements OnInit {
       isDropdown: true,
       children: [
         {
-          label: 'Publish News Article',
+          label: 'Start Housing Journey',
+          link: [],
+          icon: 'bi-stars',
+          opensVerification: true
+        },
+        {
+          label: 'Add a Location or Organization',
+          link: [getDepartmentListingSubmitRoute('housing')],
+          icon: 'bi-geo-alt-fill'
+        },
+        {
+          label: 'Write Post or Article',
           link: [getDepartmentArticleCreateRoute('housing')],
           icon: 'bi-pencil-square',
           isAction: true
         },
         {
-          label: 'Connect RSS Feed',
+          label: 'Import RSS Feed',
           link: [getDepartmentRssConnectRoute('housing')],
           icon: 'bi-broadcast',
           isAction: true
         },
         {
-          label: 'House Listing',
+          label: 'Create Housing Listing',
           link: ['/housing/create/renting'],
           icon: 'bi-key'
         }
@@ -107,6 +119,11 @@ export class HousingDepartmentHeroComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
+    this.showVerificationModal = true;
+    this.cdr.markForCheck();
+  }
+
+  openVerificationRequest(): void {
     this.showVerificationModal = true;
     this.cdr.markForCheck();
   }

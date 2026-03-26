@@ -30,6 +30,12 @@ export const COMMUNITY_TYPES_LIST = [
   { id: 12, name: 'Accessibility' }
 ];
 
+export function getCommunityTypeLabel(typeId: number | string | null | undefined): string {
+  const normalizedTypeId = Number(typeId);
+  const matchedType = COMMUNITY_TYPES_LIST.find((item) => item.id === normalizedTypeId);
+  return matchedType?.name || 'Community';
+}
+
 // ✅ New: Location Search Result Interface
 export interface LocationSearchResult {
   id: number;

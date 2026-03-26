@@ -1,5 +1,6 @@
 export interface UserInfo {
   type: number;
+  roles: string[];
   firstName: string;
   lastName: string;
   headline: string;

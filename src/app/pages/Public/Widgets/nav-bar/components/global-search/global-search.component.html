@@ -93,7 +93,7 @@
                         <h6 class="section-title">Communities</h6>
                     </div>
                     <div class="result-item" *ngFor="let community of searchResults.data.communities"
-                        [routerLink]="['/public/community', community.slug]" (click)="closeSearch()">
+                        [routerLink]="['/community', community.slug]" (click)="closeSearch()">
                         <div class="icon-wrapper">
                             <i class="bi bi-people"></i>
                         </div>

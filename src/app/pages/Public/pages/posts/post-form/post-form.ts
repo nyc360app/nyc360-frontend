@@ -75,7 +75,7 @@ export class PostFormComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(5)]],
       content: ['', [Validators.required, Validators.minLength(20)]],
       category: [7, Validators.required], // Default to 7 (News) - excluding Community, Housing, Professions
-      type: [1, Validators.required],
+      type: [0, Validators.required],
       locationSearch: ['']
     });
   }
@@ -192,6 +192,10 @@ export class PostFormComponent implements OnInit {
 
     if (typeControl.disabled) {
       typeControl.enable({ emitEvent: false });
+    }
+
+    if (!this.isEditMode && Number(typeControl.value) === 1) {
+      typeControl.setValue(0, { emitEvent: false });
     }
 
     this.newsAccess = EMPTY_NEWS_ACCESS;

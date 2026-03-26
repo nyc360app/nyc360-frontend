@@ -25,6 +25,7 @@ export class SidebarComponent implements OnInit {
     canViewSupport = false;
     canViewHousing = false;
     canViewForums = false;
+    canViewSpaceListings = false;
 
     ngOnInit() {
         this.canViewUsers = this.authService.hasPermission('Permissions.Users.View');
@@ -35,6 +36,7 @@ export class SidebarComponent implements OnInit {
         this.canViewHousing = this.authService.hasPermission('Permissions.Housing.View');
         this.canViewForums = this.authService.hasPermission('Permissions.Forums.View') || this.canViewDashboard;
         this.canViewSupport = true; // Based on NavBar implementation
+        this.canViewSpaceListings = this.authService.hasRole('SuperAdmin');
     }
 
     toggleSidebar() {
