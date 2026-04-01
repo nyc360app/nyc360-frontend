@@ -46,6 +46,12 @@
                 <span>My Articles</span>
             </button>
 
+            <button *ngIf="isNewsCategory" class="nav-item" [class.active]="activeView === 'polls'"
+                (click)="setView('polls')">
+                <i class="bi bi-bar-chart-line-fill"></i>
+                <span>My Polls</span>
+            </button>
+
             <button *ngIf="isNewsCategory && hasNewsModerationAccess" class="nav-item"
                 [class.active]="activeView === 'submissions'" (click)="setView('submissions')">
                 <i class="bi bi-shield-check"></i>
@@ -96,11 +102,11 @@
                 <button *ngIf="!showCommunityDashboardLocked" class="btn-refresh" (click)="refreshCurrentView()">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
-                <a *ngIf="!showCommunityDashboardLocked && (activeView === 'dashboard' || activeView === 'list') && (!isNewsCategory || canCreateNewsContent)" [routerLink]="createArticleLink"
+                <a *ngIf="!showCommunityDashboardLocked && (activeView === 'dashboard' || activeView === 'list' || activeView === 'polls') && (!isNewsCategory || canCreateNewsContent)" [routerLink]="currentCreateLink"
                     class="btn-create-p">
                     <i class="bi bi-plus-lg"></i> <span>{{ newsCreateButtonLabel }}</span>
                 </a>
-                <button *ngIf="!showCommunityDashboardLocked && (activeView === 'dashboard' || activeView === 'list') && isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
+                <button *ngIf="!showCommunityDashboardLocked && (activeView === 'dashboard' || activeView === 'list' || activeView === 'polls') && isNewsCategory && !canCreateNewsContent" type="button" class="btn-create-p" disabled>
                     <i class="bi bi-lock-fill"></i> <span>News Access Required</span>
                 </button>
             </div>
@@ -270,6 +276,49 @@
                             </p>
                         </div>
                     </ng-template>
+                </div>
+            </div>
+
+            <div *ngIf="!showCommunityDashboardLocked && activeView === 'polls'" class="polls-view">
+                <div class="queue-empty" *ngIf="!isLoadingNewsPolls && newsPolls.length === 0">
+                    <i class="bi bi-bar-chart-steps"></i>
+                    <p>No News polls yet.</p>
+                    <span>Create your first poll to start collecting audience feedback.</span>
+                </div>
+
+                <div class="polls-grid" *ngIf="newsPolls.length > 0">
+                    <article class="poll-card" *ngFor="let poll of newsPolls">
+                        <div class="poll-card-media" [class.empty]="!poll.coverImageUrl">
+                            <img *ngIf="poll.coverImageUrl" [src]="imageService.resolveImageUrl(poll.coverImageUrl)" [alt]="poll.title">
+                            <div class="empty-state-icon" *ngIf="!poll.coverImageUrl">
+                                <i class="bi bi-bar-chart-line"></i>
+                            </div>
+                            <span class="poll-status-badge" [ngClass]="getNewsPollStatusClass(poll)">
+                                {{ poll.status }}
+                            </span>
+                        </div>
+
+                        <div class="poll-card-body">
+                            <div class="poll-copy">
+                                <p class="poll-overline">News Poll</p>
+                                <h3>{{ poll.question }}</h3>
+                                <p>{{ poll.title }}</p>
+                            </div>
+
+                            <div class="poll-metrics">
+                                <span><i class="bi bi-ui-checks-grid"></i> {{ poll.optionCount }} options</span>
+                                <span><i class="bi bi-people"></i> {{ poll.totalVotes }} votes</span>
+                                <span *ngIf="poll.closesAt"><i class="bi bi-clock-history"></i> {{ poll.closesAt | date:'MMM d, y' }}</span>
+                            </div>
+
+                            <div class="poll-actions">
+                                <button type="button" class="btn-create-p secondary-action" (click)="openNewsPoll(poll)">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    <span>Open Poll</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
                 </div>
             </div>
 

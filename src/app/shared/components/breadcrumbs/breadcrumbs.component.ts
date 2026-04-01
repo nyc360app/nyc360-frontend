@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, HostListener, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 
@@ -17,6 +17,8 @@ const ROUTE_MAP: Array<{
         { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/explore$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'Explore', url: f }] },
         { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/saved$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'My Inquiries', url: f }] },
         { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/dashboard$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'Contributor Dashboard', url: f }] },
+        { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/create-poll$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'Create Poll', url: f }] },
+        { match: /^\/news\/polls\/([^/]+)$/, crumbs: (m, f) => [{ label: 'News', url: '/news' }, { label: 'Poll Details', url: f }] },
         { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/create$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'Create Article', url: f }] },
         { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/rss\/connect$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'Connect RSS', url: f }] },
         { match: /^\/(culture|education|health|lifestyle|legal|news|social|transportation|tv)\/discussions$/, crumbs: (m, f) => [{ label: formatDepartmentLabel(m[1]), url: departmentHomeRoute(m[1]) }, { label: 'Discussions', url: f }] },
@@ -176,6 +178,7 @@ function toTitleCase(value: string): string {
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
     private router = inject(Router);
+    private platformId = inject(PLATFORM_ID);
     private routerSub?: Subscription;
     private lastScrollY = 0;
 
@@ -203,7 +206,11 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
     @HostListener('window:scroll')
     onWindowScroll(): void {
-        const currentScrollY = Math.max(window.scrollY || 0, 0);
+        if (!this.isBrowser()) {
+            return;
+        }
+
+        const currentScrollY = this.getScrollY();
         const isScrollingDown = currentScrollY > this.lastScrollY;
 
         this.isScrolled = isScrollingDown && currentScrollY > 20;
@@ -222,13 +229,13 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.build();
-        this.lastScrollY = Math.max(window.scrollY || 0, 0);
+        this.lastScrollY = this.getScrollY();
         this.routerSub = this.router.events
             .pipe(filter((e) => e instanceof NavigationEnd))
             .subscribe(() => {
                 this.build();
                 this.isScrolled = false;
-                this.lastScrollY = Math.max(window.scrollY || 0, 0);
+                this.lastScrollY = this.getScrollY();
             });
     }
 
@@ -276,5 +283,17 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     private normalizeUrlPath(path: string): string {
         if (!path || path === '/') return '/';
         return path.replace(/\/+$/, '') || '/';
+    }
+
+    private isBrowser(): boolean {
+        return isPlatformBrowser(this.platformId);
+    }
+
+    private getScrollY(): number {
+        if (!this.isBrowser()) {
+            return 0;
+        }
+
+        return Math.max(window.scrollY || 0, 0);
     }
 }

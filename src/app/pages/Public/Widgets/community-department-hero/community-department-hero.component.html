@@ -50,20 +50,20 @@
             </div>
           </ng-template>
 
-          <ng-container *ngIf="hasOrganizationListingAccess; else lockedOrganizationListing">
+          <ng-container *ngIf="hasOrganizationListingAccess; else requestOrganizationAccess">
             <a routerLink="/community/listings/submit" class="dropdown-item-custom" (click)="closeActivityDropdown()">
               <i class="bi bi-geo-alt" aria-hidden="true"></i>
               List Community Organization in THE360 SPACE
             </a>
           </ng-container>
-          <ng-template #lockedOrganizationListing>
-            <button type="button" class="dropdown-item-custom locked" (click)="openOrganizationListingAccessModal()">
-              <i class="bi bi-lock-fill" aria-hidden="true"></i>
-              <span>List Community Organization in THE360 SPACE</span>
+          <ng-template #requestOrganizationAccess>
+            <button type="button" class="dropdown-item-custom" (click)="openOrganizationListingAccessModal()">
+              <i class="bi bi-geo-alt" aria-hidden="true"></i>
+              List Community Organization in THE360 SPACE
             </button>
           </ng-template>
 
-          <ng-container *ngIf="hasCommunityLeaderAccess; else lockedPublishing">
+          <ng-container *ngIf="hasCommunityOperationalAccess; else lockedPublishing">
             <a routerLink="/community/create/article" class="dropdown-item-custom"
               (click)="closeActivityDropdown()">
               <i class="bi bi-pencil-square" aria-hidden="true"></i>
@@ -71,13 +71,13 @@
             </a>
           </ng-container>
           <ng-template #lockedPublishing>
-            <button type="button" class="dropdown-item-custom locked" (click)="openLeaderPublishingAccessModal()">
+            <div class="dropdown-item-custom locked disabled-state">
               <i class="bi bi-lock-fill" aria-hidden="true"></i>
               <span>Write Community News or Announcement</span>
-            </button>
+            </div>
           </ng-template>
 
-          <ng-container *ngIf="hasCommunityLeaderAccess; else lockedRSS">
+          <ng-container *ngIf="hasCommunityOperationalAccess; else lockedRSS">
             <a routerLink="/community/rss/connect" class="dropdown-item-custom"
               (click)="closeActivityDropdown()">
               <i class="bi bi-rss" aria-hidden="true"></i>
@@ -85,10 +85,10 @@
             </a>
           </ng-container>
           <ng-template #lockedRSS>
-            <button type="button" class="dropdown-item-custom locked" (click)="openLeaderPublishingAccessModal()">
+            <div class="dropdown-item-custom locked disabled-state">
               <i class="bi bi-lock-fill" aria-hidden="true"></i>
               <span>Connect RSS Feed</span>
-            </button>
+            </div>
           </ng-template>
 
           <ng-container *ngIf="hasCreateCommunityAccess; else lockedCreateCommunity">
@@ -98,10 +98,10 @@
             </a>
           </ng-container>
           <ng-template #lockedCreateCommunity>
-            <button type="button" class="dropdown-item-custom locked" (click)="openCreateCommunityAccessModal()">
+            <div class="dropdown-item-custom locked disabled-state">
               <i class="bi bi-lock-fill" aria-hidden="true"></i>
               <span>Create Community</span>
-            </button>
+            </div>
           </ng-template>
         </div>
       </div>
@@ -115,7 +115,8 @@
 
   <app-community-leader-application-modal *ngIf="isLeaderApplicationModalOpen" [fullName]="leaderApplicationFullName"
     [email]="leaderApplicationEmail" [phoneNumber]="leaderApplicationPhoneNumber"
-    [availableOccupations]="communityPublicBadgeTags" [preferredOccupationId]="preferredApplicationOccupationId"
+    [availableOccupations]="modalOccupationOptions.length ? modalOccupationOptions : communityPublicBadgeTags"
+    [preferredOccupationId]="preferredApplicationOccupationId"
     (close)="closeLeaderApplicationModal()" (verified)="onVerified()">
   </app-community-leader-application-modal>
 </section>

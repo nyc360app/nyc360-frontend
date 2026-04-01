@@ -1,0 +1,241 @@
+<div class="create-poll-page">
+  <app-news-department-hero
+    title="Create Poll"
+    description="Launch a crisp, high-signal News poll with strong framing, clean answer options, and a publication-ready layout.">
+  </app-news-department-hero>
+
+  <div class="create-poll-container">
+    <header class="page-header">
+      <a class="back-pill" [routerLink]="['/news']">
+        <i class="bi bi-arrow-left"></i>
+        Back to News
+      </a>
+      <div class="copy">
+        <span class="eyebrow">News Interaction Studio</span>
+        <h1>Shape the next public conversation</h1>
+        <p>Build a poll that looks editorial, reads clearly, and invites fast participation without losing context.</p>
+      </div>
+    </header>
+
+    <div class="content-grid" [class.locked-layout]="!canCreatePoll">
+      <section class="builder-card" *ngIf="canCreatePoll; else lockedState">
+        <form [formGroup]="pollForm" (ngSubmit)="submit()">
+          <section class="form-section">
+            <div class="section-head">
+              <span class="step-chip">1</span>
+              <div>
+                <h2>Poll Basics</h2>
+                <p>Define the headline and the exact question readers will answer.</p>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field full">
+                <label for="title">Internal Poll Title <span>*</span></label>
+                <input id="title" type="text" formControlName="title"
+                  placeholder="e.g. Should NYC extend overnight truck delivery windows?">
+                <div class="field-meta">
+                  <span class="hint">Use a short internal title for dashboards and moderation.</span>
+                  <span>{{ (pollForm.get('title')?.value || '').length }}/120</span>
+                </div>
+              </div>
+
+              <div class="field full">
+                <label for="question">Public Poll Question <span>*</span></label>
+                <textarea id="question" rows="3" formControlName="question"
+                  placeholder="Ask a direct question readers can answer in one tap."></textarea>
+                <div class="field-meta">
+                  <span class="hint">Good poll questions are specific, neutral, and easy to answer quickly.</span>
+                  <span>{{ (pollForm.get('question')?.value || '').length }}/220</span>
+                </div>
+              </div>
+
+              <div class="field full">
+                <label for="description">Editorial Context</label>
+                <textarea id="description" rows="5" formControlName="description"
+                  placeholder="Add optional context, why the question matters, or what the audience should consider before voting."></textarea>
+                <div class="field-meta">
+                  <span class="hint">This appears as supporting context around the poll experience.</span>
+                  <span>{{ (pollForm.get('description')?.value || '').length }}/1200</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-head">
+              <span class="step-chip">2</span>
+              <div>
+                <h2>Answer Options</h2>
+                <p>Keep options balanced, concise, and mutually clear.</p>
+              </div>
+            </div>
+
+            <div class="options-stack" formArrayName="options">
+              <div class="option-row" *ngFor="let option of options.controls; let i = index; trackBy: trackByIndex">
+                <div class="option-index">{{ i + 1 }}</div>
+                <div class="option-field">
+                  <label [for]="'option-' + i">Option {{ i + 1 }}</label>
+                  <input class="option-input" [id]="'option-' + i" type="text" [formControlName]="i"
+                    placeholder="Write a clear answer choice">
+                  <div class="option-meta">
+                    <span>Keep each answer concise and clearly distinct.</span>
+                    <span>{{ (option.value || '').length }}/80</span>
+                  </div>
+                </div>
+                <button type="button" class="remove-option" (click)="removeOption(i)" [disabled]="options.length <= 2">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="add-option" (click)="addOption()" [disabled]="!canAddMoreOptions">
+              <i class="bi bi-plus-lg"></i>
+              Add Option
+            </button>
+          </section>
+
+          <section class="form-section">
+            <div class="section-head">
+              <span class="step-chip">3</span>
+              <div>
+                <h2>Presentation & Rules</h2>
+                <p>Decide how the poll behaves once it is live.</p>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="closesAt">Close Poll At</label>
+                <input id="closesAt" type="datetime-local" formControlName="closesAt">
+                <div class="field-meta">
+                  <span class="hint">Leave empty if the poll should stay open until manually closed.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="toggle-grid">
+              <label class="toggle-card">
+                <input type="checkbox" formControlName="allowMultipleAnswers">
+                <span class="toggle-ui"></span>
+                <span class="toggle-copy">
+                  <strong>Allow multiple answers</strong>
+                  <small>Readers can pick more than one option.</small>
+                </span>
+              </label>
+
+              <label class="toggle-card">
+                <input type="checkbox" formControlName="showResultsBeforeVoting">
+                <span class="toggle-ui"></span>
+                <span class="toggle-copy">
+                  <strong>Show results before voting</strong>
+                  <small>Results remain visible even before a vote is submitted.</small>
+                </span>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-head">
+              <span class="step-chip">4</span>
+              <div>
+                <h2>Cover Art</h2>
+                <p>Add a visual anchor so the poll reads like a premium News object.</p>
+              </div>
+            </div>
+
+            <div class="cover-uploader" [class.has-image]="!!coverPreviewUrl">
+              <input type="file" accept="image/*" id="poll-cover" hidden (change)="onCoverSelected($event)">
+              <label for="poll-cover" class="upload-surface">
+                <ng-container *ngIf="coverPreviewUrl; else uploadEmpty">
+                  <img [src]="coverPreviewUrl" alt="Poll cover preview">
+                  <span class="replace-label">Replace Cover</span>
+                </ng-container>
+                <ng-template #uploadEmpty>
+                  <div class="upload-copy">
+                    <div class="upload-icon"><i class="bi bi-image"></i></div>
+                    <strong>Drop in a cover image</strong>
+                    <p>Use a clean editorial image that frames the question without distracting from it.</p>
+                  </div>
+                </ng-template>
+              </label>
+              <div class="uploader-footer">
+                <span>{{ coverFileName || 'No image selected yet' }}</span>
+                <button *ngIf="coverPreviewUrl" type="button" class="clear-cover" (click)="clearCover()">Remove</button>
+              </div>
+            </div>
+          </section>
+
+          <footer class="form-actions">
+            <a class="ghost-action" [routerLink]="['/news']">Cancel</a>
+            <button class="primary-action" type="submit" [disabled]="isSubmitting">
+              <i class="bi bi-bar-chart-fill" *ngIf="!isSubmitting"></i>
+              <i class="bi bi-hourglass-split spinner" *ngIf="isSubmitting"></i>
+              {{ isSubmitting ? 'Publishing Poll...' : 'Create Poll' }}
+            </button>
+          </footer>
+        </form>
+      </section>
+
+      <ng-template #lockedState>
+        <section class="builder-card locked-card">
+          <span class="lock-chip">News Contributor Access Required</span>
+          <div class="lock-icon"><i class="bi bi-shield-lock-fill"></i></div>
+          <h2>Create Poll is currently locked</h2>
+          <p>Poll creation is reserved for approved News contributors and staff so audience participation stays moderated and high-signal.</p>
+          <div class="lock-points">
+            <div><i class="bi bi-check2-circle"></i> Polls stay consistent with D08 News publishing standards.</div>
+            <div><i class="bi bi-check2-circle"></i> Readers get clean, moderated participation instead of open spam submissions.</div>
+          </div>
+          <div class="locked-actions">
+            <a class="ghost-action" [routerLink]="['/news']">Open News</a>
+          </div>
+        </section>
+      </ng-template>
+
+      <aside class="preview-panel">
+        <div class="preview-shell">
+          <div class="preview-header">
+            <span class="preview-chip">Live Preview</span>
+            <span class="preview-state">{{ hasCloseDate ? 'Timed Poll' : 'Open Poll' }}</span>
+          </div>
+
+          <div class="preview-cover" [class.empty]="!coverPreviewUrl">
+            <img *ngIf="coverPreviewUrl" [src]="coverPreviewUrl" alt="Preview cover">
+            <div class="empty-cover" *ngIf="!coverPreviewUrl">
+              <i class="bi bi-newspaper"></i>
+            </div>
+          </div>
+
+          <div class="preview-body">
+            <h3>{{ pollQuestion }}</h3>
+            <p>{{ pollDescription }}</p>
+
+            <div class="preview-options">
+              <div class="preview-option" *ngFor="let option of options.controls; let i = index; trackBy: trackByIndex">
+                <span class="option-dot"></span>
+                <span>{{ option.value || ('Option ' + (i + 1)) }}</span>
+              </div>
+            </div>
+
+            <div class="preview-flags">
+              <span *ngIf="pollForm.get('allowMultipleAnswers')?.value">Multiple answers enabled</span>
+              <span *ngIf="pollForm.get('showResultsBeforeVoting')?.value">Results visible before voting</span>
+              <span *ngIf="hasCloseDate">Closes on schedule</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guidance-card">
+          <h4>Editorial guidance</h4>
+          <ul>
+            <li>Ask one question only. Split complex issues into separate polls.</li>
+            <li>Keep options parallel in tone and length.</li>
+            <li>Use the description to add context, not bias.</li>
+            <li>Choose cover art that supports the topic without overpowering it.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>

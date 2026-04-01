@@ -94,11 +94,20 @@ export class HousingHomeComponent implements OnInit {
                 }
             },
             error: (err) => {
-                console.error('Error fetching housing home:', err);
+                if (this.isBackendAuthRedirect(err)) {
+                    console.warn('Housing home endpoint is redirecting to login. Backend must allow anonymous access for /api/housing/home.');
+                } else {
+                    console.error('Error fetching housing home:', err);
+                }
                 this.isLoading = false;
                 this.cdr.markForCheck();
             }
         });
+    }
+
+    private isBackendAuthRedirect(err: any): boolean {
+        const url = String(err?.url || '');
+        return !!err?.redirected || url.includes('/Account/Login');
     }
 
     private stripHtml(html: string | null | undefined): string {

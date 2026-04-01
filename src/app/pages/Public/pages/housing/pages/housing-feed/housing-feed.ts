@@ -74,11 +74,20 @@ export class HousingFeedComponent implements OnInit {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                console.error('Error loading housing feed:', err);
+                if (this.isBackendAuthRedirect(err)) {
+                    console.warn('Housing feed endpoint is redirecting to login. Backend must allow anonymous access for /api/housing/feed.');
+                } else {
+                    console.error('Error loading housing feed:', err);
+                }
                 this.isLoading = false;
                 this.cdr.markForCheck();
             }
         });
+    }
+
+    private isBackendAuthRedirect(err: any): boolean {
+        const url = String(err?.url || '');
+        return !!err?.redirected || url.includes('/Account/Login');
     }
 
     applyFilters(): void {

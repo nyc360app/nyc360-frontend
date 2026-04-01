@@ -124,7 +124,10 @@ export class ImageService {
         const lowerUrl = cleanUrl.toLowerCase();
 
         // 3. If it already has a known folder prefix, resolve to base URL
-        if (lowerUrl.startsWith('posts/') || lowerUrl.startsWith('housing/') || lowerUrl.startsWith('avatars/')) {
+        if (lowerUrl.startsWith('posts/')
+            || lowerUrl.startsWith('housing/')
+            || lowerUrl.startsWith('avatars/')
+            || lowerUrl.startsWith('news-polls/')) {
             return `${this.baseApiUrl}/${cleanUrl}`;
         }
 

@@ -19,11 +19,6 @@ const INTERNAL_COMMUNITY_MEMBERSHIP_TAG_IDS = new Set<number>([
   // Add known backend IDs here when confirmed.
 ]);
 
-const COMMUNITY_LEADER_TAG_NAMES = [
-  'community leader',
-  'community leader badge'
-] as const;
-
 const COMMUNITY_D01_TAG_IDS = {
   leader: 2000,
   create: 2001,
@@ -112,10 +107,16 @@ export function filterPublicCommunityBadges<T extends TagLike>(tags: T[] | null 
 export function isCommunityLeaderTag(tag: TagLike | null | undefined): boolean {
   if (!tag) return false;
 
+  const tagId = getTagId(tag);
+  if (tagId === COMMUNITY_D01_TAG_IDS.leader) {
+    return true;
+  }
+
   const normalized = normalizeTagName(getTagName(tag));
   if (!normalized) return false;
 
-  return COMMUNITY_LEADER_TAG_NAMES.some((name) => normalized.includes(name));
+  return COMMUNITY_D01_ALIASES.leader.some((name) => normalized.includes(name))
+    || normalized.includes(normalizeTagName(COMMUNITY_D01_LABELS.leader));
 }
 
 export function isCommunityCreateTag(tag: TagLike | null | undefined): boolean {

@@ -123,6 +123,24 @@ a {
       font-size: 0.9rem;
     }
 
+    &.verified {
+      background: color-mix(in srgb, #1f8f62, white 86%);
+      border-color: color-mix(in srgb, #1f8f62, white 72%);
+      color: #0f6b47;
+    }
+
+    &.probationary {
+      background: color-mix(in srgb, #d4a019, white 84%);
+      border-color: color-mix(in srgb, #d4a019, white 70%);
+      color: #8a6200;
+    }
+
+    &.unverified {
+      background: color-mix(in srgb, #9b5de5, white 88%);
+      border-color: color-mix(in srgb, #9b5de5, white 74%);
+      color: #6b35a8;
+    }
+
     &.subtle {
       background: rgba(255, 255, 255, 0.78);
       color: color-mix(in srgb, var(--theme-color), black 18%);
@@ -244,10 +262,25 @@ a {
 
     &.locked {
       opacity: 0.7;
-      cursor: pointer;
+      cursor: default;
 
       i {
         color: #999999 !important;
+      }
+    }
+
+    &.disabled-state {
+      pointer-events: none;
+      transform: none !important;
+    }
+
+    &.status-item {
+      color: var(--theme-color);
+      background: color-mix(in srgb, var(--theme-color), white 92%);
+      cursor: default;
+
+      i {
+        color: var(--theme-color);
       }
     }
 

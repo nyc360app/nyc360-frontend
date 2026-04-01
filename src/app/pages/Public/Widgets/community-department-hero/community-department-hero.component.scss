@@ -271,6 +271,12 @@ a {
       }
     }
 
+    &.disabled-state {
+      cursor: default;
+      pointer-events: none;
+      user-select: none;
+    }
+
     &.status-item {
       justify-content: center;
       background: #f8fafc;

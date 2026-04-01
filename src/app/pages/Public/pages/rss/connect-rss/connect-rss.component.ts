@@ -5,6 +5,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CATEGORY_THEMES, CategoryEnum } from '../../../Widgets/feeds/models/categories';
 import { EMPTY_NEWS_ACCESS, NewsService } from '../../../../../shared/services/news.service';
 import { RssService, type ConnectRssRequest } from '../service/rss.service';
+import { VerificationModalComponent } from '../../../../../shared/components/verification-modal/verification-modal';
+import { AuthService } from '../../../../Authentication/Service/auth';
 
 type DivisionTag = {
     id: number;
@@ -15,7 +17,7 @@ type DivisionTag = {
 @Component({
     selector: 'app-connect-rss',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, VerificationModalComponent],
     templateUrl: './connect-rss.component.html',
     styleUrls: ['./connect-rss.component.scss']
 })
@@ -25,6 +27,7 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private newsService = inject(NewsService);
+    private authService = inject(AuthService);
 
     readonly languageOptions = [
         'English',
@@ -96,8 +99,10 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
 
     categoryInfo = signal<any>(null);
     categoryName = signal<string>('');
-    newsRssAccessResolved = signal(false);
     hasNewsRssAccess = signal(false);
+    showNewsRssVerificationModal = signal(false);
+    newsBadgeTags = signal<any[]>([]);
+    newsRssRequestOccupations = signal<any[]>([]);
 
     private selectedLogoFile: File | null = null;
     private selectedLogoObjectUrl: string | null = null;
@@ -105,6 +110,7 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.route.queryParamMap.subscribe(params => {
             const categoryParam = params.get('category');
+            const feedUrlParam = String(params.get('url') || '').trim();
             const rawCategory = categoryParam !== null ? Number(categoryParam) : Number.NaN;
             const routeCategory = Number(this.route.snapshot.data['categoryId']);
             const fallbackCategory = Number.isFinite(routeCategory)
@@ -112,6 +118,23 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
                 : Number(this.rssForm.get('Category')?.value ?? 0);
             const resolvedCategory = Number.isFinite(rawCategory) ? rawCategory : fallbackCategory;
             this.applyCategory(resolvedCategory);
+
+            if (feedUrlParam) {
+                this.rssForm.patchValue({ Url: feedUrlParam }, { emitEvent: false });
+                this.onFeedUrlBlur();
+            }
+        });
+
+        this.newsService.getNewsHome(12).subscribe({
+            next: (res: any) => {
+                const tags = res?.isSuccess && Array.isArray(res?.data?.tags) ? res.data.tags : [];
+                this.newsBadgeTags.set(tags);
+                this.newsRssRequestOccupations.set(this.resolveNewsRssOccupations(tags));
+            },
+            error: () => {
+                this.newsBadgeTags.set([]);
+                this.newsRssRequestOccupations.set([]);
+            }
         });
     }
 
@@ -136,18 +159,17 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
 
         const formValue = this.rssForm.getRawValue();
         const payload: ConnectRssRequest = {
-            Url: String(formValue.Url || '').trim(),
-            Category: Number(formValue.Category),
-            Name: String(formValue.Name || '').trim(),
-            Description: String(formValue.Description || '').trim(),
-            ImageUrl: String(formValue.ImageUrl || '').trim(),
-            Image: this.selectedLogoFile,
-            Language: String(formValue.Language || '').trim(),
-            SourceWebsite: String(formValue.SourceWebsite || '').trim(),
-            SourceCredibility: String(formValue.SourceCredibility || '').trim(),
-            DivisionTag: this.categoryName(),
-            AgreementAccepted: !!formValue.AgreementAccepted,
-            LogoFileName: this.selectedLogoFile?.name || ''
+            url: String(formValue.Url || '').trim(),
+            category: Number(formValue.Category),
+            name: String(formValue.Name || '').trim(),
+            description: String(formValue.Description || '').trim(),
+            imageUrl: String(formValue.ImageUrl || '').trim(),
+            language: String(formValue.Language || '').trim(),
+            sourceWebsite: String(formValue.SourceWebsite || '').trim(),
+            sourceCredibility: String(formValue.SourceCredibility || '').trim(),
+            agreementAccepted: !!formValue.AgreementAccepted,
+            divisionTag: this.categoryName(),
+            logoImage: this.selectedLogoFile
         };
 
         this.rssService.connectRss(payload).subscribe({
@@ -156,7 +178,7 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
 
                 if (isSuccess) {
                     this.successMessage.set('RSS feed request submitted successfully!');
-                    this.navigateAfterSuccess(payload.Category);
+                    this.navigateAfterSuccess(payload.category);
                 } else {
                     this.errorMessage.set(this.getErrorMessage(res) || 'Failed to submit RSS feed request.');
                 }
@@ -166,7 +188,7 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
             error: (err) => {
                 if (err.status === 200 || err.status === 201) {
                     this.successMessage.set('RSS feed request submitted successfully!');
-                    this.navigateAfterSuccess(payload.Category);
+                    this.navigateAfterSuccess(payload.category);
                 } else {
                     this.errorMessage.set(this.getErrorMessage(err?.error ?? err) || 'An unexpected error occurred.');
                 }
@@ -248,6 +270,25 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
         return Number(this.rssForm.get('Category')?.value) === CategoryEnum.News;
     }
 
+    isNewsCategoryLocked(): boolean {
+        return this.isNewsCategory() && !this.hasNewsRssAccess();
+    }
+
+    openNewsRssVerificationRequest(): void {
+        this.newsRssRequestOccupations.set(this.resolveNewsRssOccupations(this.newsBadgeTags()));
+        this.showNewsRssVerificationModal.set(true);
+    }
+
+    closeNewsRssVerificationRequest(): void {
+        this.showNewsRssVerificationModal.set(false);
+    }
+
+    onNewsRssVerified(): void {
+        this.showNewsRssVerificationModal.set(false);
+        this.authService.fetchFullUserInfo().subscribe({ error: () => undefined });
+        this.resolveNewsRssAccess(CategoryEnum.News);
+    }
+
     private applyCategory(categoryId: number): void {
         const info = this.getCategoryInfo(categoryId);
         const resolvedCategoryId = info ? categoryId : 0;
@@ -324,25 +365,47 @@ export class ConnectRssComponent implements OnInit, OnDestroy {
         return Number.isFinite(categoryId) ? (CATEGORY_THEMES as any)[categoryId] : null;
     }
 
+    private resolveNewsRssOccupations(tags: any[]): any[] {
+        if (!Array.isArray(tags) || !tags.length) {
+            return [];
+        }
+
+        const rssOrPublisherTags = tags.filter((tag) => this.isNewsRssTag(tag));
+        if (rssOrPublisherTags.length) {
+            return rssOrPublisherTags;
+        }
+
+        const nonListingTags = tags.filter((tag) => !this.isNewsListingTag(tag));
+        return nonListingTags.length ? nonListingTags : tags;
+    }
+
+    private isNewsRssTag(tag: any): boolean {
+        const label = String(tag?.name ?? tag?.Name ?? '').trim().toLowerCase();
+        return label.includes('rss') || label.includes('publisher');
+    }
+
+    private isNewsListingTag(tag: any): boolean {
+        const label = String(tag?.name ?? tag?.Name ?? '').trim().toLowerCase();
+        return label.includes('organization')
+            || label.includes('space')
+            || label.includes('location');
+    }
+
     private resolveNewsRssAccess(categoryId: number): void {
         if (categoryId !== CategoryEnum.News) {
-            this.newsRssAccessResolved.set(false);
             this.hasNewsRssAccess.set(true);
             return;
         }
 
-        this.newsRssAccessResolved.set(false);
         this.hasNewsRssAccess.set(false);
 
         this.newsService.getNewsAccess().subscribe({
             next: (access) => {
                 const canConnect = access?.canConnectRss ?? EMPTY_NEWS_ACCESS.canConnectRss;
                 this.hasNewsRssAccess.set(!!canConnect);
-                this.newsRssAccessResolved.set(true);
             },
             error: () => {
                 this.hasNewsRssAccess.set(false);
-                this.newsRssAccessResolved.set(true);
             }
         });
     }

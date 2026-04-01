@@ -1,7 +1,6 @@
 import {
   TagLike,
   hasAnyCommunityContributorTag,
-  hasCommunityCreateTag,
   hasCommunityLeaderTag,
   hasCommunityOrganizationTag
 } from './community-badge-policy';
@@ -15,13 +14,16 @@ export enum CommunityRole {
 
 const COMMUNITY_ERROR_MESSAGES: Record<string, string> = {
   'user.notVerified': 'A verified Resident, Organization, or Business account is required before using community contributor tools.',
-  'community.create.requiresContributorTag': 'You need the D01.2 Create a Community tag before you can create a community.',
+  'community.create.requiresContributorTag': 'Community creation requires an approved Community Leader or Community Organization contributor badge.',
+  'community.create.requiresEligibleContributor': 'Only approved Community Leaders or approved Community Organization contributors can create a community.',
   'community.duplicate': 'A community with the same name, type, and location already exists.',
   'location.notFound': 'Select a valid location before continuing.',
   'community.forbidden': 'You do not have permission to perform that community action.',
   'community.post.requires_contributor': 'Only the community leader or an approved volunteer can publish in this community.',
   'community.post.moderator_restricted': 'Moderators can moderate community activity, but they cannot publish posts here.',
-  'space.listing.community_organization.requires_tag': 'You need the D01.3 Community Organization tag before listing an organization in THE360 Space.'
+  'posts.unauthorized_division': 'Only approved Community Leaders or approved Community Organization contributors can publish Community division content.',
+  'community.rss.requiresEligibleContributor': 'Only approved Community Leaders or approved Community Organization contributors can connect Community RSS feeds.',
+  'space.listing.community_organization.requires_tag': 'Community organization listings require an approved Community Leader or Community Organization contributor badge.'
 };
 
 const COMMUNITY_GATE1_PROFILE_ROLES = new Set([
@@ -126,7 +128,15 @@ export function hasCommunityContributorAccess(tags: TagLike[] | null | undefined
 }
 
 export function hasCommunityCreateAccess(tags: TagLike[] | null | undefined): boolean {
-  return hasCommunityCreateTag(tags);
+  return hasCommunityLeaderTag(tags) || hasCommunityOrganizationTag(tags);
+}
+
+export function hasCommunityOperationalAccess(tags: TagLike[] | null | undefined): boolean {
+  return hasCommunityCreateAccess(tags);
+}
+
+export function hasCommunityOrganizationListingAccess(tags: TagLike[] | null | undefined): boolean {
+  return hasCommunityLeaderTag(tags) || hasCommunityOrganizationTag(tags);
 }
 
 export function hasCommunityOrganizationAccess(tags: TagLike[] | null | undefined): boolean {

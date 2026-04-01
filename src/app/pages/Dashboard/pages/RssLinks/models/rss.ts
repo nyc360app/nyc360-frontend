@@ -49,6 +49,8 @@ export interface RssRequest {
   id: number;
   url: string;
   category: number;
+  requestedCategory?: number;
+  finalCategory?: number;
   name: string;
   description: string;
   imageUrl: string;
@@ -79,5 +81,5 @@ export interface RssRequestUpdate {
   id: number;
   status: number;
   adminNote: string;
+  category?: number;
 }
-

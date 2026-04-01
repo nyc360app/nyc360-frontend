@@ -11,7 +11,7 @@ import { NewsDepartmentHeroComponent } from '../../Widgets/news-department-hero/
 import { CommunityDepartmentHeroComponent } from '../../Widgets/community-department-hero/community-department-hero.component';
 import { CategoryDepartmentHeroComponent } from '../../Widgets/category-department-hero/category-department-hero.component';
 import { HousingDepartmentHeroComponent } from '../../Widgets/housing-department-hero/housing-department-hero.component';
-import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../shared/services/news.service';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsPollSummary, NewsService } from '../../../../shared/services/news.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { hasCommunityContributorAccess, hasCommunityStaffBypass } from '../../../../shared/utils/community-contract';
 
@@ -37,7 +37,7 @@ export class CategoryDashboardComponent implements OnInit {
     analytics: any = null;
     posts: Post[] = [];
     isLoading = true;
-    activeView: 'dashboard' | 'list' | 'submissions' | 'rssRequests' | 'rssSources' = 'dashboard';
+    activeView: 'dashboard' | 'list' | 'polls' | 'submissions' | 'rssRequests' | 'rssSources' = 'dashboard';
     currentUsername: string = 'User';
     newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
     pendingNewsSubmissions: any[] = [];
@@ -50,6 +50,8 @@ export class CategoryDashboardComponent implements OnInit {
     processingRssRequestId: number | null = null;
     newsRssSources: any[] = [];
     isLoadingNewsRssSources = false;
+    newsPolls: NewsPollSummary[] = [];
+    isLoadingNewsPolls = false;
     showRssSourceModal = false;
     private resolvedCategoryPath = '';
     editingRssSourceId: number | null = null;
@@ -164,7 +166,7 @@ export class CategoryDashboardComponent implements OnInit {
         });
     }
 
-    setView(view: 'dashboard' | 'list' | 'submissions' | 'rssRequests' | 'rssSources') {
+    setView(view: 'dashboard' | 'list' | 'polls' | 'submissions' | 'rssRequests' | 'rssSources') {
         this.activeView = view;
         this.loadActiveViewData();
         this.cdr.detectChanges();
@@ -172,6 +174,9 @@ export class CategoryDashboardComponent implements OnInit {
 
     loadActiveViewData(): void {
         switch (this.activeView) {
+            case 'polls':
+                this.loadNewsPolls();
+                break;
             case 'submissions':
                 this.loadPendingNewsSubmissions();
                 break;
@@ -243,13 +248,21 @@ export class CategoryDashboardComponent implements OnInit {
     }
 
     get newsHeroTitle(): string {
-        return this.activeView === 'dashboard' ? 'News Dashboard' : 'My News Articles';
+        if (this.activeView === 'dashboard') return 'News Dashboard';
+        if (this.activeView === 'polls') return 'My News Polls';
+        return 'My News Articles';
     }
 
     get newsHeroDescription(): string {
-        return this.activeView === 'dashboard'
-            ? 'Track performance, engagement, and publishing momentum across your News contributions.'
-            : 'Review, refine, and manage the News stories you have published in NYC360.';
+        if (this.activeView === 'dashboard') {
+            return 'Track performance, engagement, and publishing momentum across your News contributions.';
+        }
+
+        if (this.activeView === 'polls') {
+            return 'Open your live News polls, monitor voting activity, and review response momentum.';
+        }
+
+        return 'Review, refine, and manage the News stories you have published in NYC360.';
     }
 
     get canCreateNewsContent(): boolean {
@@ -258,6 +271,7 @@ export class CategoryDashboardComponent implements OnInit {
 
     get newsCreateButtonLabel(): string {
         if (!this.isNewsCategory) return 'Article';
+        if (this.activeView === 'polls') return 'Create Poll';
         return this.authService.hasRole('SuperAdmin') || this.newsAccess.canPublishContent
             ? 'Publish Article'
             : 'Submit Story';
@@ -276,11 +290,15 @@ export class CategoryDashboardComponent implements OnInit {
     }
 
     get hasNewsOrganizationListingAccess(): boolean {
-        return this.authService.hasRole('SuperAdmin') || this.newsAccess.canListNewsOrganizationInSpace;
+        return this.authService.hasRole('SuperAdmin')
+            || this.newsAccess.canListNewsOrganizationsInSpace
+            || this.newsAccess.canListNewsOrganizationInSpace;
     }
 
     get contentHeaderTitle(): string {
         switch (this.activeView) {
+            case 'polls':
+                return 'My Polls';
             case 'list':
                 return 'My List';
             case 'submissions':
@@ -296,6 +314,8 @@ export class CategoryDashboardComponent implements OnInit {
 
     get contentHeaderDescription(): string {
         switch (this.activeView) {
+            case 'polls':
+                return 'Manage your News polls, open live voting pages, and track engagement at a glance.';
             case 'list':
                 return `Manage articles for ${this.categoryTheme?.label}`;
             case 'submissions':
@@ -319,6 +339,42 @@ export class CategoryDashboardComponent implements OnInit {
         }
 
         return 'Your submitted News stories stay under review until a News moderator or publisher approves them.';
+    }
+
+    loadNewsPolls(): void {
+        if (!this.isNewsCategory) return;
+
+        this.isLoadingNewsPolls = true;
+        this.newsService.getMyNewsPolls(1, 20).subscribe({
+            next: (res) => {
+                this.newsPolls = res.isSuccess ? (res.data || []) : [];
+                this.isLoadingNewsPolls = false;
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.newsPolls = [];
+                this.isLoadingNewsPolls = false;
+                this.toastService.error('Failed to load your News polls.');
+                this.cdr.markForCheck();
+            }
+        });
+    }
+
+    openNewsPoll(item: NewsPollSummary): void {
+        const pollId = Number(item?.pollId ?? 0);
+        if (!pollId) {
+            this.toastService.error('Invalid poll id.');
+            return;
+        }
+
+        this.router.navigate(['/news/polls', pollId]);
+    }
+
+    getNewsPollStatusClass(item: NewsPollSummary): string {
+        const status = String(item?.status || '').toLowerCase();
+        if (status === 'published') return 'published';
+        if (status === 'closed') return 'closed';
+        return 'draft';
     }
 
     loadPendingNewsSubmissions(): void {
@@ -730,7 +786,7 @@ export class CategoryDashboardComponent implements OnInit {
         return formData;
     }
 
-    private isNewsViewAllowed(view: 'dashboard' | 'list' | 'submissions' | 'rssRequests' | 'rssSources'): boolean {
+    private isNewsViewAllowed(view: 'dashboard' | 'list' | 'polls' | 'submissions' | 'rssRequests' | 'rssSources'): boolean {
         if (view === 'submissions') return this.hasNewsModerationAccess;
         if (view === 'rssRequests') return this.hasNewsRssRequestAccess;
         if (view === 'rssSources') return this.hasNewsRssSourceAccess;
@@ -793,5 +849,13 @@ export class CategoryDashboardComponent implements OnInit {
 
     get createArticleLink(): any[] {
         return [getDepartmentArticleCreateRoute(this.categoryTheme?.path)];
+    }
+
+    get currentCreateLink(): any[] {
+        if (this.isNewsCategory && this.activeView === 'polls') {
+            return ['/news/create-poll'];
+        }
+
+        return this.createArticleLink;
     }
 }

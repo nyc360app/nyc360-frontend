@@ -18,17 +18,20 @@ import {
   SpaceListingService,
   SpaceListingSubmitResult
 } from '../../../../../shared/services/space-listing.service';
+import { EMPTY_NEWS_ACCESS, NewsAccess, NewsService } from '../../../../../shared/services/news.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { AuthService } from '../../../../Authentication/Service/auth';
 import { BadgeOption } from '../../../../../shared/utils/community-badge-policy';
 import {
   getCommunityErrorMessage,
   hasCommunityOrganizationAccess,
+  hasCommunityOrganizationListingAccess,
   hasCommunityStaffBypass,
   isCommunityGate1Eligible
 } from '../../../../../shared/utils/community-contract';
 import { CommunityService } from '../../communities/services/community';
 import { CommunityLeaderApplicationModalComponent } from '../../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
+import { VerificationModalComponent } from '../../../../../shared/components/verification-modal/verification-modal';
 
 type LocationSearchResult = {
   id: number;
@@ -41,7 +44,7 @@ type LocationSearchResult = {
 @Component({
   selector: 'app-space-listing-request',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, CommunityLeaderApplicationModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CommunityLeaderApplicationModalComponent, VerificationModalComponent],
   templateUrl: './space-listing-request.html',
   styleUrls: ['./space-listing-request.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -56,6 +59,7 @@ export class SpaceListingRequestComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly authService = inject(AuthService);
   private readonly communityService = inject(CommunityService);
+  private readonly newsService = inject(NewsService);
 
   private readonly locationSearch$ = new Subject<string>();
 
@@ -98,8 +102,12 @@ export class SpaceListingRequestComponent implements OnInit {
   proofFiles: File[] = [];
   currentUserInfo: any | null = this.authService.getFullUserInfo();
   communityAccessOptions: BadgeOption[] = [];
+  newsAccessOptions: any[] = [];
+  newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
   isVerificationModalOpen = false;
   preferredOccupationId: number | null = null;
+  isNewsVerificationModalOpen = false;
+  preferredNewsOccupationId: number | null = null;
 
   ngOnInit(): void {
     this.resolveDepartment();
@@ -130,6 +138,30 @@ export class SpaceListingRequestComponent implements OnInit {
         },
         error: () => {
           this.communityAccessOptions = [];
+          this.cdr.markForCheck();
+        }
+      });
+    }
+
+    if (this.isNewsDepartment) {
+      this.newsService.getNewsAccess().subscribe({
+        next: (access) => {
+          this.newsAccess = access;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.newsAccess = EMPTY_NEWS_ACCESS;
+          this.cdr.markForCheck();
+        }
+      });
+
+      this.newsService.getNewsHome(12).subscribe({
+        next: (res: any) => {
+          this.newsAccessOptions = res?.isSuccess && Array.isArray(res?.data?.tags) ? res.data.tags : [];
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.newsAccessOptions = [];
           this.cdr.markForCheck();
         }
       });
@@ -201,6 +233,10 @@ export class SpaceListingRequestComponent implements OnInit {
     return this.departmentPath === 'community';
   }
 
+  get isNewsDepartment(): boolean {
+    return this.departmentPath === 'news';
+  }
+
   get availableEntityTypes(): Array<{ value: SpaceListingEntityType; label: string; description: string }> {
     if (this.isCommunityDepartment) {
       return this.entityTypes.filter((option) => option.value === 'organization');
@@ -220,15 +256,31 @@ export class SpaceListingRequestComponent implements OnInit {
   }
 
   get hasCommunityOrganizationAccess(): boolean {
-    return this.hasStaffBypass || hasCommunityOrganizationAccess(this.currentUserInfo?.tags || []);
+    return this.hasStaffBypass || hasCommunityOrganizationListingAccess(this.currentUserInfo?.tags || []);
   }
 
   get showCommunityOrganizationLock(): boolean {
     return this.isCommunityDepartment && (!this.hasGate1Eligibility || !this.hasCommunityOrganizationAccess);
   }
 
+  get hasNewsOrganizationAccess(): boolean {
+    return this.authService.hasRole('Admin')
+      || this.authService.hasRole('SuccessAdmin')
+      || this.authService.hasRole('SuperAdmin')
+      || this.newsAccess.canListNewsOrganizationsInSpace
+      || this.newsAccess.canListNewsOrganizationInSpace;
+  }
+
+  get showNewsOrganizationLock(): boolean {
+    return this.isNewsDepartment && !this.hasNewsOrganizationAccess;
+  }
+
   get verificationModalOccupations(): BadgeOption[] {
     return this.communityAccessOptions.filter((option) => hasCommunityOrganizationAccess([option]));
+  }
+
+  get newsVerificationModalOccupations(): any[] {
+    return this.newsAccessOptions.filter((option) => this.isNewsOrganizationAccessOption(option));
   }
 
   get contributorApplicationFullName(): string {
@@ -284,6 +336,11 @@ export class SpaceListingRequestComponent implements OnInit {
 
     if (this.showCommunityOrganizationLock) {
       this.toastService.error('Community organization listing access is locked for this account.');
+      return;
+    }
+
+    if (this.showNewsOrganizationLock) {
+      this.toastService.error('News organization listing access is locked for this account.');
       return;
     }
 
@@ -417,15 +474,46 @@ export class SpaceListingRequestComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  openNewsOrganizationAccess(): void {
+    if (!this.newsVerificationModalOccupations.length) {
+      this.toastService.error('News organization contributor roles are not available right now.');
+      return;
+    }
+
+    this.preferredNewsOccupationId = this.newsVerificationModalOccupations[0]?.id ?? null;
+    this.isNewsVerificationModalOpen = true;
+    this.cdr.markForCheck();
+  }
+
   closeVerificationModal(): void {
     this.preferredOccupationId = null;
     this.isVerificationModalOpen = false;
     this.cdr.markForCheck();
   }
 
+  closeNewsVerificationModal(): void {
+    this.preferredNewsOccupationId = null;
+    this.isNewsVerificationModalOpen = false;
+    this.cdr.markForCheck();
+  }
+
   onVerified(): void {
     this.authService.fetchFullUserInfo().subscribe({ error: () => undefined });
     this.closeVerificationModal();
+  }
+
+  onNewsVerified(): void {
+    this.authService.fetchFullUserInfo().subscribe({ error: () => undefined });
+    this.newsService.refreshNewsAccess().subscribe({
+      next: (access) => {
+        this.newsAccess = access;
+        this.closeNewsVerificationModal();
+      },
+      error: () => {
+        this.newsAccess = EMPTY_NEWS_ACCESS;
+        this.closeNewsVerificationModal();
+      }
+    });
   }
 
   private contactMethodValidator(control: AbstractControl): ValidationErrors | null {
@@ -515,5 +603,12 @@ export class SpaceListingRequestComponent implements OnInit {
     };
 
     return map[normalized] ?? CategoryEnum.News;
+  }
+
+  private isNewsOrganizationAccessOption(option: any): boolean {
+    const label = String(option?.name ?? option?.Name ?? '').trim().toLowerCase();
+    return label.includes('organization')
+      || label.includes('space')
+      || label.includes('location');
   }
 }

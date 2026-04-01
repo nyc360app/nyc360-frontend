@@ -64,7 +64,12 @@
                         <div class="info-grid">
                             <div class="info-item">
                                 <label><i class="fas fa-tag"></i> Category</label>
-                                <span class="category-badge">{{ getCategoryLabel(req.category) }}</span>
+                                <span class="category-badge">{{ getCategoryLabel(getEffectiveCategory(req)) }}</span>
+                            </div>
+
+                            <div class="info-item" *ngIf="hasCategoryOverride(req)">
+                                <label><i class="fas fa-shuffle"></i> Requested Category</label>
+                                <span class="category-badge">{{ getCategoryLabel(getRequestedCategory(req)) }}</span>
                             </div>
 
                             <div class="info-item">
@@ -134,12 +139,23 @@
     <div class="modal-card">
         <div class="modal-header">
             <h2>{{ actionStatus === 1 ? 'Approve' : 'Reject' }} Request</h2>
-            <button class="close-btn" (click)="showActionModal = false">&times;</button>
+            <button class="close-btn" (click)="closeActionModal()">&times;</button>
         </div>
         <div class="modal-body">
             <div class="req-preview" *ngIf="selectedRequest">
                 <strong>Source:</strong> {{ selectedRequest.name }}<br>
-                <strong>URL:</strong> {{ selectedRequest.url }}
+                <strong>URL:</strong> {{ selectedRequest.url }}<br>
+                <strong>Requested Category:</strong> {{ getCategoryLabel(getRequestedCategory(selectedRequest)) }}
+            </div>
+
+            <div class="form-group" *ngIf="actionStatus === 1">
+                <label>Approve Under Category</label>
+                <select [(ngModel)]="selectedCategoryForAction">
+                    <option *ngFor="let option of categoryOptions" [ngValue]="option.id">
+                        {{ option.label }}
+                    </option>
+                </select>
+                <small class="field-hint">You can keep the requested category or assign a different one before approval.</small>
             </div>
 
             <div class="form-group">
@@ -148,7 +164,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-secondary" (click)="showActionModal = false">Cancel</button>
+            <button class="btn-secondary" (click)="closeActionModal()">Cancel</button>
             <button [class]="actionStatus === 1 ? 'btn-primary' : 'btn-danger'" (click)="submitAction()">
                 Confirm {{ actionStatus === 1 ? 'Approval' : 'Rejection' }}
             </button>

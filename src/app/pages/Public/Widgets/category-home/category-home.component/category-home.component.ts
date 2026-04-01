@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { CategoryPost } from '../models/category-home.models';
+import { CategoryPost, LatestRssFeedItemDto, StandardApiResponse } from '../models/category-home.models';
 import { CategoryHomeService } from '../service/category-home.service';
 import { CATEGORY_THEMES, getDepartmentDiscussionsRoute, getDepartmentExploreRoute } from '../../feeds/models/categories';
 import { environment } from '../../../../../environments/environment';
@@ -13,6 +13,9 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { AuthService } from '../../../../Authentication/Service/auth';
 import { VerificationService } from '../../../pages/settings/services/verification.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { PostsService } from '../../../pages/posts/services/posts';
+import { FeedData, InterestGroup, Post } from '../../../pages/posts/models/posts';
+import { NewsPollSummary, NewsService } from '../../../../../shared/services/news.service';
 
 export interface HeaderButtonChild {
   label: string;
@@ -57,6 +60,8 @@ export class CategoryHomeComponent implements OnInit {
   protected authService = inject(AuthService);
   private verificationService = inject(VerificationService);
   private toastService = inject(ToastService);
+  private postsService = inject(PostsService);
+  private newsService = inject(NewsService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
@@ -67,6 +72,7 @@ export class CategoryHomeComponent implements OnInit {
   moreNewsPosts: CategoryPost[] = [];         // 4. القائمة السفلية (More News)
   textOnlyPosts: CategoryPost[] = [];         // 5. بوستات بدون صور (التصميم الجديد في الأسفل)
   trendingPosts: CategoryPost[] = [];         // 6. التريند (Sidebar)
+  rssFeedPosts: CategoryPost[] = [];          // Backend RSS feed items
 
   // --- Theme ---
   activeTheme: any = null;
@@ -79,6 +85,10 @@ export class CategoryHomeComponent implements OnInit {
   homesForSale: CategoryPost[] = [];
   homesForRent: CategoryPost[] = [];
   officialPosts: CategoryPost[] = [];
+  crossDepartmentGroups: InterestGroup[] = [];
+  isLoadingCrossDepartmentGroups = false;
+  newsPolls: NewsPollSummary[] = [];
+  isLoadingNewsPolls = false;
 
   // --- Dynamic Buttons ---
   headerButtons: HeaderButton[] = [];
@@ -126,11 +136,24 @@ export class CategoryHomeComponent implements OnInit {
       this.resolveHeaderButtons(divisionId, path);
       // Removed updateModalOccupations();
       this.fetchData(divisionId);
+      if (divisionId === 7) {
+        this.loadCrossDepartmentGroups();
+        this.loadPublishedNewsPolls();
+      } else {
+        this.crossDepartmentGroups = [];
+        this.isLoadingCrossDepartmentGroups = false;
+        this.newsPolls = [];
+        this.isLoadingNewsPolls = false;
+      }
     } else {
       this.activeTheme = { label: 'News', color: '#333' }; // Fallback
       this.isHousingCategory = false;
       this.isLoading = false;
       this.resolveHeaderButtons(0, 'news');
+      this.crossDepartmentGroups = [];
+      this.isLoadingCrossDepartmentGroups = false;
+      this.newsPolls = [];
+      this.isLoadingNewsPolls = false;
       // Removed updateModalOccupations();
     }
   }
@@ -199,6 +222,11 @@ export class CategoryHomeComponent implements OnInit {
   }
 
   fetchData(divisionId: number) {
+    this.rssFeedPosts = [];
+
+    // Prefer dedicated latest RSS endpoint; keep home payload RSS as fallback.
+    this.loadLatestRssItems(divisionId);
+
     this.homeService.getCategoryHomeData(divisionId, 25).subscribe({
       next: (res: any) => {
         if (res.isSuccess && res.data) {
@@ -207,8 +235,17 @@ export class CategoryHomeComponent implements OnInit {
             this.categoryTags = res.data.tags;
           }
 
-          // دمج المصادر لعمل الفرز اليدوي
-          const allIncoming = [...(res.data.featured || []), ...(res.data.latest || [])];
+          const featuredIncoming = Array.isArray(res.data.featured) ? res.data.featured : [];
+          const latestIncoming = Array.isArray(res.data.latest) ? res.data.latest : [];
+          const rssIncoming = Array.isArray(res.data.rss) ? res.data.rss : [];
+
+          // Keep RSS in a dedicated bucket for explicit rendering in UI.
+          if (this.rssFeedPosts.length === 0) {
+            this.rssFeedPosts = rssIncoming.map((p: any) => this.parsePostData(p));
+          }
+
+          // دمج المصادر لعمل الفرز اليدوي (regular content only)
+          const allIncoming = [...featuredIncoming, ...latestIncoming];
 
           // 1. فصل البوستات: "بصور" vs "بدون صور"
           let allPosts: any[] = allIncoming.map(p => this.parsePostData(p));
@@ -247,6 +284,115 @@ export class CategoryHomeComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private loadLatestRssItems(divisionId: number): void {
+    this.homeService.getLatestRssItems(divisionId, 6).subscribe({
+      next: (response) => {
+        // Prevent stale response writing when user switches departments quickly.
+        if (this.activeCategoryId !== divisionId) {
+          return;
+        }
+
+        const items = this.getStandardResponseData(response);
+        if (!Array.isArray(items) || items.length === 0) {
+          return;
+        }
+
+        this.rssFeedPosts = items.map((item) => this.mapLatestRssItemToPost(item));
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        // Keep existing RSS fallback data from category-home response.
+      }
+    });
+  }
+
+  private getStandardResponseData<T>(response: StandardApiResponse<T> | null | undefined): T | undefined {
+    return response?.data ?? response?.Data;
+  }
+
+  private mapLatestRssItemToPost(item: LatestRssFeedItemDto): CategoryPost {
+    return {
+      id: item.id,
+      title: item.title || 'Untitled',
+      content: item.summary || '',
+      category: Number(item.category ?? this.activeCategoryId),
+      createdAt: item.publishedAt || new Date().toISOString(),
+      author: {
+        id: item.sourceId || 0,
+        name: 'RSS Source',
+        imageUrl: ''
+      },
+      attachments: item.imageUrl ? [{ id: 0, url: item.imageUrl }] : [],
+      stats: { views: 0, likes: 0, shares: 0, comments: 0 },
+      isSavedByUser: false,
+      cleanDescription: this.stripHtml(item.summary || ''),
+      externalLink: item.link || ''
+    };
+  }
+
+  private loadCrossDepartmentGroups(): void {
+    this.isLoadingCrossDepartmentGroups = true;
+
+    this.postsService.getPostsFeed().subscribe({
+      next: (res) => {
+        if (res?.isSuccess && res.data) {
+          this.crossDepartmentGroups = this.mapCrossDepartmentGroups(res.data);
+        } else {
+          this.crossDepartmentGroups = [];
+        }
+
+        this.isLoadingCrossDepartmentGroups = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.crossDepartmentGroups = [];
+        this.isLoadingCrossDepartmentGroups = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadPublishedNewsPolls(): void {
+    this.isLoadingNewsPolls = true;
+
+    this.newsService.getPublishedNewsPolls(1, 4).subscribe({
+      next: (response) => {
+        this.newsPolls = response?.isSuccess ? (response.data || []) : [];
+        this.isLoadingNewsPolls = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.newsPolls = [];
+        this.isLoadingNewsPolls = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private mapCrossDepartmentGroups(data: FeedData): InterestGroup[] {
+    return (data.interestGroups || [])
+      .map((group) => {
+        const validGroupPosts: Post[] = [];
+        const normalizedGroupPosts: Post[] = [];
+
+        (group.posts || []).forEach((rawPost) => {
+          const post = this.parsePostData(rawPost);
+          normalizedGroupPosts.push(post);
+
+          if (this.hasImage(post)) {
+            validGroupPosts.push(post);
+          }
+        });
+
+        return {
+          ...group,
+          posts: validGroupPosts.length > 0 ? validGroupPosts : normalizedGroupPosts
+        };
+      })
+      .filter((group) => (group.posts || []).length > 0)
+      .sort((a, b) => Number(a.category) - Number(b.category));
   }
 
   // ... helpers ...
@@ -342,6 +488,14 @@ export class CategoryHomeComponent implements OnInit {
     return `Discover the latest updates, opportunities, and insights in ${this.activeTheme?.label || 'NYC'}.`;
   }
 
+  get featuredNewsPoll(): NewsPollSummary | null {
+    return this.newsPolls[0] || null;
+  }
+
+  get secondaryNewsPolls(): NewsPollSummary[] {
+    return this.newsPolls.slice(1, 4);
+  }
+
   get educationHeroTitle(): string {
     return 'Education';
   }
@@ -384,6 +538,66 @@ export class CategoryHomeComponent implements OnInit {
 
   getAuthorImg(author: any): string {
     return this.imageService.resolveAvatar(author);
+  }
+
+  getDepartmentRowLabel(categoryId: number): string {
+    return (CATEGORY_THEMES as any)[Number(categoryId)]?.label || 'General';
+  }
+
+  getDepartmentRowColor(categoryId: number): string {
+    return (CATEGORY_THEMES as any)[Number(categoryId)]?.color || '#B59B62';
+  }
+
+  getDepartmentRowRoute(categoryId: number): string {
+    return (CATEGORY_THEMES as any)[Number(categoryId)]?.route || '/public/home';
+  }
+
+  getPollCoverImage(poll: NewsPollSummary): string {
+    return this.imageService.resolveImageUrl(poll.coverImageUrl || '');
+  }
+
+  openNewsPoll(poll: NewsPollSummary): void {
+    this.router.navigate(['/news/polls', poll.pollId]);
+  }
+
+  isNewsPollClosed(poll: NewsPollSummary): boolean {
+    return !!poll.closesAt && new Date(poll.closesAt).getTime() < Date.now();
+  }
+
+  getNewsPollStatusLabel(poll: NewsPollSummary): string {
+    return this.isNewsPollClosed(poll) ? 'Closed' : 'Live Poll';
+  }
+
+  getNewsPollMeta(poll: NewsPollSummary): string {
+    if (!poll.closesAt) {
+      return 'Open-ended';
+    }
+
+    return this.isNewsPollClosed(poll)
+      ? `Closed ${new Date(poll.closesAt).toLocaleDateString()}`
+      : `Closes ${new Date(poll.closesAt).toLocaleDateString()}`;
+  }
+
+  goToDepartmentPost(post: Post): void {
+    if (post.category === 8 && (post as any).linkedResource) {
+      this.router.navigate(['/professions/jobs', (post as any).linkedResource.id]);
+      return;
+    }
+
+    this.router.navigate(['/public/posts/details', post.id], {
+      state: { postData: post }
+    });
+  }
+
+  scrollDepartmentGroup(categoryId: number, direction: 'left' | 'right'): void {
+    const slider = document.getElementById('news-slider-' + categoryId);
+    if (!slider) return;
+
+    const scrollAmount = slider.clientWidth * 0.8;
+    slider.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
   }
 
   private stripHtml(html: string | null | undefined): string {

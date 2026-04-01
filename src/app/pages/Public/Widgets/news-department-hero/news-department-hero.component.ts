@@ -43,15 +43,20 @@ export class NewsDepartmentHeroComponent implements OnInit {
   @Input() title = 'News';
   @Input() description = 'Discover the latest updates, opportunities, and insights in News.';
   @Input() searchPlaceholder = 'Search in News...';
-
+  
   readonly categoryId = CategoryEnum.News;
   readonly theme = CATEGORY_THEMES[CategoryEnum.News];
   readonly headerButtons: HeroButton[] = this.buildHeaderButtons();
+  readonly newsCreateRoute: any[] = ['/news/create'];
+  readonly newsRssRoute: any[] = ['/news/rss/connect'];
+  readonly newsPollRoute: any[] = ['/news/create-poll'];
+  readonly newsListingRoute: any[] = ['/news/listings/submit'];
 
   showVerificationModal = false;
   currentUserInfo: any | null = null;
   newsBadgeTags: any[] = [];
   newsAccess: NewsAccess = EMPTY_NEWS_ACCESS;
+  modalOccupations: any[] = [];
 
   ngOnInit(): void {
     this.authService.fullUserInfo$
@@ -60,7 +65,7 @@ export class NewsDepartmentHeroComponent implements OnInit {
         this.currentUserInfo = info;
         this.cdr.markForCheck();
       });
-
+      
     this.newsService.getNewsHome(12).subscribe({
       next: (res: any) => {
         this.newsBadgeTags = res?.isSuccess && Array.isArray(res?.data?.tags) ? res.data.tags : [];
@@ -94,19 +99,72 @@ export class NewsDepartmentHeroComponent implements OnInit {
   }
 
   hasContributorAccess(): boolean {
-    return this.canSubmitContent;
+    return this.hasUnlockedContributorActions;
   }
 
   get canSubmitContent(): boolean {
-    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canSubmitContent;
+    return this.hasStaffBypass() || this.newsAccess.canSubmitContent;
   }
 
   get canPublishContent(): boolean {
-    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canPublishContent;
+    return this.hasStaffBypass() || this.newsAccess.canPublishContent;
   }
 
   get canConnectRss(): boolean {
-    return this.authService.hasRole('SuperAdmin') || this.newsAccess.canConnectRss;
+    return this.hasStaffBypass() || this.newsAccess.canConnectRss;
+  }
+
+  get canListNewsOrganization(): boolean {
+    return this.hasStaffBypass()
+      || this.newsAccess.canListNewsOrganizationsInSpace
+      || this.newsAccess.canListNewsOrganizationInSpace;
+  }
+
+  get hasNewsStatusBadges(): boolean {
+    return this.hasUnlockedContributorActions
+      || !!this.newsAccess.trustState
+      || this.visibleGrantedBadges.length > 0;
+  }
+
+  get visibleGrantedBadges(): Array<{ id: number | string; code: string; name: string }> {
+    return this.newsAccess.grantedBadges.slice(0, 3);
+  }
+
+  get additionalBadgeCount(): number {
+    return Math.max(0, this.newsAccess.grantedBadges.length - this.visibleGrantedBadges.length);
+  }
+
+  get newsTrustStateLabel(): string {
+    switch (this.newsAccess.trustState) {
+      case 'VerifiedPublisher':
+        return 'Verified Publisher';
+      case 'ProbationaryPublisher':
+        return 'Probationary Publisher';
+      case 'UnverifiedContributor':
+        return 'Unverified Contributor';
+      default:
+        return '';
+    }
+  }
+
+  get newsTrustStateClass(): string {
+    switch (this.newsAccess.trustState) {
+      case 'VerifiedPublisher':
+        return 'verified';
+      case 'ProbationaryPublisher':
+        return 'probationary';
+      case 'UnverifiedContributor':
+        return 'unverified';
+      default:
+        return 'subtle';
+    }
+  }
+
+  get hasUnlockedContributorActions(): boolean {
+    return this.hasStaffBypass()
+      || this.newsAccess.canSubmitContent
+      || this.newsAccess.canPublishContent
+      || this.newsAccess.canConnectRss;
   }
 
   isActionVisible(child: HeroButtonChild): boolean {
@@ -129,8 +187,30 @@ export class NewsDepartmentHeroComponent implements OnInit {
   }
 
   openVerificationRequest(): void {
+    this.modalOccupations = this.newsBadgeTags;
     this.showVerificationModal = true;
     this.cdr.markForCheck();
+  }
+
+  openNewsJourneyRequest(): void {
+    this.modalOccupations = this.resolveNewsJourneyOccupations();
+    this.showVerificationModal = true;
+    this.cdr.markForCheck();
+  }
+
+  openNewsOrganizationAccessRequest(): void {
+    this.modalOccupations = this.resolveNewsListingOccupations();
+    this.showVerificationModal = true;
+    this.cdr.markForCheck();
+  }
+
+  openNewsOrganizationEntry(): void {
+    if (this.canListNewsOrganization) {
+      this.router.navigate(this.newsListingRoute);
+      return;
+    }
+
+    this.openNewsOrganizationAccessRequest();
   }
 
   onVerified(): void {
@@ -149,6 +229,7 @@ export class NewsDepartmentHeroComponent implements OnInit {
   }
 
   closeModal(): void {
+    this.modalOccupations = [];
     this.showVerificationModal = false;
     this.cdr.markForCheck();
   }
@@ -194,5 +275,39 @@ export class NewsDepartmentHeroComponent implements OnInit {
   private isRssAction(child: HeroButtonChild): boolean {
     const route = Array.isArray(child?.link) ? child.link.join('/') : '';
     return route.includes('/rss/connect');
+  }
+
+  private resolveNewsJourneyOccupations(): any[] {
+    const preferredRoles = this.newsBadgeTags.filter((tag) => this.isNewsJourneyTag(tag));
+    return preferredRoles.length ? preferredRoles : this.newsBadgeTags.filter((tag) => !this.isNewsListingTag(tag));
+  }
+
+  private resolveNewsListingOccupations(): any[] {
+    const listingRoles = this.newsBadgeTags.filter((tag) => this.isNewsListingTag(tag));
+    return listingRoles.length ? listingRoles : this.newsBadgeTags;
+  }
+
+  private isNewsListingTag(tag: any): boolean {
+    const label = String(tag?.name ?? tag?.Name ?? '').trim().toLowerCase();
+    return label.includes('organization')
+      || label.includes('space')
+      || label.includes('location');
+  }
+
+  private isNewsJourneyTag(tag: any): boolean {
+    const label = String(tag?.name ?? tag?.Name ?? '').trim().toLowerCase();
+    return label.includes('publisher')
+      || label.includes('assistant publisher')
+      || label.includes('journalist')
+      || label.includes('author')
+      || label.includes('documentor')
+      || label.includes('contributor')
+      || label.includes('trainee');
+  }
+
+  private hasStaffBypass(): boolean {
+    return this.authService.hasRole('Admin')
+      || this.authService.hasRole('SuccessAdmin')
+      || this.authService.hasRole('SuperAdmin');
   }
 }

@@ -5,17 +5,17 @@
 
   <div class="community-create-wrap" style="width:min(calc(100% - 28px), 700px); max-width:700px; margin:28px auto 0;">
     <section *ngIf="showLockedState" class="community-access-lock">
-      <p class="lock-kicker">D01.2 Gate Required</p>
+      <p class="lock-kicker">Community Contributor Access Required</p>
       <h2>Create Community is locked for this account</h2>
       <p *ngIf="!hasGate1Eligibility">
-        A verified Resident, Organization, or Business account is required first. After that, request the D01.2 Create a Community contributor tag to unlock community creation.
+        A verified Resident, Organization, or Business account is required first. After that, request Community Leader access to unlock community creation.
       </p>
       <p *ngIf="hasGate1Eligibility && !hasCreateGateAccess">
-        Your account is eligible for Community contributor flows, but it still needs the D01.2 Create a Community contributor tag before this form can be submitted.
+        Community creation unlocks after Community Leader or Community Organization approval. Request Community Leader access here, or use Contributor Activities for the organization listing path.
       </p>
       <div class="lock-actions">
         <button type="button" class="btn-submit" (click)="openCreateAccessModal()">
-          {{ hasGate1Eligibility ? 'Request D01.2 Access' : 'Go to Verification Settings' }}
+          {{ hasGate1Eligibility ? 'Request Community Leader Access' : 'Go to Verification Settings' }}
         </button>
         <button type="button" class="btn-cancel" routerLink="/community">
           Back to Community

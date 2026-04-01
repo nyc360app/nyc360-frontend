@@ -10,8 +10,6 @@
       <button type="submit" class="search-btn">Search</button>
     </form>
 
-    
-
     <div class="header-nav-buttons">
       <ng-container *ngFor="let btn of headerButtons">
         <div class="nav-dropdown-wrapper" *ngIf="btn.isDropdown; else standardButton">
@@ -22,27 +20,62 @@
           </button>
 
           <div class="dropdown-menu-custom">
-            <ng-container *ngFor="let child of btn.children">
-              <button *ngIf="child.opensVerification" type="button" class="dropdown-item-custom"
-                (click)="openVerificationRequest()">
-                <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
-                {{ child.label }}
+            <ng-container *ngIf="!hasUnlockedContributorActions; else newsAccessActive">
+              <button type="button" class="dropdown-item-custom" (click)="openNewsJourneyRequest()">
+                <i class="bi bi-stars"></i>
+                Start News Journey
               </button>
+            </ng-container>
+            <ng-template #newsAccessActive>
+              <div class="dropdown-item-custom status-item">
+                <i class="bi bi-patch-check-fill"></i>
+                News Contributor Access Active
+              </div>
+            </ng-template>
 
-              <a *ngIf="child.isAction" [routerLink]="canUseAction(child) ? child.link : null"
-                [queryParams]="child.queryParams" class="dropdown-item-custom"
-                (click)="handleContributorAction($event, child)" [class.locked]="!canUseAction(child)">
-                <i class="bi" [ngClass]="!canUseAction(child) ? 'bi-lock-fill' : (child.icon || 'bi-dot')"></i>
-                {{ child.label }}
-              </a>
+            <button type="button" class="dropdown-item-custom" (click)="openNewsOrganizationEntry()">
+              <i class="bi bi-geo-alt-fill"></i>
+              Add a Location or Organization
+            </button>
 
-              <a *ngIf="!child.isAction && !child.opensVerification" [routerLink]="child.link"
-                [queryParams]="child.queryParams"
-                class="dropdown-item-custom">
-                <i class="bi" [ngClass]="child.icon || 'bi-dot'"></i>
-                {{ child.label }}
+            <ng-container *ngIf="hasUnlockedContributorActions; else lockedWrite">
+              <a [routerLink]="newsCreateRoute" [queryParams]="{ category: categoryId }" class="dropdown-item-custom">
+                <i class="bi bi-pencil-square"></i>
+                Write Post or Article
               </a>
             </ng-container>
+            <ng-template #lockedWrite>
+              <div class="dropdown-item-custom locked disabled-state">
+                <i class="bi bi-lock-fill"></i>
+                Write Post or Article
+              </div>
+            </ng-template>
+
+            <ng-container *ngIf="hasUnlockedContributorActions; else lockedRss">
+              <a [routerLink]="newsRssRoute" [queryParams]="{ category: categoryId }" class="dropdown-item-custom">
+                <i class="bi bi-rss"></i>
+                Import RSS Feed
+              </a>
+            </ng-container>
+            <ng-template #lockedRss>
+              <div class="dropdown-item-custom locked disabled-state">
+                <i class="bi bi-lock-fill"></i>
+                Import RSS Feed
+              </div>
+            </ng-template>
+
+            <ng-container *ngIf="hasUnlockedContributorActions; else lockedPoll">
+              <a [routerLink]="newsPollRoute" class="dropdown-item-custom">
+                <i class="bi bi-lightning-charge-fill"></i>
+                Create Poll
+              </a>
+            </ng-container>
+            <ng-template #lockedPoll>
+              <div class="dropdown-item-custom locked disabled-state">
+                <i class="bi bi-lock-fill"></i>
+                Create Poll
+              </div>
+            </ng-template>
           </div>
         </div>
 
@@ -57,6 +90,6 @@
   </div>
 
   <app-verification-modal *ngIf="showVerificationModal" [categoryName]="theme?.label || 'News'"
-    [categoryId]="categoryId" [extraOccupations]="newsBadgeTags" (close)="closeModal()" (verified)="onVerified()">
+    [categoryId]="categoryId" [extraOccupations]="modalOccupations.length ? modalOccupations : newsBadgeTags" (close)="closeModal()" (verified)="onVerified()">
   </app-verification-modal>
 </section>

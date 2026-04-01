@@ -39,6 +39,8 @@ const loadFeedLayout = () => import('../pages/Public/Widgets/feeds/feed-layout/f
 const loadPostForm = () => import('../pages/Public/pages/posts/post-form/post-form').then(m => m.PostFormComponent);
 const loadConnectRss = () => import('../pages/Public/pages/rss/connect-rss/connect-rss.component').then(m => m.ConnectRssComponent);
 const loadSpaceListingRequest = () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent);
+const loadCreatePoll = () => import('../pages/Public/pages/polls/create-poll/create-poll.component').then(m => m.CreatePollComponent);
+const loadPollDetails = () => import('../pages/Public/pages/polls/poll-details/poll-details.component').then(m => m.PollDetailsComponent);
 const loadForumQuestions = () => import('../pages/Public/pages/forums/pages/forum-questions/forum-questions').then(m => m.ForumQuestionsComponent);
 const loadCreateQuestion = () => import('../pages/Public/pages/forums/pages/create-question/create-question.component').then(m => m.CreateQuestionComponent);
 const loadQuestionDetails = () => import('../pages/Public/pages/forums/pages/question-details/question-details.component').then(m => m.QuestionDetailsComponent);
@@ -101,6 +103,19 @@ const buildGenericDepartmentRoutes = ({ categoryId, path, label }: GenericDepart
     data: { breadcrumb: 'Add Listing', categoryPath: path },
     loadComponent: loadSpaceListingRequest
   },
+  ...(path === 'news'
+    ? [{
+        path: `${path}/polls/:id`,
+        data: { breadcrumb: 'Poll Details', categoryId, categoryPath: path },
+        loadComponent: loadPollDetails
+      },
+      {
+        path: `${path}/create-poll`,
+        canActivate: [authGuard],
+        data: { breadcrumb: 'Create Poll', categoryId, categoryPath: path },
+        loadComponent: loadCreatePoll
+      }]
+    : []),
   {
     path: `${path}/create`,
     canActivate: [authGuard],

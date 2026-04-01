@@ -556,6 +556,10 @@
         }
 
         .form-group {
+            & + .form-group {
+                margin-top: 1rem;
+            }
+
             label {
                 display: block;
                 margin-bottom: 0.5rem;
@@ -563,6 +567,7 @@
                 color: rgba(0, 0, 0, 0.7);
             }
 
+            select,
             textarea {
                 width: 100%;
                 background: rgba(0, 0, 0, 0.03);
@@ -578,6 +583,18 @@
                 &:focus {
                     border-color: #3b82f6;
                 }
+            }
+
+            select {
+                min-height: 44px;
+                padding: 0 0.8rem;
+            }
+
+            .field-hint {
+                display: block;
+                margin-top: 0.4rem;
+                color: rgba(0, 0, 0, 0.55);
+                font-size: 0.8rem;
             }
         }
     }

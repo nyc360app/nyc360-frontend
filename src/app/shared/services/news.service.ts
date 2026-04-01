@@ -11,7 +11,11 @@ export interface NewsAccess {
   canPublishContent: boolean;
   canConnectRss: boolean;
   canReviewRssRequests: boolean;
+  canListNewsLocationsInSpace: boolean;
+  canListNewsOrganizationsInSpace: boolean;
   canListNewsOrganizationInSpace: boolean;
+  grantedBadges: Array<{ id: number | string; code: string; name: string }>;
+  trustState: string | null;
   grantedKeys: string[];
 }
 
@@ -25,13 +29,61 @@ export interface NewsPaginatedResponse<T> {
   error: any;
 }
 
+export interface NewsPollOption {
+  id: number;
+  text: string;
+  votes?: number;
+  votePercent?: number;
+}
+
+export interface NewsPollSummary {
+  pollId: number;
+  slug: string;
+  title: string;
+  question: string;
+  description?: string | null;
+  status: string;
+  allowMultipleAnswers: boolean;
+  showResultsBeforeVoting: boolean;
+  isFeatured: boolean;
+  coverImageUrl?: string | null;
+  optionCount: number;
+  totalVotes: number;
+  createdAt: string;
+  closesAt?: string | null;
+  hasVoted: boolean;
+}
+
+export interface NewsPollDetails extends NewsPollSummary {
+  description?: string | null;
+  creatorUserId?: number | null;
+  locationId?: number | null;
+  tags?: any[];
+  selectedOptionIds: number[];
+  canEdit: boolean;
+  canVote: boolean;
+  options: NewsPollOption[];
+}
+
+export interface NewsPollResults {
+  pollId: number;
+  status: string;
+  totalVotes: number;
+  showResultsBeforeVoting: boolean;
+  options: NewsPollOption[];
+}
+
 export const EMPTY_NEWS_ACCESS: NewsAccess = {
   canSubmitContent: false,
   canModerateContent: false,
   canPublishContent: false,
   canConnectRss: false,
   canReviewRssRequests: false,
+  canListNewsLocationsInSpace: false,
+  canListNewsOrganizationsInSpace: false,
   canListNewsOrganizationInSpace: false,
+  grantedBadges: [],
+  trustState: null,
   grantedKeys: []
 };
 
@@ -50,6 +102,54 @@ export class NewsService {
 
     return this.http.get<any>(`${this.newsBaseUrl}/home`, { params }).pipe(
       map((response) => this.normalizeHomeResponse(response))
+    );
+  }
+
+  createNewsPoll(formData: FormData): Observable<any> {
+    return this.http.post(`${this.newsBaseUrl}/polls/create`, formData);
+  }
+
+  getMyNewsPolls(page: number = 1, pageSize: number = 20): Observable<NewsPaginatedResponse<NewsPollSummary>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<any>(`${this.newsBaseUrl}/polls/mine`, { params }).pipe(
+      map((response) => this.normalizePaginatedResponse(response))
+    );
+  }
+
+  getPublishedNewsPolls(page: number = 1, pageSize: number = 6): Observable<NewsPaginatedResponse<NewsPollSummary>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<any>(`${this.newsBaseUrl}/polls/published`, { params }).pipe(
+      map((response) => this.normalizePaginatedResponse(response))
+    );
+  }
+
+  getNewsPollById(pollId: number): Observable<{ isSuccess: boolean; data: NewsPollDetails | null; error: any }> {
+    return this.http.get<any>(`${this.newsBaseUrl}/polls/${pollId}`).pipe(
+      map((response) => ({
+        isSuccess: response?.isSuccess ?? response?.IsSuccess ?? true,
+        data: response?.data ?? response?.Data ?? null,
+        error: response?.error ?? response?.Error ?? null
+      }))
+    );
+  }
+
+  voteOnNewsPoll(pollId: number, optionIds: number[]): Observable<any> {
+    return this.http.post(`${this.newsBaseUrl}/polls/${pollId}/vote`, { optionIds });
+  }
+
+  getNewsPollResults(pollId: number): Observable<{ isSuccess: boolean; data: NewsPollResults | null; error: any }> {
+    return this.http.get<any>(`${this.newsBaseUrl}/polls/${pollId}/results`).pipe(
+      map((response) => ({
+        isSuccess: response?.isSuccess ?? response?.IsSuccess ?? true,
+        data: response?.data ?? response?.Data ?? null,
+        error: response?.error ?? response?.Error ?? null
+      }))
     );
   }
 
@@ -168,7 +268,22 @@ export class NewsService {
       canPublishContent: !!(payload?.canPublishContent ?? payload?.CanPublishContent),
       canConnectRss: !!(payload?.canConnectRss ?? payload?.CanConnectRss),
       canReviewRssRequests: !!(payload?.canReviewRssRequests ?? payload?.CanReviewRssRequests),
-      canListNewsOrganizationInSpace: !!(payload?.canListNewsOrganizationInSpace ?? payload?.CanListNewsOrganizationInSpace),
+      canListNewsLocationsInSpace: !!(payload?.canListNewsLocationsInSpace ?? payload?.CanListNewsLocationsInSpace),
+      canListNewsOrganizationsInSpace: !!(payload?.canListNewsOrganizationsInSpace ?? payload?.CanListNewsOrganizationsInSpace),
+      canListNewsOrganizationInSpace: !!(
+        payload?.canListNewsOrganizationsInSpace
+        ?? payload?.CanListNewsOrganizationsInSpace
+        ?? payload?.canListNewsOrganizationInSpace
+        ?? payload?.CanListNewsOrganizationInSpace
+      ),
+      grantedBadges: Array.isArray(payload?.grantedBadges ?? payload?.GrantedBadges)
+        ? (payload?.grantedBadges ?? payload?.GrantedBadges).map((badge: any) => ({
+          id: badge?.id ?? badge?.Id ?? '',
+          code: String(badge?.code ?? badge?.Code ?? '').trim(),
+          name: String(badge?.name ?? badge?.Name ?? '').trim()
+        })).filter((badge: any) => badge.code || badge.name)
+        : [],
+      trustState: payload?.trustState ?? payload?.TrustState ?? null,
       grantedKeys: Array.isArray(payload?.grantedKeys ?? payload?.GrantedKeys)
         ? [...(payload.grantedKeys ?? payload.GrantedKeys)]
         : []

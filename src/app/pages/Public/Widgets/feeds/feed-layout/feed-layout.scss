@@ -45,6 +45,7 @@ $radius: 16px;
   padding: 0 0 100px;
 
   .posts-grid,
+  .rss-section,
   .pagination-wrapper {
     max-width: 1280px;
     margin-left: auto;
@@ -59,6 +60,7 @@ $radius: 16px;
   padding: 0 0 100px;
 
   .posts-grid,
+  .rss-section,
   .pagination-wrapper {
     max-width: 1280px;
     margin-left: auto;
@@ -73,6 +75,7 @@ $radius: 16px;
   padding: 0 0 100px;
 
   .posts-grid,
+  .rss-section,
   .pagination-wrapper {
     max-width: 1280px;
     margin-left: auto;
@@ -80,6 +83,32 @@ $radius: 16px;
     padding-left: 20px;
     padding-right: 20px;
   }
+}
+
+.rss-section {
+  margin-bottom: 32px;
+}
+
+.rss-section-header {
+  margin: 0 0 16px;
+
+  h3 {
+    font-family: $font-header;
+    color: $dark;
+    margin: 0 0 6px;
+    font-size: 1.6rem;
+  }
+
+  p {
+    margin: 0;
+    color: $gray;
+    font-size: 0.95rem;
+  }
+}
+
+.rss-card-link {
+  text-decoration: none;
+  color: inherit;
 }
 
 // 4. Premium Category Header (Match CategoryHome)

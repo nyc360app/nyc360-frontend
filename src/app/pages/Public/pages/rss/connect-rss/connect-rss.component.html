@@ -17,8 +17,7 @@
             </div>
         </header>
 
-        <ng-container *ngIf="!isNewsCategory() || hasNewsRssAccess(); else newsRssLocked">
-            <form class="rss-connect-form" [formGroup]="rssForm" (ngSubmit)="onSubmit()">
+        <form class="rss-connect-form" [formGroup]="rssForm" (ngSubmit)="onSubmit()">
                 <section class="form-section">
                     <div class="section-heading">
                         <span class="step-index">1</span>
@@ -171,6 +170,20 @@
                             </button>
                         </div>
                     </div>
+
+                    <div class="news-rss-access-callout" *ngIf="isNewsCategoryLocked()">
+                        <i class="bi bi-lock-fill"></i>
+                        <div class="callout-copy">
+                            <strong>News RSS Access Required</strong>
+                            <p>
+                                You can still submit this feed for another department. For News division, request
+                                Publisher-level RSS access first.
+                            </p>
+                        </div>
+                        <button type="button" class="request-access-btn compact" (click)="openNewsRssVerificationRequest()">
+                            Request News RSS Access
+                        </button>
+                    </div>
                 </section>
 
                 <section class="form-section compliance-section">
@@ -206,34 +219,25 @@
 
                 <footer class="form-footer">
                     <p>Submitted RSS feeds will be reviewed by our editorial team before activation.</p>
-                    <button type="submit" class="submit-btn" [disabled]="isSubmitting() || rssForm.invalid">
+                    <button type="submit" class="submit-btn" [disabled]="isSubmitting() || rssForm.invalid || isNewsCategoryLocked()">
                         <ng-container *ngIf="!isSubmitting(); else submittingState">
                             <span>Connect RSS Feed</span>
                             <i class="bi bi-arrow-right"></i>
                         </ng-container>
                     </button>
                 </footer>
-            </form>
-        </ng-container>
-
-        <ng-template #newsRssLocked>
-            <section class="locked-state" *ngIf="newsRssAccessResolved(); else resolvingNewsAccess">
-                <div class="locked-icon">
-                    <i class="bi bi-lock-fill"></i>
-                </div>
-                <h2>News RSS Access Required</h2>
-                <p>You need Publisher-level News RSS access before you can connect a feed in the News division.</p>
-            </section>
-            <ng-template #resolvingNewsAccess>
-                <section class="locked-state loading-state">
-                    <div class="spinner"></div>
-                    <h2>Checking RSS Access</h2>
-                    <p>We are verifying your News RSS permissions.</p>
-                </section>
-            </ng-template>
-        </ng-template>
+        </form>
     </div>
 </div>
+
+<app-verification-modal
+    *ngIf="showNewsRssVerificationModal()"
+    [categoryName]="'News'"
+    [categoryId]="7"
+    [extraOccupations]="newsRssRequestOccupations().length ? newsRssRequestOccupations() : newsBadgeTags()"
+    (close)="closeNewsRssVerificationRequest()"
+    (verified)="onNewsRssVerified()">
+</app-verification-modal>
 
 <ng-template #submittingState>
     <span class="spinner small"></span>

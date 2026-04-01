@@ -5,18 +5,17 @@ import { environment } from '../../../../../environments/environment';
 import { CategoryEnum } from '../../../Widgets/feeds/models/categories';
 
 export interface ConnectRssRequest {
-    Url: string;
-    Category: number;
-    Name: string;
-    Description: string;
-    ImageUrl?: string;
-    Image?: File | null;
-    Language?: string;
-    SourceWebsite?: string;
-    SourceCredibility?: string;
-    DivisionTag?: string;
-    AgreementAccepted?: boolean;
-    LogoFileName?: string;
+    url: string;
+    category: number;
+    name: string;
+    description: string;
+    imageUrl?: string;
+    language?: string;
+    sourceWebsite?: string;
+    sourceCredibility?: string;
+    agreementAccepted: boolean;
+    divisionTag?: string;
+    logoImage?: File | null;
 }
 
 @Injectable({
@@ -30,8 +29,7 @@ export class RssService {
     connectRss(data: ConnectRssRequest): Observable<any> {
         const formData = this.buildConnectRssFormData(data);
 
-        if (Number(data?.Category) === CategoryEnum.News) {
-            formData.delete('Category');
+        if (Number(data?.category) === CategoryEnum.News) {
             return this.http.post(this.newsApiUrl, formData);
         }
 
@@ -40,20 +38,19 @@ export class RssService {
 
     private buildConnectRssFormData(data: ConnectRssRequest): FormData {
         const formData = new FormData();
-        formData.append('Url', data.Url);
-        formData.append('Category', String(Number(data.Category) || 0));
-        formData.append('Name', data.Name);
-        formData.append('Description', data.Description || '');
-        formData.append('ImageUrl', data.ImageUrl || '');
-        formData.append('Language', data.Language || '');
-        formData.append('SourceWebsite', data.SourceWebsite || '');
-        formData.append('SourceCredibility', data.SourceCredibility || '');
-        formData.append('DivisionTag', data.DivisionTag || '');
-        formData.append('AgreementAccepted', String(!!data.AgreementAccepted));
-        formData.append('LogoFileName', data.LogoFileName || '');
+        formData.append('url', data.url);
+        formData.append('category', String(Number(data.category) || 0));
+        formData.append('name', data.name);
+        formData.append('description', data.description || '');
+        formData.append('imageUrl', data.imageUrl || '');
+        formData.append('language', data.language || '');
+        formData.append('sourceWebsite', data.sourceWebsite || '');
+        formData.append('sourceCredibility', data.sourceCredibility || '');
+        formData.append('agreementAccepted', String(!!data.agreementAccepted));
+        formData.append('divisionTag', data.divisionTag || '');
 
-        if (data.Image) {
-            formData.append('Image', data.Image, data.Image.name);
+        if (data.logoImage) {
+            formData.append('logoImage', data.logoImage, data.logoImage.name);
         }
 
         return formData;

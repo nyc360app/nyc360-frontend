@@ -16,25 +16,43 @@
     <div class="listing-grid">
       <section class="listing-card form-card" *ngIf="showCommunityOrganizationLock">
         <div class="section-copy">
-          <p class="section-kicker">D01.3 Gate Required</p>
+          <p class="section-kicker">Community Contributor Access Required</p>
           <h2>Community organization listing is locked</h2>
           <p *ngIf="!hasGate1Eligibility">
-            A verified Resident, Organization, or Business account is required first. After that, request the D01.3 Community Organization tag to submit this listing.
+            A verified Resident, Organization, or Business account is required first. After that, request Community contributor access to submit this listing.
           </p>
           <p *ngIf="hasGate1Eligibility && !hasCommunityOrganizationAccess">
-            Your account is eligible for Community contributor flows, but it still needs the D01.3 Community Organization tag before this listing can be submitted.
+            Community organization listings unlock after Community Leader or Community Organization approval. Request the organization listing path here if your account does not already have access.
           </p>
           <div class="section-divider"></div>
         </div>
 
         <div class="form-footer">
           <button type="button" class="submit-btn" (click)="openCommunityOrganizationAccess()">
-            {{ hasGate1Eligibility ? 'Request D01.3 Access' : 'Go to Verification Settings' }}
+            {{ hasGate1Eligibility ? 'Request Community Organization Access' : 'Go to Verification Settings' }}
           </button>
         </div>
       </section>
 
-      <section class="listing-card form-card" *ngIf="!showCommunityOrganizationLock">
+      <section class="listing-card form-card" *ngIf="showNewsOrganizationLock">
+        <div class="section-copy">
+          <p class="section-kicker">D08.6 Access Required</p>
+          <h2>News organization listing is locked</h2>
+          <p>
+            Official News organization listings in THE360 Space require the D08.6 News Organization listing access.
+            Request that role first, then submit the listing once your account is approved.
+          </p>
+          <div class="section-divider"></div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" class="submit-btn" (click)="openNewsOrganizationAccess()">
+            Request D08.6 Access
+          </button>
+        </div>
+      </section>
+
+      <section class="listing-card form-card" *ngIf="!showCommunityOrganizationLock && !showNewsOrganizationLock">
         <div class="section-copy">
           <p class="section-kicker">Listing Request</p>
           <h2>Submit the core details</h2>
@@ -317,3 +335,12 @@
   (close)="closeVerificationModal()"
   (verified)="onVerified()">
 </app-community-leader-application-modal>
+
+<app-verification-modal
+  *ngIf="isNewsVerificationModalOpen"
+  [categoryName]="'News'"
+  [categoryId]="7"
+  [extraOccupations]="newsVerificationModalOccupations"
+  (close)="closeNewsVerificationModal()"
+  (verified)="onNewsVerified()">
+</app-verification-modal>

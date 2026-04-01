@@ -13,6 +13,18 @@ import { CategoryDepartmentHeroComponent } from '../../category-department-hero/
 
 import { CategoryEnum, CATEGORY_THEMES } from '../models/categories';
 
+interface ExploreRssItem {
+  id: number;
+  title: string;
+  summary: string;
+  publishedAt: string;
+  link: string;
+  imageUrl: string;
+  categoryName: string;
+  categoryColor: string;
+  categoryIcon?: string;
+}
+
 @Component({
   selector: 'app-feed-layout',
   templateUrl: './feed-layout.html',
@@ -25,6 +37,7 @@ import { CategoryEnum, CATEGORY_THEMES } from '../models/categories';
 export class FeedLayoutComponent implements OnInit, OnDestroy {
   protected readonly CategoryEnum = CategoryEnum;
   posts: any[] = [];
+  rssPosts: ExploreRssItem[] = [];
   locations: any[] = [];
   loading = true;
 
@@ -76,6 +89,7 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
         this.applyTheme(theme.color);
         this.selectedLocationId = null;
         this.currentPage = 1;
+        this.loadLatestRssItems();
         this.loadPosts();
       })
     );
@@ -85,6 +99,10 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
 
   // ⚡ دالة التتبع لتحسين أداء ngFor (الحل للمشكلة السابقة)
   trackByPostId(index: number, item: any): number {
+    return item.id;
+  }
+
+  trackByRssId(index: number, item: ExploreRssItem): number {
     return item.id;
   }
 
@@ -126,6 +144,28 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadLatestRssItems() {
+    this.rssPosts = [];
+
+    this.postsService.getLatestRssItems(this.currentCategory, 6).subscribe({
+      next: (res: any) => {
+        const data = this.extractStandardResponseData<any[]>(res);
+        if (!Array.isArray(data)) {
+          this.rssPosts = [];
+          this.cdr.markForCheck();
+          return;
+        }
+
+        this.rssPosts = data.map((item) => this.mapRssItem(item));
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.rssPosts = [];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   // --- معالجة البيانات ---
   private mapAndSortPosts(rawPosts: any[]): any[] {
     const mapped = rawPosts.map(post => {
@@ -154,6 +194,27 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
 
     // ترتيب الصور أولاً
     return mapped.sort((a, b) => (b.ui.displayImage ? 1 : 0) - (a.ui.displayImage ? 1 : 0));
+  }
+
+  private mapRssItem(item: any): ExploreRssItem {
+    const categoryId = Number(item?.category ?? this.currentCategory);
+    const catTheme = CATEGORY_THEMES[categoryId] || CATEGORY_THEMES[this.currentCategory] || { label: 'General', color: '#999' };
+
+    return {
+      id: Number(item?.id ?? 0),
+      title: String(item?.title || 'Untitled'),
+      summary: this.stripHtml(item?.summary || ''),
+      publishedAt: String(item?.publishedAt || new Date().toISOString()),
+      link: String(item?.link || ''),
+      imageUrl: this.imageService.resolveImageUrl(item?.imageUrl || ''),
+      categoryName: catTheme.label,
+      categoryColor: catTheme.color,
+      categoryIcon: catTheme.icon
+    };
+  }
+
+  private extractStandardResponseData<T>(response: any): T | undefined {
+    return response?.data ?? response?.Data;
   }
 
   getPostTypeName(postType: number, sourceType: number): string {

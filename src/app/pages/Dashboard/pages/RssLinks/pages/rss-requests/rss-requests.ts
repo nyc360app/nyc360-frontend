@@ -33,8 +33,16 @@ export class RssRequestsComponent implements OnInit {
     selectedRequest: RssRequest | null = null;
     adminNote = '';
     actionStatus = 1; // 1 = Approve, 2 = Reject (example)
+    selectedCategoryForAction: number | null = null;
 
     categories = CATEGORY_THEMES;
+    categoryOptions = Object.entries(CATEGORY_THEMES)
+        .map(([id, theme]: any) => ({
+            id: Number(id),
+            label: String(theme?.label || 'Unknown')
+        }))
+        .filter((entry) => Number.isFinite(entry.id))
+        .sort((left, right) => left.id - right.id);
 
     ngOnInit() {
         this.loadRequests();
@@ -66,6 +74,20 @@ export class RssRequestsComponent implements OnInit {
         return (this.categories as any)[id]?.label || 'Unknown';
     }
 
+    getRequestedCategory(request: RssRequest): number {
+        const requested = Number((request as any)?.requestedCategory);
+        return Number.isFinite(requested) ? requested : Number(request?.category);
+    }
+
+    getEffectiveCategory(request: RssRequest): number {
+        const finalCategory = Number((request as any)?.finalCategory);
+        return Number.isFinite(finalCategory) ? finalCategory : this.getRequestedCategory(request);
+    }
+
+    hasCategoryOverride(request: RssRequest): boolean {
+        return this.getEffectiveCategory(request) !== this.getRequestedCategory(request);
+    }
+
     onPageChange(newPage: number) {
         this.page = newPage;
         this.loadRequests();
@@ -80,7 +102,13 @@ export class RssRequestsComponent implements OnInit {
         this.selectedRequest = request;
         this.actionStatus = status;
         this.adminNote = '';
+        this.selectedCategoryForAction = status === 1 ? this.getRequestedCategory(request) : null;
         this.showActionModal = true;
+    }
+
+    closeActionModal() {
+        this.showActionModal = false;
+        this.selectedCategoryForAction = null;
     }
 
     submitAction() {
@@ -92,10 +120,14 @@ export class RssRequestsComponent implements OnInit {
             adminNote: this.adminNote
         };
 
+        if (this.actionStatus === 1 && typeof this.selectedCategoryForAction === 'number') {
+            updateData.category = this.selectedCategoryForAction;
+        }
+
         this.rssService.updateRssRequestStatus(updateData).subscribe({
             next: (res) => {
                 if (res.isSuccess) {
-                    this.showActionModal = false;
+                    this.closeActionModal();
                     this.loadRequests();
                 } else {
                     alert('Error: ' + (res.error?.message || 'Update failed'));

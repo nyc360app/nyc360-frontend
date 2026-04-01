@@ -159,7 +159,7 @@ function getDepartmentTakeAction(path: string): { label: string; route: string }
     case 'lifestyle':
       return { label: 'Create Lifestyle Program', route: '/public/coming-soon' };
     case 'news':
-      return { label: 'Create Poll', route: '/public/coming-soon' };
+      return { label: 'Create Poll', route: '/news/create-poll' };
     case 'professions':
       return { label: 'Create Job Post', route: '/professions/offers/create' };
     case 'social':

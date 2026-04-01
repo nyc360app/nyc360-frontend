@@ -72,11 +72,16 @@ export class RssService {
   // --- UPDATE REQUEST STATUS ---
   updateRssRequestStatus(data: RssRequestUpdate): Observable<any> {
     // Transform to PascalCase for Backend
-    const payload = {
+    const payload: any = {
       Id: data.id,
       Status: data.status,
       AdminNote: data.adminNote
     };
+
+    if (typeof data.category === 'number') {
+      payload.Category = data.category;
+    }
+
     return this.http.put(`${this.baseUrl}/requests/update`, payload);
   }
 }

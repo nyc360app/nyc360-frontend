@@ -6,13 +6,14 @@ import { AuthService } from '../../../Authentication/Service/auth';
 import { CommunityService } from '../../pages/communities/services/community';
 import { CommunityLeaderApplicationModalComponent } from '../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { BadgeOption, buildCommunityD01BadgeOptions } from '../../../../shared/utils/community-badge-policy';
+import { BadgeOption, buildCommunityD01BadgeOptions, COMMUNITY_D01_LABELS } from '../../../../shared/utils/community-badge-policy';
 import {
   hasCommunityStaffBypass,
   hasCommunityContributorAccess as hasCommunityContributorAccessTag,
   hasCommunityCreateAccess as hasCommunityCreateAccessTag,
   hasCommunityLeaderAccess as hasCommunityLeaderAccessTag,
-  hasCommunityOrganizationAccess as hasCommunityOrganizationAccessTag,
+  hasCommunityOperationalAccess as hasCommunityOperationalAccessTag,
+  hasCommunityOrganizationListingAccess as hasCommunityOrganizationListingAccessTag,
   isCommunityGate1Eligible
 } from '../../../../shared/utils/community-contract';
 import { getDepartmentExploreRoute } from '../feeds/models/categories';
@@ -43,6 +44,7 @@ export class CommunityDepartmentHeroComponent implements OnInit {
 
   currentUserInfo: any | null = this.authService.getFullUserInfo();
   communityPublicBadgeTags: BadgeOption[] = buildCommunityD01BadgeOptions([]);
+  modalOccupationOptions: BadgeOption[] = [];
   isLeaderApplicationModalOpen = false;
   preferredApplicationOccupationId: number | null = null;
 
@@ -78,8 +80,12 @@ export class CommunityDepartmentHeroComponent implements OnInit {
     return this.hasStaffBypass || hasCommunityCreateAccessTag(this.currentUserInfo?.tags || []);
   }
 
+  get hasCommunityOperationalAccess(): boolean {
+    return this.hasStaffBypass || hasCommunityOperationalAccessTag(this.currentUserInfo?.tags || []);
+  }
+
   get hasOrganizationListingAccess(): boolean {
-    return this.hasStaffBypass || hasCommunityOrganizationAccessTag(this.currentUserInfo?.tags || []);
+    return this.hasStaffBypass || hasCommunityOrganizationListingAccessTag(this.currentUserInfo?.tags || []);
   }
 
   get hasCommunityContributorAccess(): boolean {
@@ -118,19 +124,11 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   }
 
   openLeaderApplicationModal(): void {
-    this.openContributorApplicationModal(null);
-  }
-
-  openLeaderPublishingAccessModal(): void {
-    this.openContributorApplicationModal('Apply for Community Leader Badges');
-  }
-
-  openCreateCommunityAccessModal(): void {
-    this.openContributorApplicationModal('Apply for Create a Community');
+    this.openContributorApplicationModal(COMMUNITY_D01_LABELS.leader);
   }
 
   openOrganizationListingAccessModal(): void {
-    this.openContributorApplicationModal('List Community Organization in Space');
+    this.openContributorApplicationModal(COMMUNITY_D01_LABELS.organization);
   }
 
   private openContributorApplicationModal(preferredOccupationName: string | null): void {
@@ -147,7 +145,9 @@ export class CommunityDepartmentHeroComponent implements OnInit {
       return;
     }
 
-    this.preferredApplicationOccupationId = this.resolvePreferredOccupationId(preferredOccupationName);
+    this.modalOccupationOptions = this.resolveModalOccupationOptions(preferredOccupationName);
+    this.preferredApplicationOccupationId = this.modalOccupationOptions[0]?.id
+      ?? this.resolvePreferredOccupationId(preferredOccupationName);
     this.isLeaderApplicationModalOpen = true;
     this.isActivityDropdownOpen = false;
   }
@@ -158,6 +158,7 @@ export class CommunityDepartmentHeroComponent implements OnInit {
   }
 
   closeLeaderApplicationModal(): void {
+    this.modalOccupationOptions = [];
     this.preferredApplicationOccupationId = null;
     this.isLeaderApplicationModalOpen = false;
     this.cdr.markForCheck();
@@ -217,5 +218,25 @@ export class CommunityDepartmentHeroComponent implements OnInit {
     );
 
     return match?.id ?? null;
+  }
+
+  private resolveModalOccupationOptions(preferredOccupationName: string | null | undefined): BadgeOption[] {
+    const normalized = this.normalizeOccupationNameForMatch(preferredOccupationName);
+
+    if (!normalized) {
+      const leaderOnly = this.communityPublicBadgeTags.filter((occupation) =>
+        this.normalizeOccupationNameForMatch(occupation?.name).includes(this.normalizeOccupationNameForMatch(COMMUNITY_D01_LABELS.leader))
+        || this.normalizeOccupationNameForMatch(COMMUNITY_D01_LABELS.leader).includes(this.normalizeOccupationNameForMatch(occupation?.name))
+      );
+
+      return leaderOnly.length ? leaderOnly : this.communityPublicBadgeTags.slice(0, 1);
+    }
+
+    const exactMatch = this.communityPublicBadgeTags.find((occupation) =>
+      this.normalizeOccupationNameForMatch(occupation?.name).includes(normalized)
+      || normalized.includes(this.normalizeOccupationNameForMatch(occupation?.name))
+    );
+
+    return exactMatch ? [exactMatch] : this.communityPublicBadgeTags;
   }
 }

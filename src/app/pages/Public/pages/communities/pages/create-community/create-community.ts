@@ -12,6 +12,7 @@ import { BadgeOption } from '../../../../../../shared/utils/community-badge-poli
 import {
   getCommunityErrorMessage,
   hasCommunityCreateAccess,
+  hasCommunityLeaderAccess,
   hasCommunityStaffBypass,
   isCommunityGate1Eligible
 } from '../../../../../../shared/utils/community-contract';
@@ -95,7 +96,7 @@ export class CreateCommunityComponent implements OnInit {
   }
 
   get verificationModalOccupations(): BadgeOption[] {
-    return this.accessOptions.filter((option) => hasCommunityCreateAccess([option]));
+    return this.accessOptions.filter((option) => hasCommunityLeaderAccess([option]));
   }
 
   get contributorApplicationFullName(): string {
@@ -174,7 +175,7 @@ export class CreateCommunityComponent implements OnInit {
 
   openCreateAccessModal(): void {
     if (!this.hasGate1Eligibility) {
-      this.toastService.info('A verified Resident, Organization, or Business account is required before requesting the D01.2 Create a Community tag.');
+      this.toastService.info('A verified Resident, Organization, or Business account is required before requesting Community contributor access.');
       this.router.navigate(['/public/profile/settings']);
       return;
     }

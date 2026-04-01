@@ -32,11 +32,13 @@ export interface CategoryPost {
     Price: number;
   };
   cleanDescription?: string;
+  externalLink?: string;
 }
 
 export interface CategoryHomeData {
   featured: CategoryPost[];
   latest: CategoryPost[];
+  rss?: CategoryPost[];
   trending: CategoryPost[];
   tags?: any[];
 }
@@ -45,4 +47,24 @@ export interface CategoryHomeResponse {
   isSuccess: boolean;
   data: CategoryHomeData;
   error: any;
+}
+
+export interface LatestRssFeedItemDto {
+  id: number;
+  sourceId: number;
+  category: number;
+  title: string;
+  link: string;
+  summary: string | null;
+  imageUrl: string | null;
+  publishedAt: string;
+}
+
+export interface StandardApiResponse<T> {
+  isSuccess?: boolean;
+  data?: T;
+  error?: any;
+  IsSuccess?: boolean;
+  Data?: T;
+  Error?: any;
 }

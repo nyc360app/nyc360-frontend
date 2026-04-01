@@ -171,7 +171,15 @@ export class SpaceListingRequestsComponent implements OnInit {
         this.isProcessingAction = false;
 
         if (response?.isSuccess) {
-          this.toastService.success(approved ? 'Listing request approved.' : 'Listing request rejected.');
+          if (approved) {
+            this.toastService.success(
+              this.isLocationRequest(this.selectedRequest)
+                ? 'Location listing approved. No separate publish step is required.'
+                : 'Listing request approved.'
+            );
+          } else {
+            this.toastService.success('Listing request rejected.');
+          }
           this.closeResolveModal();
           this.loadRequests(this.currentPage);
           return;
@@ -231,6 +239,10 @@ export class SpaceListingRequestsComponent implements OnInit {
       }
     }
     return value ?? 'listing';
+  }
+
+  isLocationRequest(request: any): boolean {
+    return this.getRequestEntityType(request) === 'location';
   }
 
   getRequestDescription(request: any): string {

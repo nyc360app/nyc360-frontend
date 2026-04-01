@@ -139,6 +139,71 @@
         </div>
       </section>
 
+      <section class="news-polls-section fade-in-up" *ngIf="isNewsCategory && (isLoadingNewsPolls || newsPolls.length > 0)">
+        <div class="section-header news-polls-header mb-4">
+          <div class="section-header-copy">
+            <h3>Vote In Live News Polls</h3>
+            <p>See what the NYC360 audience is weighing in on right now and jump straight into the conversation.</p>
+          </div>
+        </div>
+
+        <div class="news-polls-grid" *ngIf="!isLoadingNewsPolls; else newsPollsLoading">
+          <article class="news-poll-card" *ngFor="let poll of newsPolls; let i = index" (click)="openNewsPoll(poll)">
+            <div class="poll-card-media" [class.has-image]="!!poll.coverImageUrl">
+              <img *ngIf="poll.coverImageUrl"
+                [src]="getPollCoverImage(poll)"
+                [alt]="poll.title || poll.question"
+                loading="lazy"
+                appImgFallback="post">
+              <div class="poll-card-overlay"></div>
+              <div class="poll-card-badges">
+                <span class="poll-status-chip" [class.closed]="isNewsPollClosed(poll)">
+                  {{ getNewsPollStatusLabel(poll) }}
+                </span>
+                <span class="poll-status-chip subtle" *ngIf="poll.allowMultipleAnswers">Multiple choice</span>
+                <span class="poll-status-chip subtle" *ngIf="i === 0">Top pick</span>
+              </div>
+            </div>
+
+            <div class="poll-card-body">
+              <div class="poll-card-topline">
+                <span class="poll-card-kicker">{{ poll.allowMultipleAnswers ? 'Multiple choice poll' : 'Single choice poll' }}</span>
+                <span class="poll-card-count">{{ poll.totalVotes }} {{ poll.totalVotes === 1 ? 'vote' : 'votes' }}</span>
+              </div>
+
+              <h4>{{ poll.question }}</h4>
+
+              <p class="poll-card-description" *ngIf="poll.description">{{ poll.description }}</p>
+
+              <div class="poll-card-metrics">
+                <div class="metric-pill compact">
+                  <span class="metric-value">{{ poll.optionCount }}</span>
+                  <span class="metric-label">{{ poll.optionCount === 1 ? 'Option' : 'Options' }}</span>
+                </div>
+                <div class="metric-pill compact">
+                  <span class="metric-value">{{ getNewsPollMeta(poll) }}</span>
+                  <span class="metric-label">Schedule</span>
+                </div>
+              </div>
+
+              <div class="poll-card-footer">
+                <span class="results-note" *ngIf="poll.showResultsBeforeVoting">Results visible before voting</span>
+
+                <button type="button" class="poll-inline-link" (click)="openNewsPoll(poll); $event.stopPropagation()">
+                  Vote now
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #newsPollsLoading>
+          <div class="news-polls-grid is-loading">
+            <div class="news-poll-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+          </div>
+        </ng-template>
+      </section>
+
       <!-- Standard Dashboard (Non-Housing) -->
       <section class="latest-grid-section mb-5 fade-in-up" *ngIf="gridPosts.length > 0 && !isHousingCategory">
         <div class="section-header mb-3">
@@ -162,6 +227,83 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <section class="latest-grid-section mb-5 fade-in-up" *ngIf="rssFeedPosts.length > 0 && !isHousingCategory">
+        <div class="section-header mb-3">
+          <h3>RSS Feed Updates</h3>
+          <a [routerLink]="exploreRoute" class="view-all">View All</a>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-4" *ngFor="let post of (rssFeedPosts | slice:0:3)">
+            <a class="grid-card rss-grid-card-link"
+              [attr.href]="post.externalLink || null"
+              [routerLink]="post.externalLink ? null : ['/public/posts/details', post.id]"
+              [attr.target]="post.externalLink ? '_blank' : null"
+              [attr.rel]="post.externalLink ? 'noopener noreferrer' : null">
+              <div class="img-wrapper">
+                <img [src]="getImg(post)" alt="RSS Post Thumb" loading="lazy" appImgFallback="post">
+                <div class="color-bar"></div>
+              </div>
+              <div class="card-content">
+                <h4>{{ post.title | slice:0:60 }}{{ (post.title || '').length > 60 ? '...' : '' }}</h4>
+                <p class="desc">{{ (post.cleanDescription || post.content || '') | slice:0:100 }}...</p>
+                <span class="read-more">Read More <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="cross-department-feed fade-in-up" *ngIf="isNewsCategory && crossDepartmentGroups.length > 0">
+        <div class="section-header section-header-rows mb-4">
+          <div class="section-header-copy">
+            <h3>Across NYC360</h3>
+            <p>Browse the latest visual stories from every department without leaving News.</p>
+          </div>
+        </div>
+
+        <section class="category-block-full cross-row-block" *ngFor="let group of crossDepartmentGroups"
+          [style.--cat-color]="getDepartmentRowColor(group.category)">
+          <header class="block-header">
+            <div class="header-left">
+              <div class="vertical-bar" [style.background]="getDepartmentRowColor(group.category)"></div>
+              <div class="title-stack">
+                <h2 [style.color]="getDepartmentRowColor(group.category)">{{ getDepartmentRowLabel(group.category) }}</h2>
+                <p>{{ group.posts.length }} {{ group.posts.length === 1 ? 'story' : 'stories' }} live in this department</p>
+              </div>
+            </div>
+            <div class="header-actions">
+              <a class="open-department" [routerLink]="getDepartmentRowRoute(group.category)">
+                Open Department
+              </a>
+              <div class="slider-controls" *ngIf="group.posts.length > 3">
+                <button class="ctrl-btn prev" type="button" (click)="scrollDepartmentGroup(group.category, 'left')">
+                  <i class="bi bi-arrow-left"></i>
+                </button>
+                <button class="ctrl-btn next" type="button" (click)="scrollDepartmentGroup(group.category, 'right')">
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <div class="slider-wrapper">
+            <div class="slider-container" [id]="'news-slider-'+group.category">
+              <article class="std-card-v2" *ngFor="let post of group.posts" (click)="goToDepartmentPost(post)">
+                <div class="card-media">
+                  <img [src]="getImg(post)" [alt]="post.title" loading="lazy" appImgFallback="post">
+                  <span class="category-badge-top-left" [style.--badge-color]="getDepartmentRowColor(post.category)">
+                    <span>{{ getDepartmentRowLabel(post.category) }}</span>
+                  </span>
+                  <div class="media-overlay">
+                    <h4>{{ post.title | slice:0:60 }}{{ post.title.length > 60 ? '...' : '' }}</h4>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
       </section>
 
       <!-- Housing Specific Sections -->

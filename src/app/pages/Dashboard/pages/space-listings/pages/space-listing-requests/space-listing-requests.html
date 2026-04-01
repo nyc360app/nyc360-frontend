@@ -179,6 +179,10 @@
               <span class="detail-label">Listing Type</span>
               <strong>{{ getRequestEntityType(selectedRequest) | titlecase }}</strong>
             </div>
+            <div class="col-md-6" *ngIf="isLocationRequest(selectedRequest)">
+              <span class="detail-label">Approval Flow</span>
+              <strong>Internal approval only</strong>
+            </div>
             <div class="col-md-6" *ngIf="isOwnershipClaim(selectedRequest)">
               <span class="detail-label">Ownership</span>
               <strong>Claimed by submitter</strong>
@@ -243,8 +247,12 @@
 
         <div class="audit-warning p-3 rounded d-flex gap-3 align-items-center">
           <div class="warning-icon"><i class="bi bi-info-circle-fill"></i></div>
-          <p class="mb-0 x-small text-muted">
+          <p class="mb-0 x-small text-muted" *ngIf="!isLocationRequest(selectedRequest)">
             Approval should only be granted once the location context and ownership/contact information are verified.
+          </p>
+          <p class="mb-0 x-small text-muted" *ngIf="isLocationRequest(selectedRequest)">
+            Approved location listings are finalized internally at review time. They will not appear in
+            <code>/admin/locations</code> and do not require a separate publish step.
           </p>
         </div>
       </div>

@@ -80,9 +80,61 @@
     </div>
   </div>
 
+  <section class="rss-section" *ngIf="!loading && rssPosts.length > 0">
+    <div class="rss-section-header">
+      <h3>RSS Feed Updates</h3>
+      <p>Latest imported stories for this department.</p>
+    </div>
+
+    <div class="posts-grid rss-posts-grid">
+      <a
+        *ngFor="let item of rssPosts | slice:0:6; trackBy: trackByRssId"
+        class="feed-card rss-card-link"
+        [class.has-image]="!!item.imageUrl"
+        [class.text-card]="!item.imageUrl"
+        [attr.href]="item.link || null"
+        [attr.target]="item.link ? '_blank' : null"
+        [attr.rel]="item.link ? 'noopener noreferrer' : null"
+      >
+        <div class="card-media" *ngIf="item.imageUrl">
+          <img [src]="item.imageUrl" loading="lazy" alt="RSS Cover" appImgFallback="post">
+          <span class="category-badge" [style.background]="item.categoryColor">
+            <img *ngIf="item.categoryIcon" [src]="item.categoryIcon" alt="icon">
+            {{ item.categoryName }}
+          </span>
+        </div>
+
+        <div class="card-content">
+          <div class="accent-line" *ngIf="!item.imageUrl" [style.background]="item.categoryColor"></div>
+
+          <div class="card-meta">
+            <span class="date">{{ item.publishedAt | date:'MMM d' }}</span>
+            <span class="dot">•</span>
+            <span class="loc">RSS Source</span>
+          </div>
+
+          <h3 class="card-title">{{ item.title }}</h3>
+
+          <p class="card-excerpt" *ngIf="!item.imageUrl">
+            {{ item.summary | slice:0:140 }}...
+          </p>
+
+          <div class="card-footer">
+            <div class="author">
+              <span>External Story</span>
+            </div>
+            <span class="read-more">
+              <i class="bi bi-arrow-up-right"></i>
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
   <div class="posts-grid" *ngIf="!loading">
 
-    <div *ngIf="posts.length === 0" class="empty-state">
+    <div *ngIf="posts.length === 0 && rssPosts.length === 0" class="empty-state">
       <div class="icon-box"><i class="bi bi-inbox"></i></div>
       <h3>No updates found</h3>
       <p>Try adjusting your search filters.</p>

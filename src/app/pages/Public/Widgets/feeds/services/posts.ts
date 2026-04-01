@@ -47,6 +47,14 @@ export class PostsService {
     return this.http.get(`${this.apiUrl}/posts/feed`, { params: httpParams });
   }
 
+  getLatestRssItems(category: number, limit: number = 6): Observable<any> {
+    const params = new HttpParams()
+      .set('Category', category.toString())
+      .set('Limit', limit.toString());
+
+    return this.http.get(`${this.apiUrl}/rss-feed/items/latest`, { params });
+  }
+
   /**
    * 2. Search Locations (Dropdown)
    * دالة للبحث عن المناطق لملء القائمة المنسدلة

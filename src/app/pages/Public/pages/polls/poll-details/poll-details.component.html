@@ -1,0 +1,114 @@
+<div class="poll-details-page">
+  <app-news-department-hero
+    title="News Poll"
+    description="Review the question, cast a vote, and track live audience response in a clean editorial poll layout.">
+  </app-news-department-hero>
+
+  <div class="poll-details-shell">
+    <div class="poll-topbar">
+      <a class="back-pill" [routerLink]="['/news/dashboard']">
+        <i class="bi bi-arrow-left"></i>
+        Back to Dashboard
+      </a>
+      <a class="back-pill secondary" [routerLink]="['/news']">
+        <i class="bi bi-newspaper"></i>
+        Open News
+      </a>
+    </div>
+
+    <div class="poll-loading" *ngIf="isLoading">
+      <div class="spinner-border" role="status"></div>
+    </div>
+
+    <div class="poll-layout" *ngIf="!isLoading && poll">
+      <section class="poll-main-card">
+        <div class="cover-frame" [class.empty]="!coverUrl">
+          <img *ngIf="coverUrl" [src]="coverUrl" [alt]="poll.title">
+          <div class="cover-placeholder" *ngIf="!coverUrl">
+            <i class="bi bi-bar-chart-line-fill"></i>
+          </div>
+          <div class="cover-badges">
+            <span class="status-badge">{{ poll.status }}</span>
+            <span class="status-badge subtle" *ngIf="poll.allowMultipleAnswers">Multiple answers</span>
+            <span class="status-badge subtle" *ngIf="poll.showResultsBeforeVoting">Live results</span>
+          </div>
+        </div>
+
+        <div class="poll-copy">
+          <span class="eyebrow">NYC360 News Poll</span>
+          <h1>{{ poll.question }}</h1>
+          <p>{{ poll.description || poll.title }}</p>
+        </div>
+
+        <div class="options-panel">
+          <h2>Vote</h2>
+          <p class="section-note">
+            {{ poll.allowMultipleAnswers ? 'Choose one or more options.' : 'Choose one option.' }}
+          </p>
+
+          <div class="options-list">
+            <button
+              type="button"
+              class="option-button"
+              *ngFor="let option of poll.options"
+              [class.selected]="isSelected(option.id)"
+              [disabled]="!canVote || isSubmittingVote"
+              (click)="toggleOption(option)">
+              <span class="option-marker">
+                <i class="bi" [ngClass]="poll.allowMultipleAnswers ? 'bi-check2-square' : 'bi-record-circle'"></i>
+              </span>
+              <span class="option-text">{{ option.text }}</span>
+            </button>
+          </div>
+
+          <div class="vote-actions">
+            <button class="vote-button" type="button" [disabled]="!canVote || isSubmittingVote" (click)="submitVote()">
+              <i class="bi" [ngClass]="isSubmittingVote ? 'bi-hourglass-split' : 'bi-hand-index-thumb'"></i>
+              {{ isSubmittingVote ? 'Submitting Vote...' : (canVote ? 'Submit Vote' : 'Voting Closed') }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="poll-sidebar">
+        <section class="sidebar-card">
+          <h3>Poll Snapshot</h3>
+          <div class="meta-grid">
+            <div class="meta-item">
+              <span class="label">Total votes</span>
+              <strong>{{ totalVotes }}</strong>
+            </div>
+            <div class="meta-item">
+              <span class="label">Options</span>
+              <strong>{{ poll.options.length }}</strong>
+            </div>
+            <div class="meta-item">
+              <span class="label">Created</span>
+              <strong>{{ poll.createdAt | date:'MMM d, y' }}</strong>
+            </div>
+            <div class="meta-item" *ngIf="poll.closesAt">
+              <span class="label">Closes</span>
+              <strong>{{ poll.closesAt | date:'MMM d, y, h:mm a' }}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="sidebar-card" *ngIf="shouldShowResults">
+          <h3>Live Results</h3>
+          <div class="results-list">
+            <div class="result-row" *ngFor="let option of poll.options">
+              <div class="result-head">
+                <span>{{ option.text }}</span>
+                <strong>{{ getVotePercent(option.id) }}%</strong>
+              </div>
+              <div class="result-bar">
+                <span [style.width.%]="getVotePercent(option.id)"></span>
+              </div>
+              <small>{{ getVoteCount(option.id) }} votes</small>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>

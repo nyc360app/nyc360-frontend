@@ -73,6 +73,7 @@ export class CommunityLeaderApplicationModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.occupationOptions = this.normalizeOccupations(this.availableOccupations);
+    this.occupationOptions = this.filterOccupationsByPreference(this.occupationOptions);
 
     if (!this.occupationOptions.length) {
       this.occupationOptions = [
@@ -359,6 +360,16 @@ export class CommunityLeaderApplicationModalComponent implements OnInit {
         };
       })
       .filter((item): item is CommunityOccupationOption => !!item);
+  }
+
+  private filterOccupationsByPreference(items: CommunityOccupationOption[]): CommunityOccupationOption[] {
+    if (!this.preferredOccupationId) {
+      return items;
+    }
+
+    const preferredId = Number(this.preferredOccupationId);
+    const preferredOnly = items.filter((item) => item.id === preferredId);
+    return preferredOnly.length ? preferredOnly : items;
   }
 
   private toDisplayOccupationName(name: string): string {

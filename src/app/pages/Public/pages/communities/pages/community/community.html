@@ -158,10 +158,10 @@
       <p>
         {{ hasCreateCommunityAccess
           ? 'Open the verified community creation flow and publish a new neighborhood, civic, or support-based community.'
-          : 'Community creation is protected by the D01.2 gate. Request access through Contributor Activities, then return here to create it.' }}
+          : 'Community creation unlocks after Community Leader or Community Organization approval. Use Contributor Activities to request the relevant contributor access, then return here to create it.' }}
       </p>
       <button class="btn-create" routerLink="/community/create/community">
-        {{ hasCreateCommunityAccess ? 'Create Community' : 'Request Create Community Access' }}
+        {{ hasCreateCommunityAccess ? 'Create Community' : 'Unlock Community Creation' }}
       </button>
     </section>
 
