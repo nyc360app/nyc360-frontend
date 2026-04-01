@@ -65,6 +65,22 @@ export class CategoryHomeComponent implements OnInit {
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
+  // Explicit palette for News cross-department rows (matches product spec exactly).
+  private readonly departmentPalette: Record<number, string> = {
+    [CategoryEnum.Community]: '#BC5E3D',
+    [CategoryEnum.Culture]: '#DC3545',
+    [CategoryEnum.Education]: '#0056B3',
+    [CategoryEnum.Health]: '#00C3FF',
+    [CategoryEnum.Housing]: '#B59B62',
+    [CategoryEnum.Lifestyle]: '#8BC34A',
+    [CategoryEnum.Legal]: '#102A43',
+    [CategoryEnum.News]: '#333333',
+    [CategoryEnum.Professions]: '#2ECC71',
+    [CategoryEnum.Social]: '#17A2B8',
+    [CategoryEnum.Transportation]: '#F1C40F',
+    [CategoryEnum.Tv]: '#0D47A1'
+  };
+
   // --- Data Buckets ---
   heroPost: CategoryPost | null = null;       // 1. الصورة الكبيرة (Hero)
   topSidePosts: CategoryPost[] = [];          // 2. القائمة الجانبية العلوية
@@ -573,7 +589,9 @@ export class CategoryHomeComponent implements OnInit {
   }
 
   getDepartmentRowColor(categoryId: number): string {
-    return (CATEGORY_THEMES as any)[Number(categoryId)]?.color || '#B59B62';
+    return this.departmentPalette[Number(categoryId)]
+      || (CATEGORY_THEMES as any)[Number(categoryId)]?.color
+      || '#B59B62';
   }
 
   getDepartmentRowRoute(categoryId: number): string {
