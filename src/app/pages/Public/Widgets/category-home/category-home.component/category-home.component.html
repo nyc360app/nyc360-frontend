@@ -205,7 +205,7 @@
       </section>
 
       <!-- Standard Dashboard (Non-Housing) -->
-      <section class="latest-grid-section mb-5 fade-in-up" *ngIf="gridPosts.length > 0 && !isHousingCategory">
+      <section class="latest-grid-section mb-5 fade-in-up" *ngIf="gridPosts.length > 0 && !isHousingCategory && !isNewsCategory">
         <div class="section-header mb-3">
           <h3>Highlights</h3>
           <a [routerLink]="exploreRoute" class="view-all">View All</a>
@@ -408,7 +408,7 @@
 
       </ng-container>
 
-      <div class="row g-5 mb-5 fade-in-up">
+      <div class="row g-5 mb-5 fade-in-up" *ngIf="!isNewsCategory">
         <div class="col-lg-8" *ngIf="moreNewsPosts.length > 0">
           <div class="section-header mb-4">
             <h3>More Stories</h3>
