@@ -68,7 +68,7 @@ export class CategoryHomeComponent implements OnInit {
   // Explicit palette for News cross-department rows (matches product spec exactly).
   private readonly departmentPalette: Record<number, string> = {
     [CategoryEnum.Community]: '#FB7D3F',
-    [CategoryEnum.Culture]: '#DC3545',
+    [CategoryEnum.Culture]: '#DD363A',
     [CategoryEnum.Education]: '#0056B3',
     [CategoryEnum.Health]: '#00C3FF',
     [CategoryEnum.Housing]: '#B59B62',

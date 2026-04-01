@@ -260,7 +260,7 @@ export const CATEGORY_THEMES: { [key: number]: any } = {
     topLinks: buildStandardTopLinks('community')
   },
   [CategoryEnum.Culture]: {
-    color: '#dc3545',
+    color: '#DD363A',
     label: 'Culture',
     path: 'culture',
     icon: '/icon-category/culture.png',

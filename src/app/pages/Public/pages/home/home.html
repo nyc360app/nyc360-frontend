@@ -251,36 +251,6 @@
       </div>
     </section>
 
-    <!-- 6. Text Only Posts (Moved to Bottom as Requested) -->
-    <section class="text-only-section-v2" *ngIf="textOnlyPosts.length > 0">
-      <header class="block-header">
-        <div class="vertical-bar"></div>
-        <h2>Text-Only Insights</h2>
-      </header>
-      <div class="text-insights-grid">
-        <div class="insight-card" *ngFor="let post of textOnlyPosts" (click)="goToPost(post)">
-          <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(post.category)">
-            <img [src]="getCategoryIcon(post.category)" alt="icon">
-            <span>{{ getCategoryName(post.category) }}</span>
-          </span>
-          <div class="insight-meta">
-            <span class="date">{{ post.createdAt | date:'shortDate' }}</span>
-          </div>
-          <h3 class="insight-title">{{ post.title }}</h3>
-          <p class="insight-excerpt">{{ post.content | slice:0:150 }}...</p>
-          <div class="insight-footer">
-            <div class="author">
-              <img [src]="getAuthorImage(post.author)" alt="auth" appImgFallback="avatar">
-              <span>{{ getAuthorName(post.author) }}</span>
-            </div>
-            <button class="save-btn-mini" (click)="onSavePost(post, $event)">
-              <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Empty State -->
     <div class="empty-state-v2" *ngIf="!isLoading && featuredPosts.length === 0 && !heroBanner">
       <img src="assets/images/default-post.jpg" alt="empty" style="opacity: 0.1; width: 100px;">
