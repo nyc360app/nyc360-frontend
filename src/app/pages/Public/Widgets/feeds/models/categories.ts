@@ -251,7 +251,7 @@ function buildProfessionsTopLinks() {
 
 export const CATEGORY_THEMES: { [key: number]: any } = {
   [CategoryEnum.Community]: {
-    color: '#BC5E3D',
+    color: '#FB7D3F',
     label: 'Community',
     path: 'community',
     icon: '/icon-category/commumity.png',

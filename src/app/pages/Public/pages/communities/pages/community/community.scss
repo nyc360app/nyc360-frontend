@@ -2,7 +2,7 @@
 @use "sass:color";
 
 $bg-header: #fff0e6;
-$primary-orange: #BC5E3D;
+$primary-orange: #FB7D3F;
 $primary-hover: #A04A2E;
 $text-dark: #1f2937;
 $text-gray: #6b7280;
@@ -1306,7 +1306,7 @@ $surface-soft: #f6f7f9;
         &:hover,
         &.active-sub {
           background: #fff0e6;
-          color: #BC5E3D;
+          color: #FB7D3F;
 
           .small-arrow {
             transform: translateX(3px);
@@ -1355,7 +1355,7 @@ $surface-soft: #f6f7f9;
         transition: all 0.2s;
 
         &:hover {
-          color: #BC5E3D;
+          color: #FB7D3F;
           background: #fafafa;
           padding-left: 25px; // Small indent on hover
         }

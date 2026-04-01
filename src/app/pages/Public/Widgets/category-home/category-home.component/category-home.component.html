@@ -293,8 +293,8 @@
               <article class="std-card-v2" *ngFor="let post of group.posts" (click)="goToDepartmentPost(post)">
                 <div class="card-media">
                   <img [src]="getImg(post)" [alt]="post.title" loading="lazy" appImgFallback="post">
-                  <span class="category-badge-top-left" [style.--badge-color]="getDepartmentRowColor(post.category)">
-                    <span>{{ getDepartmentRowLabel(post.category) }}</span>
+                  <span class="category-badge-top-left" [style.--badge-color]="getDepartmentRowColor(group.category)">
+                    <span>{{ getDepartmentRowLabel(group.category) }}</span>
                   </span>
                   <div class="media-overlay">
                     <h4>{{ post.title | slice:0:60 }}{{ post.title.length > 60 ? '...' : '' }}</h4>

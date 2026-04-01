@@ -41,7 +41,7 @@ export class RegisterSelectionComponent {
       icon: 'bi-houses-fill',
       desc: 'Residents & locals looking to connect with their neighborhood.',
       theme: 'newyorker',
-      color: '#BC5E3D'
+      color: '#FB7D3F'
     },
     {
       id: 'business',
