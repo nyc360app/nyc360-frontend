@@ -229,7 +229,7 @@
         </div>
       </section>
 
-      <section class="latest-grid-section mb-5 fade-in-up" *ngIf="rssFeedPosts.length > 0 && !isHousingCategory">
+      <section class="latest-grid-section mb-5 fade-in-up" *ngIf="rssFeedPosts.length > 0 && !isHousingCategory && !isNewsCategory">
         <div class="section-header mb-3">
           <h3>RSS Feed Updates</h3>
           <a [routerLink]="exploreRoute" class="view-all">View All</a>

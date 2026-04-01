@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CategoryPost, LatestRssFeedItemDto, StandardApiResponse } from '../models/category-home.models';
 import { CategoryHomeService } from '../service/category-home.service';
-import { CATEGORY_THEMES, getDepartmentDiscussionsRoute, getDepartmentExploreRoute } from '../../feeds/models/categories';
+import { CATEGORY_THEMES, CategoryEnum, getDepartmentDiscussionsRoute, getDepartmentExploreRoute } from '../../feeds/models/categories';
 import { environment } from '../../../../../environments/environment';
 import { ImageService } from '../../../../../shared/services/image.service';
 import { ImgFallbackDirective } from '../../../../../shared/directives/img-fallback.directive';
@@ -224,8 +224,11 @@ export class CategoryHomeComponent implements OnInit {
   fetchData(divisionId: number) {
     this.rssFeedPosts = [];
 
-    // Prefer dedicated latest RSS endpoint; keep home payload RSS as fallback.
-    this.loadLatestRssItems(divisionId);
+    // RSS feed update cards are hidden for News department by product decision.
+    if (divisionId !== CategoryEnum.News) {
+      // Prefer dedicated latest RSS endpoint; keep home payload RSS as fallback.
+      this.loadLatestRssItems(divisionId);
+    }
 
     this.homeService.getCategoryHomeData(divisionId, 25).subscribe({
       next: (res: any) => {
@@ -240,7 +243,7 @@ export class CategoryHomeComponent implements OnInit {
           const rssIncoming = Array.isArray(res.data.rss) ? res.data.rss : [];
 
           // Keep RSS in a dedicated bucket for explicit rendering in UI.
-          if (this.rssFeedPosts.length === 0) {
+          if (divisionId !== CategoryEnum.News && this.rssFeedPosts.length === 0) {
             this.rssFeedPosts = rssIncoming.map((p: any) => this.parsePostData(p));
           }
 
@@ -386,13 +389,38 @@ export class CategoryHomeComponent implements OnInit {
           }
         });
 
+        let groupPosts = validGroupPosts.length > 0 ? validGroupPosts : normalizedGroupPosts;
+
+        // In News department, keep the "News" row focused on general news only.
+        if (this.activeCategoryId === CategoryEnum.News && Number(group.category) === CategoryEnum.News) {
+          groupPosts = groupPosts.filter((post) => this.isGeneralNewsPost(post));
+        }
+
         return {
           ...group,
-          posts: validGroupPosts.length > 0 ? validGroupPosts : normalizedGroupPosts
+          posts: groupPosts
         };
       })
       .filter((group) => (group.posts || []).length > 0)
       .sort((a, b) => Number(a.category) - Number(b.category));
+  }
+
+  private isGeneralNewsPost(post: Post): boolean {
+    const isNewsCategory = Number(post?.category) === CategoryEnum.News;
+    if (!isNewsCategory) {
+      return false;
+    }
+
+    const parentCategory = Number((post as any)?.parentPost?.category);
+    const sharedFromAnotherDepartment =
+      !Number.isNaN(parentCategory) &&
+      parentCategory !== CategoryEnum.News;
+
+    const isHousingLike =
+      !!(post as any)?.housingMetadata ||
+      Number((post as any)?.linkedResource?.category) === CategoryEnum.Housing;
+
+    return !sharedFromAnotherDepartment && !isHousingLike;
   }
 
   // ... helpers ...

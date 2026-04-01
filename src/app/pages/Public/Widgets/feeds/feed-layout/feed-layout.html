@@ -80,7 +80,7 @@
     </div>
   </div>
 
-  <section class="rss-section" *ngIf="!loading && rssPosts.length > 0">
+  <section class="rss-section" *ngIf="!loading && rssPosts.length > 0 && !isNewsCategory">
     <div class="rss-section-header">
       <h3>RSS Feed Updates</h3>
       <p>Latest imported stories for this department.</p>

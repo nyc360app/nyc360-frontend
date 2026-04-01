@@ -89,7 +89,11 @@ export class FeedLayoutComponent implements OnInit, OnDestroy {
         this.applyTheme(theme.color);
         this.selectedLocationId = null;
         this.currentPage = 1;
-        this.loadLatestRssItems();
+        if (this.currentCategory !== CategoryEnum.News) {
+          this.loadLatestRssItems();
+        } else {
+          this.rssPosts = [];
+        }
         this.loadPosts();
       })
     );
