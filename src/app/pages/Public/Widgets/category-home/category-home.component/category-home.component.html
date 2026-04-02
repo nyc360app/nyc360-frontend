@@ -118,12 +118,59 @@
 
     <div class="container main-content">
 
-      <section class="hero-section mb-5 fade-in-up" *ngIf="heroPost">
+      <section class="hero-section mb-5 fade-in-up" *ngIf="!isNewsCategory && heroPost">
         <app-article-hero [image]="getImg(heroPost)" [title]="heroPost.title || ''"
           [description]="(heroPost.cleanDescription || heroPost.content) || ''"
           [metaText]="'Published: ' + (heroPost.createdAt | date:'MMM d, y')"
           [link]="['/public/posts/details', heroPost.id]" [customColor]="activeTheme?.color || '#00695C'">
         </app-article-hero>
+      </section>
+
+      <section class="news-hero-slider mb-5 fade-in-up" *ngIf="isNewsCategory && activeNewsHeroPost">
+        <div class="news-hero-slider-shell">
+          <div class="news-hero-slider-main">
+            <button class="news-hero-nav prev" type="button" (click)="prevNewsHero()"
+              [disabled]="newsHeroSlides.length <= 1" aria-label="Previous featured news">
+              <i class="bi bi-arrow-left"></i>
+            </button>
+
+            <div class="news-hero-slide">
+              <app-article-hero [image]="getImg(activeNewsHeroPost)" [title]="activeNewsHeroPost.title || ''"
+                [description]="(activeNewsHeroPost.cleanDescription || activeNewsHeroPost.content) || ''"
+                [metaText]="'Published: ' + (activeNewsHeroPost.createdAt | date:'MMM d, y')"
+                [badgeLabel]="getNewsHeroSourceLabel(activeNewsHeroPost)"
+                [badgeIcon]="getNewsHeroSourceIcon(activeNewsHeroPost)"
+                [badgeColor]="getDepartmentRowColor(resolvePostCategory(activeNewsHeroPost))"
+                [showBadge]="true"
+                [link]="['/public/posts/details', activeNewsHeroPost.id]"
+                [customColor]="activeTheme?.color || '#333333'"
+                mode="slider">
+              </app-article-hero>
+            </div>
+
+            <button class="news-hero-nav next" type="button" (click)="nextNewsHero()"
+              [disabled]="newsHeroSlides.length <= 1" aria-label="Next featured news">
+              <i class="bi bi-arrow-right"></i>
+            </button>
+          </div>
+
+        <div class="news-hero-slider-footer" *ngIf="newsHeroSlides.length > 1">
+          <div class="news-hero-dots">
+            <button *ngFor="let dotIndex of newsHeroDotIndices"
+              type="button"
+              class="news-hero-dot"
+              [class.active]="dotIndex === newsHeroIndex"
+              [attr.aria-label]="'Go to featured news ' + (dotIndex + 1)"
+              (click)="setNewsHeroSlide(dotIndex)">
+            </button>
+          </div>
+        </div>
+        <div class="news-hero-cta">
+          <a class="news-hero-cta-btn" [routerLink]="exploreRoute" [queryParams]="{ filter: 'featured' }">
+            Read all featured posts
+          </a>
+        </div>
+      </div>
       </section>
 
       <!-- Filter bar section removed per user request -->
@@ -137,71 +184,6 @@
         <div class="dropdown-filters ms-auto">
           <!-- <button class="chip-drop">Most Recent <i class="bi bi-chevron-down"></i></button> -->
         </div>
-      </section>
-
-      <section class="news-polls-section fade-in-up" *ngIf="isNewsCategory && (isLoadingNewsPolls || newsPolls.length > 0)">
-        <div class="section-header news-polls-header mb-4">
-          <div class="section-header-copy">
-            <h3>Vote In Live News Polls</h3>
-            <p>See what the NYC360 audience is weighing in on right now and jump straight into the conversation.</p>
-          </div>
-        </div>
-
-        <div class="news-polls-grid" *ngIf="!isLoadingNewsPolls; else newsPollsLoading">
-          <article class="news-poll-card" *ngFor="let poll of newsPolls; let i = index" (click)="openNewsPoll(poll)">
-            <div class="poll-card-media" [class.has-image]="!!poll.coverImageUrl">
-              <img *ngIf="poll.coverImageUrl"
-                [src]="getPollCoverImage(poll)"
-                [alt]="poll.title || poll.question"
-                loading="lazy"
-                appImgFallback="post">
-              <div class="poll-card-overlay"></div>
-              <div class="poll-card-badges">
-                <span class="poll-status-chip" [class.closed]="isNewsPollClosed(poll)">
-                  {{ getNewsPollStatusLabel(poll) }}
-                </span>
-                <span class="poll-status-chip subtle" *ngIf="poll.allowMultipleAnswers">Multiple choice</span>
-                <span class="poll-status-chip subtle" *ngIf="i === 0">Top pick</span>
-              </div>
-            </div>
-
-            <div class="poll-card-body">
-              <div class="poll-card-topline">
-                <span class="poll-card-kicker">{{ poll.allowMultipleAnswers ? 'Multiple choice poll' : 'Single choice poll' }}</span>
-                <span class="poll-card-count">{{ poll.totalVotes }} {{ poll.totalVotes === 1 ? 'vote' : 'votes' }}</span>
-              </div>
-
-              <h4>{{ poll.question }}</h4>
-
-              <p class="poll-card-description" *ngIf="poll.description">{{ poll.description }}</p>
-
-              <div class="poll-card-metrics">
-                <div class="metric-pill compact">
-                  <span class="metric-value">{{ poll.optionCount }}</span>
-                  <span class="metric-label">{{ poll.optionCount === 1 ? 'Option' : 'Options' }}</span>
-                </div>
-                <div class="metric-pill compact">
-                  <span class="metric-value">{{ getNewsPollMeta(poll) }}</span>
-                  <span class="metric-label">Schedule</span>
-                </div>
-              </div>
-
-              <div class="poll-card-footer">
-                <span class="results-note" *ngIf="poll.showResultsBeforeVoting">Results visible before voting</span>
-
-                <button type="button" class="poll-inline-link" (click)="openNewsPoll(poll); $event.stopPropagation()">
-                  Vote now
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <ng-template #newsPollsLoading>
-          <div class="news-polls-grid is-loading">
-            <div class="news-poll-skeleton" *ngFor="let i of [1,2,3,4]"></div>
-          </div>
-        </ng-template>
       </section>
 
       <!-- Standard Dashboard (Non-Housing) -->
@@ -269,7 +251,10 @@
             <div class="header-left">
               <div class="vertical-bar" [style.background]="getDepartmentRowColor(group.category)"></div>
               <div class="title-stack">
-                <h2 [style.color]="getDepartmentRowColor(group.category)">{{ getDepartmentRowLabel(group.category) }}</h2>
+                <h2 [style.color]="getDepartmentRowColor(group.category)">
+                  <i class="bi heading-icon" [ngClass]="getDepartmentRowBiIcon(group.category)" [style.color]="getDepartmentRowColor(group.category)"></i>
+                  {{ getDepartmentRowLabel(group.category) }}
+                </h2>
                 <p>{{ group.posts.length }} {{ group.posts.length === 1 ? 'story' : 'stories' }} live in this department</p>
               </div>
             </div>
@@ -293,8 +278,11 @@
               <article class="std-card-v2" *ngFor="let post of group.posts" (click)="goToDepartmentPost(post)">
                 <div class="card-media">
                   <img [src]="getImg(post)" [alt]="post.title" loading="lazy" appImgFallback="post">
-                  <span class="category-badge-top-left" [style.--badge-color]="getDepartmentRowColor(group.category)">
-                    <span>{{ getDepartmentRowLabel(group.category) }}</span>
+                  <span class="category-badge-top-left"
+                    [style.--badge-color]="getDepartmentRowColor(post.category || group.category)">
+                    <img *ngIf="getDepartmentRowIcon(post.category || group.category)"
+                      [src]="getDepartmentRowIcon(post.category || group.category)" alt="" aria-hidden="true">
+                    <span>{{ getDepartmentRowLabel(post.category || group.category) }}</span>
                   </span>
                   <div class="media-overlay">
                     <h4>{{ post.title | slice:0:60 }}{{ post.title.length > 60 ? '...' : '' }}</h4>
@@ -505,6 +493,71 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <section class="news-polls-section fade-in-up" *ngIf="isNewsCategory && (isLoadingNewsPolls || newsPolls.length > 0)">
+        <div class="section-header news-polls-header mb-4">
+          <div class="section-header-copy">
+            <h3>Vote In Live News Polls</h3>
+            <p>See what the NYC360 audience is weighing in on right now and jump straight into the conversation.</p>
+          </div>
+        </div>
+
+        <div class="news-polls-grid" *ngIf="!isLoadingNewsPolls; else newsPollsLoading">
+          <article class="news-poll-card" *ngFor="let poll of newsPolls; let i = index" (click)="openNewsPoll(poll)">
+            <div class="poll-card-media" [class.has-image]="!!poll.coverImageUrl">
+              <img *ngIf="poll.coverImageUrl"
+                [src]="getPollCoverImage(poll)"
+                [alt]="poll.title || poll.question"
+                loading="lazy"
+                appImgFallback="post">
+              <div class="poll-card-overlay"></div>
+              <div class="poll-card-badges">
+                <span class="poll-status-chip" [class.closed]="isNewsPollClosed(poll)">
+                  {{ getNewsPollStatusLabel(poll) }}
+                </span>
+                <span class="poll-status-chip subtle" *ngIf="poll.allowMultipleAnswers">Multiple choice</span>
+                <span class="poll-status-chip subtle" *ngIf="i === 0">Top pick</span>
+              </div>
+            </div>
+
+            <div class="poll-card-body">
+              <div class="poll-card-topline">
+                <span class="poll-card-kicker">{{ poll.allowMultipleAnswers ? 'Multiple choice poll' : 'Single choice poll' }}</span>
+                <span class="poll-card-count">{{ poll.totalVotes }} {{ poll.totalVotes === 1 ? 'vote' : 'votes' }}</span>
+              </div>
+
+              <h4>{{ poll.question }}</h4>
+
+              <p class="poll-card-description" *ngIf="poll.description">{{ poll.description }}</p>
+
+              <div class="poll-card-metrics">
+                <div class="metric-pill compact">
+                  <span class="metric-value">{{ poll.optionCount }}</span>
+                  <span class="metric-label">{{ poll.optionCount === 1 ? 'Option' : 'Options' }}</span>
+                </div>
+                <div class="metric-pill compact">
+                  <span class="metric-value">{{ getNewsPollMeta(poll) }}</span>
+                  <span class="metric-label">Schedule</span>
+                </div>
+              </div>
+
+              <div class="poll-card-footer">
+                <span class="results-note" *ngIf="poll.showResultsBeforeVoting">Results visible before voting</span>
+
+                <button type="button" class="poll-inline-link" (click)="openNewsPoll(poll); $event.stopPropagation()">
+                  Vote now
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #newsPollsLoading>
+          <div class="news-polls-grid is-loading">
+            <div class="news-poll-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+          </div>
+        </ng-template>
       </section>
 
     </div>

@@ -29,10 +29,10 @@ $nyc-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
         left: 15px;
         background: var(--badge-color, $nyc-gold);
         color: white;
-        padding: 6px 14px;
+        padding: 3px 8px;
         border-radius: 8px;
         font-weight: 800;
-        font-size: 0.75rem;
+        font-size: 0.55rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         z-index: 5;
@@ -43,24 +43,24 @@ $nyc-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
 
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
 
         img {
-            width: 14px;
-            height: 14px;
+            width: 11px;
+            height: 11px;
             object-fit: contain;
             filter: brightness(0) invert(1);
         }
 
         @media(max-width: 768px) {
-            top: 10px;
-            left: 10px;
-            padding: 4px 10px;
-            font-size: 0.65rem;
+            top: 8px;
+            left: 8px;
+            padding: 3px 8px;
+            font-size: 0.55rem;
 
             img {
-                width: 12px;
-                height: 12px;
+                width: 10px;
+                height: 10px;
             }
         }
 
@@ -155,8 +155,8 @@ $nyc-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
     align-items: center;
     justify-content: space-between;
     gap: 15px;
-    margin-bottom: clamp(1.5rem, 4vw, 2rem);
-    margin-top: clamp(2.5rem, 8vw, 4rem);
+    margin-bottom: clamp(0.75rem, 2vw, 1rem);
+    margin-top: clamp(1.25rem, 4vw, 2rem);
     position: relative;
 
     .header-left {
@@ -190,13 +190,19 @@ $nyc-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
 
     .vertical-bar {
         width: 5px;
-        height: clamp(24px, 5vw, 36px);
+        height: clamp(18px, 4vw, 26px);
         border-radius: 4px;
         background: var(--cat-color) !important; // Dynamic color
     }
 
+    .heading-icon {
+        font-size: 0.9em;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
     h2 {
-        font-size: clamp(1.3rem, 4vw, 1.75rem);
+        font-size: clamp(1rem, 3vw, 1.3rem);
         font-weight: 800;
         color: var(--cat-color) !important; // Dynamic color
         margin: 0;
@@ -219,87 +225,170 @@ $nyc-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
         grid-template-columns: 3fr 1fr;
     }
 
-    .featured-cards-row {
+    .featured-slider-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .featured-slider-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .featured-kicker {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(181, 155, 98, 0.14), rgba(181, 155, 98, 0.06));
+        border: 1px solid rgba(181, 155, 98, 0.18);
+        color: $nyc-gold;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .featured-counter {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: rgba(15, 23, 42, 0.6);
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .featured-slider {
         display: grid;
-        grid-template-columns: repeat(3, 1fr); // Strict 3 columns on desktop
-        gap: 20px;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 16px;
+        min-height: 260px;
 
         @media(max-width: 768px) {
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
 
-        .feat-card-small {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-
-            aspect-ratio: 4/3;
+        .slider-nav {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: $nyc-navy;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+
+            &:not(:disabled):hover {
+                transform: translateY(-1px);
+                box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+            }
 
             @media(max-width: 768px) {
-                aspect-ratio: 1 / 1.1; // Make it taller on mobile
+                order: 2;
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        .featured-slide {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            min-height: 360px;
+            background: #fff;
+            box-shadow: $nyc-shadow-lg;
+            cursor: pointer;
+        }
+    }
+
+    .featured-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(15, 23, 42, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+
+            &.active {
+                background: $nyc-gold;
+                transform: scale(1.2);
+            }
+        }
+    }
+
+    .featured-slide {
+        aspect-ratio: 16 / 9;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.12);
+
+            .card-img-container img {
+                transform: scale(1.05);
             }
 
-            &:hover {
-                transform: translateY(-8px) scale(1.02);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-                z-index: 2;
-
-                .card-img-container img {
-                    transform: scale(1.1);
-                }
-
-                .card-overlay {
-                    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.2) 60%, transparent);
-                }
+            .card-overlay {
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.2) 60%, transparent);
             }
+        }
 
-            .card-img-container {
+        .card-img-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+
+            img {
                 width: 100%;
                 height: 100%;
-                position: relative;
+                object-fit: cover;
+                transition: transform 0.6s ease;
+            }
 
-                img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 0.6s ease;
+            .card-overlay {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent 50%);
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                padding: 1.6rem;
+                transition: all 0.3s;
+
+                @media(max-width: 768px) {
+                    padding: 1rem;
                 }
 
-                .card-overlay {
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 50%);
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-end;
-                    padding: 1.5rem;
-                    transition: all 0.3s;
-
-                    @media(max-width: 768px) {
-                        padding: 1rem;
-                    }
-
-                    h3 {
-                        color: white;
-                        font-size: 1.1rem;
-                        font-weight: 700;
-                        line-height: 1.4;
-                        margin-bottom: 8px;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-
-                        @media(max-width: 768px) {
-                            font-size: 1rem;
-                        }
-                    }
-
-                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-
-                    @media(max-width: 768px) {
-                        font-size: 1rem;
-                    }
+                h3 {
+                    color: white;
+                    font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+                    font-weight: 800;
+                    line-height: 1.35;
+                    margin: 0;
+                    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
                 }
             }
 
@@ -326,6 +415,43 @@ $nyc-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
                     transform: scale(1.1);
                 }
             }
+        }
+    }
+
+    @media(max-width: 768px) {
+        .featured-slider-shell {
+            gap: 12px;
+        }
+
+        .featured-slider-header {
+            align-items: flex-start;
+        }
+
+        .featured-slider {
+            grid-template-columns: 1fr auto auto;
+            grid-template-areas:
+                "slide slide slide"
+                ". prev next";
+            align-items: center;
+        }
+
+        .featured-slide {
+            grid-area: slide;
+            min-height: 260px;
+        }
+
+        .slider-nav.prev {
+            grid-area: prev;
+            justify-self: end;
+        }
+
+        .slider-nav.next {
+            grid-area: next;
+            justify-self: end;
+        }
+
+        .featured-dots {
+            justify-content: flex-start;
         }
     }
 }

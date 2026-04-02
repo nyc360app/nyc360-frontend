@@ -9,14 +9,12 @@ import { ImageService } from '../../../../../shared/services/image.service';
 import { ImgFallbackDirective } from '../../../../../shared/directives/img-fallback.directive';
 import { CategoryContextService } from '../../../../../shared/services/category-context.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../../Authentication/Service/auth';
-import { VerificationService } from '../../../pages/settings/services/verification.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PostsService } from '../../../pages/posts/services/posts';
 import { FeedData, InterestGroup, Post } from '../../../pages/posts/models/posts';
-import { NewsPollSummary, NewsService } from '../../../../../shared/services/news.service';
-
+import { NewsFeaturedFeedResponse, NewsPollSummary, NewsService } from '../../../../../shared/services/news.service';
 export interface HeaderButtonChild {
   label: string;
   link: any[];
@@ -58,11 +56,9 @@ export class CategoryHomeComponent implements OnInit {
   protected readonly environment = environment;
   protected imageService = inject(ImageService);
   protected authService = inject(AuthService);
-  private verificationService = inject(VerificationService);
   private toastService = inject(ToastService);
   private postsService = inject(PostsService);
   private newsService = inject(NewsService);
-  private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
   // Explicit palette for News cross-department rows (matches product spec exactly).
@@ -89,6 +85,12 @@ export class CategoryHomeComponent implements OnInit {
   textOnlyPosts: CategoryPost[] = [];         // 5. بوستات بدون صور (التصميم الجديد في الأسفل)
   trendingPosts: CategoryPost[] = [];         // 6. التريند (Sidebar)
   rssFeedPosts: CategoryPost[] = [];          // Backend RSS feed items
+  newsHeroIndex = 0;
+  newsFeaturedSlidesStore: CategoryPost[] = [];
+  newsFeaturedCursor: string | null = null;
+  isLoadingMoreNewsFeatured = false;
+  hasMoreNewsFeatured = true;
+  newsFeaturedFeedEmpty = false;
 
   // --- Theme ---
   activeTheme: any = null;
@@ -239,6 +241,12 @@ export class CategoryHomeComponent implements OnInit {
 
   fetchData(divisionId: number) {
     this.rssFeedPosts = [];
+    this.newsHeroIndex = 0;
+    this.newsFeaturedSlidesStore = [];
+    this.newsFeaturedCursor = null;
+    this.hasMoreNewsFeatured = true;
+    this.isLoadingMoreNewsFeatured = false;
+    this.newsFeaturedFeedEmpty = false;
 
     // RSS feed update cards are hidden for News department by product decision.
     if (divisionId !== CategoryEnum.News) {
@@ -257,6 +265,10 @@ export class CategoryHomeComponent implements OnInit {
           const featuredIncoming = Array.isArray(res.data.featured) ? res.data.featured : [];
           const latestIncoming = Array.isArray(res.data.latest) ? res.data.latest : [];
           const rssIncoming = Array.isArray(res.data.rss) ? res.data.rss : [];
+
+          if (divisionId === CategoryEnum.News) {
+            this.loadInitialFeaturedNewsFeed();
+          }
 
           // Keep RSS in a dedicated bucket for explicit rendering in UI.
           if (divisionId !== CategoryEnum.News && this.rssFeedPosts.length === 0) {
@@ -536,6 +548,65 @@ export class CategoryHomeComponent implements OnInit {
     return this.newsPolls[0] || null;
   }
 
+  get newsHeroSlides(): CategoryPost[] {
+    const slides = this.newsFeaturedSlidesStore.length > 0
+      ? this.newsFeaturedSlidesStore
+      : [this.heroPost, ...this.topSidePosts].filter((post): post is CategoryPost => !!post);
+
+    return slides;
+  }
+
+  get newsHeroDotIndices(): number[] {
+    const total = this.newsHeroSlides.length;
+    const maxDots = 6;
+    if (total <= maxDots) {
+      return Array.from({ length: total }, (_, i) => i);
+    }
+
+    const half = Math.floor(maxDots / 2);
+    let start = Math.max(0, this.newsHeroIndex - half);
+    let end = start + maxDots - 1;
+
+    if (end >= total) {
+      end = total - 1;
+      start = Math.max(0, end - maxDots + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  get activeNewsHeroPost(): CategoryPost | null {
+    return this.newsHeroSlides[this.newsHeroIndex] || null;
+  }
+
+  nextNewsHero(): void {
+    if (this.newsHeroSlides.length <= 1) return;
+    this.newsHeroIndex = (this.newsHeroIndex + 1) % this.newsHeroSlides.length;
+    this.maybeLoadMoreNewsFeatured();
+    this.cdr.markForCheck();
+  }
+
+  prevNewsHero(): void {
+    if (this.newsHeroSlides.length <= 1) return;
+    this.newsHeroIndex = (this.newsHeroIndex - 1 + this.newsHeroSlides.length) % this.newsHeroSlides.length;
+    this.cdr.markForCheck();
+  }
+
+  setNewsHeroSlide(index: number): void {
+    if (index < 0 || index >= this.newsHeroSlides.length) return;
+    this.newsHeroIndex = index;
+    this.maybeLoadMoreNewsFeatured();
+    this.cdr.markForCheck();
+  }
+
+  getNewsHeroSourceLabel(post: CategoryPost): string {
+    return this.getDepartmentRowLabel(this.resolvePostCategory(post));
+  }
+
+  getNewsHeroSourceIcon(post: CategoryPost): string {
+    return this.getDepartmentRowIcon(this.resolvePostCategory(post));
+  }
+
   get secondaryNewsPolls(): NewsPollSummary[] {
     return this.newsPolls.slice(1, 4);
   }
@@ -592,6 +663,14 @@ export class CategoryHomeComponent implements OnInit {
     return this.departmentPalette[Number(categoryId)]
       || (CATEGORY_THEMES as any)[Number(categoryId)]?.color
       || '#B59B62';
+  }
+
+  getDepartmentRowIcon(categoryId: number): string {
+    return (CATEGORY_THEMES as any)[Number(categoryId)]?.icon || '';
+  }
+
+  getDepartmentRowBiIcon(categoryId: number): string {
+    return (CATEGORY_THEMES as any)[Number(categoryId)]?.biIcon || 'bi-circle-fill';
   }
 
   getDepartmentRowRoute(categoryId: number): string {
@@ -678,5 +757,104 @@ export class CategoryHomeComponent implements OnInit {
     // Strip HTML from RSS/blog content for display in card excerpts
     post.content = this.stripHtml(post.content);
     return post;
+  }
+
+  private maybeLoadMoreNewsFeatured(): void {
+    if (!this.isNewsCategory || this.isLoadingMoreNewsFeatured || !this.hasMoreNewsFeatured) {
+      return;
+    }
+
+    if (this.newsHeroIndex < this.newsHeroSlides.length - 3) {
+      return;
+    }
+
+    this.loadMoreNewsFeatured();
+  }
+
+  private loadMoreNewsFeatured(): void {
+    this.isLoadingMoreNewsFeatured = true;
+    this.newsService.getFeaturedNewsFeed(10, this.newsFeaturedCursor).subscribe({
+      next: (response: NewsFeaturedFeedResponse<any>) => {
+        const items = response?.data?.items || [];
+        const parsedFeatured = items
+          .map((p: any) => this.parsePostData(p))
+          .filter((p: CategoryPost) => this.hasImage(p));
+
+        const existingIds = new Set(this.newsFeaturedSlidesStore.map((post) => post.id));
+        const newItems = parsedFeatured.filter((post) => !existingIds.has(post.id));
+
+        if (newItems.length > 0) {
+          this.newsFeaturedSlidesStore = [...this.newsFeaturedSlidesStore, ...newItems];
+        }
+
+        this.newsFeaturedCursor = response?.data?.nextCursor || null;
+        this.hasMoreNewsFeatured = !!response?.data?.hasMore && !!this.newsFeaturedCursor;
+        this.isLoadingMoreNewsFeatured = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoadingMoreNewsFeatured = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadInitialFeaturedNewsFeed(): void {
+    this.isLoadingMoreNewsFeatured = true;
+    this.newsService.getFeaturedNewsFeed(10).subscribe({
+      next: (response: NewsFeaturedFeedResponse<any>) => {
+        const items = response?.data?.items || [];
+        const parsedFeatured = items
+          .map((p: any) => this.parsePostData(p))
+          .filter((p: CategoryPost) => this.hasImage(p));
+
+        if (parsedFeatured.length > 0) {
+          this.newsFeaturedSlidesStore = parsedFeatured;
+          this.newsFeaturedFeedEmpty = false;
+        } else {
+          this.newsFeaturedFeedEmpty = true;
+        }
+        this.newsFeaturedCursor = response?.data?.nextCursor || null;
+        this.hasMoreNewsFeatured = !!response?.data?.hasMore && !!this.newsFeaturedCursor;
+        this.isLoadingMoreNewsFeatured = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoadingMoreNewsFeatured = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  resolvePostCategory(post: CategoryPost): number {
+    const parent = Number((post as any)?.parentPost?.category);
+    if (!Number.isNaN(parent) && parent > 0) {
+      return parent;
+    }
+
+    const direct = Number(post?.category);
+    if (!Number.isNaN(direct) && direct > 0) {
+      return direct;
+    }
+
+    return CategoryEnum.News;
+  }
+
+  private coerceToCategoryPost(post: Post | CategoryPost, groupCategory?: number): CategoryPost {
+    const author = (post as any)?.author;
+    const safeAuthor = author && typeof author === 'object'
+      ? author
+      : { id: 0, name: 'NYC360', imageUrl: '' };
+
+    const incomingCategory = Number((post as any)?.category);
+    const resolvedCategory = (!Number.isNaN(groupCategory) && groupCategory && (Number.isNaN(incomingCategory) || incomingCategory === CategoryEnum.News))
+      ? groupCategory
+      : incomingCategory;
+
+    return {
+      ...(post as any),
+      category: Number.isNaN(resolvedCategory) ? CategoryEnum.News : resolvedCategory,
+      author: safeAuthor
+    } as CategoryPost;
   }
 }

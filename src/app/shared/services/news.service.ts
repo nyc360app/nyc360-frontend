@@ -73,6 +73,18 @@ export interface NewsPollResults {
   options: NewsPollOption[];
 }
 
+export interface NewsFeaturedFeedItems<T> {
+  items: T[];
+  nextCursor?: string | null;
+  hasMore?: boolean;
+}
+
+export interface NewsFeaturedFeedResponse<T> {
+  isSuccess: boolean;
+  data: NewsFeaturedFeedItems<T> | null;
+  error: any;
+}
+
 export const EMPTY_NEWS_ACCESS: NewsAccess = {
   canSubmitContent: false,
   canModerateContent: false,
@@ -102,6 +114,23 @@ export class NewsService {
 
     return this.http.get<any>(`${this.newsBaseUrl}/home`, { params }).pipe(
       map((response) => this.normalizeHomeResponse(response))
+    );
+  }
+
+  getFeaturedNewsFeed(pageSize: number = 10, cursor?: string | null, page?: number): Observable<NewsFeaturedFeedResponse<any>> {
+    let params = new HttpParams().set('pageSize', pageSize.toString());
+    if (cursor) {
+      params = params.set('cursor', cursor);
+    } else if (page) {
+      params = params.set('page', page.toString());
+    }
+
+    return this.http.get<any>(`${this.newsBaseUrl}/featured`, { params }).pipe(
+      map((response) => ({
+        isSuccess: response?.isSuccess ?? response?.IsSuccess ?? true,
+        data: response?.data ?? response?.Data ?? null,
+        error: response?.error ?? response?.Error ?? null
+      }))
     );
   }
 

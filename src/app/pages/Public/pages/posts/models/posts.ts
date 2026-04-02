@@ -77,6 +77,10 @@ export interface Post {
   // ✅ UI State Field
   isSaved?: boolean;
 
+  // Featured
+  isFeatured?: boolean;
+  featuredAt?: string | null;
+
   // UI State for feed/profile
   showComments?: boolean;
   newCommentContent?: string;

@@ -49,6 +49,8 @@ export class Home implements OnInit {
   highlightedPosts: Post[] = [];
   textOnlyPosts: Post[] = []; // New array for posts without images
 
+  featuredIndex = 0;
+
   // Weather Data
   weatherData: any = null;
   currentDate: Date = new Date();
@@ -240,7 +242,8 @@ export class Home implements OnInit {
     });
 
     // Take top 3 valid images for featured row
-    this.featuredPosts = validFeatured.slice(0, 3);
+    this.featuredPosts = validFeatured.slice(0, 6);
+    this.featuredIndex = Math.min(this.featuredIndex, Math.max(this.featuredPosts.length - 1, 0));
 
     // 2. Hero Banner Logic
     const rawDiscovery = data.discoveryPosts || [];
@@ -309,6 +312,25 @@ export class Home implements OnInit {
 
     this.trendingTags = data.trendingTags || [];
     this.suggestedCommunities = data.suggestedCommunities || [];
+  }
+
+  get activeFeaturedPost(): Post | null {
+    return this.featuredPosts.length > 0 ? this.featuredPosts[this.featuredIndex] : null;
+  }
+
+  nextFeatured() {
+    if (this.featuredPosts.length <= 1) return;
+    this.featuredIndex = (this.featuredIndex + 1) % this.featuredPosts.length;
+  }
+
+  prevFeatured() {
+    if (this.featuredPosts.length <= 1) return;
+    this.featuredIndex = (this.featuredIndex - 1 + this.featuredPosts.length) % this.featuredPosts.length;
+  }
+
+  setFeaturedIndex(index: number) {
+    if (index < 0 || index >= this.featuredPosts.length) return;
+    this.featuredIndex = index;
   }
 
   goToPost(post: Post) {
@@ -429,6 +451,11 @@ export class Home implements OnInit {
   getCategoryIcon(id: number): string {
     const theme = (CATEGORY_THEMES as any)[id];
     return theme ? theme.icon : '';
+  }
+
+  getCategoryBiIcon(id: number): string {
+    const theme = (CATEGORY_THEMES as any)[id];
+    return theme?.biIcon || 'bi-tag';
   }
 
   // ============================================

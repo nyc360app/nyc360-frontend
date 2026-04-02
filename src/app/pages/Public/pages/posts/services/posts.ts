@@ -38,6 +38,10 @@ export class PostsService {
     return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${id}/save`, {});
   }
 
+  featurePost(id: number, isFeatured: boolean): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${id}/feature`, { isFeatured });
+  }
+
   // ✅ Share Post according to Swagger
   sharePost(id: number, commentary: string = ''): Observable<ApiResponse<any>> {
     const body = { Commentary: commentary };

@@ -17,4 +17,11 @@ export class ArticleHeroComponent {
   @Input() metaText: string = '';
   @Input() link: any;
   @Input() customColor: string = '#00695C';
+  @Input() mode: 'default' | 'slider' = 'default';
+  @Input() sourceLabel: string = '';
+  @Input() sourceIcon: string = '';
+  @Input() badgeLabel: string = '';
+  @Input() badgeIcon: string = '';
+  @Input() badgeColor: string = '';
+  @Input() showBadge: boolean = false;
 }

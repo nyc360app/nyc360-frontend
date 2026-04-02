@@ -1,15 +1,24 @@
-<div class="hero-container">
+<div class="hero-container" [class.slider-mode]="mode === 'slider'">
   <div class="hero-img" [routerLink]="link" style="cursor: pointer;">
     <img [src]="image" alt="Hero" appImgFallback="post">
+    <div class="hero-image-badge" *ngIf="showBadge && (badgeLabel || badgeIcon)"
+      [style.background-color]="badgeColor || customColor">
+      <img *ngIf="badgeIcon" [src]="badgeIcon" alt="" aria-hidden="true">
+      <span>{{ badgeLabel }}</span>
+    </div>
   </div>
   <div class="hero-content">
     <div class="meta" [style.color]="customColor">
       <i class="bi bi-calendar3 me-2"></i>
       <span>{{ metaText }}</span>
     </div>
+    <div class="source-chip" *ngIf="sourceLabel && mode !== 'slider'">
+      <img *ngIf="sourceIcon" [src]="sourceIcon" alt="" aria-hidden="true">
+      <span>{{ sourceLabel }}</span>
+    </div>
     <h2 class="merriweather-font" [routerLink]="link" style="cursor: pointer;">{{ title }}</h2>
     <p>{{ description }}</p>
-    <button [routerLink]="link" [style.background-color]="customColor" class="explore-btn">
+    <button *ngIf="mode !== 'slider'" [routerLink]="link" [style.background-color]="customColor" class="explore-btn">
       Read Full Article
     </button>
   </div>

@@ -359,6 +359,11 @@ $shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
       }
     }
   }
+
+  .menu-item-btn .bi-star,
+  .menu-item-btn .bi-star-fill {
+    color: $accent;
+  }
 }
 
 .extension-specs {

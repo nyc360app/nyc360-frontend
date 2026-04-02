@@ -6,6 +6,7 @@ import { environment } from '../../../../../environments/environment';
 import { InteractionType, Post, PostAuthor, PostComment, FlagReasonType } from '../models/posts';
 import { PostsService } from '../services/posts';
 import { AuthService } from '../../../../Authentication/Service/auth';
+import { UserInfo } from '../../../../Authentication/models/user-info';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { CATEGORY_LIST } from '../../../../models/category-list';
 import { CATEGORY_THEMES } from '../../../Widgets/feeds/models/categories';
@@ -53,6 +54,7 @@ export class PostDetailsComponent implements OnInit {
   categories = CATEGORY_LIST;
   currentUserId: string | null = null;
   isAdmin = false;
+  isSuperAdmin = false;
 
   relatedPosts: RelatedPost[] = [];
 
@@ -93,9 +95,17 @@ export class PostDetailsComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       if (user && user.id) {
         this.currentUserId = user.id;
-        this.isAdmin = Array.isArray(user.roles) ? user.roles.includes('Admin') : user.roles === 'Admin';
+        this.syncRoles(user);
       }
     });
+
+    this.authService.fullUserInfo$.subscribe((info) => {
+      if (info) this.syncRoles(info);
+    });
+
+    if (this.authService.isLoggedIn() && !this.authService.getFullUserInfo()) {
+      this.authService.fetchFullUserInfo().subscribe({ error: () => undefined });
+    }
 
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -214,6 +224,10 @@ export class PostDetailsComponent implements OnInit {
     if (post.currentUserInteraction !== undefined) post.userInteraction = post.currentUserInteraction;
     if (post.isSavedByUser !== undefined) post.isSaved = post.isSavedByUser;
     else post.isSaved = false;
+    if ((post as any).isFeatured !== undefined) post.isFeatured = (post as any).isFeatured;
+    if ((post as any).IsFeatured !== undefined) post.isFeatured = (post as any).IsFeatured;
+    if ((post as any).featuredAt !== undefined) post.featuredAt = (post as any).featuredAt;
+    if ((post as any).FeaturedAt !== undefined) post.featuredAt = (post as any).FeaturedAt;
 
     // Recursively normalize parent post
     if (post.parentPost && typeof post.parentPost === 'object') {
@@ -224,6 +238,44 @@ export class PostDetailsComponent implements OnInit {
     }
 
     return post;
+  }
+
+  private syncRoles(user: UserInfo | any) {
+    const roles = Array.isArray(user?.roles) ? user.roles : (user?.roles ? [user.roles] : []);
+    const tokenRole = this.authService.currentUser$.value?.role ?? this.authService.currentUser$.value?.roles;
+    const tokenRoles = Array.isArray(tokenRole) ? tokenRole : (tokenRole ? [tokenRole] : []);
+    const allRoles = [...roles, ...tokenRoles].filter(Boolean);
+    this.isSuperAdmin = allRoles.includes('SuperAdmin');
+    this.isAdmin = this.isSuperAdmin || allRoles.includes('Admin');
+  }
+
+  get canFeaturePost(): boolean {
+    return this.isAdmin || this.isSuperAdmin;
+  }
+
+  toggleFeatured() {
+    if (!this.post || !this.canFeaturePost) return;
+    const nextState = !this.post.isFeatured;
+    const original = this.post.isFeatured;
+    this.post.isFeatured = nextState;
+
+    this.postsService.featurePost(this.post.id, nextState).subscribe({
+      next: (res: any) => {
+        if (res?.isSuccess) {
+          const msg = nextState ? 'Post marked as featured.' : 'Post removed from featured.';
+          this.toastService.success(msg);
+        } else {
+          this.post!.isFeatured = original;
+          this.toastService.error('Failed to update featured status.');
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.post!.isFeatured = original;
+        this.toastService.error('Error updating featured status.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   openShareModal() {
