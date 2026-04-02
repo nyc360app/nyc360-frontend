@@ -91,6 +91,14 @@ export class CategoryHomeComponent implements OnInit {
   isLoadingMoreNewsFeatured = false;
   hasMoreNewsFeatured = true;
   newsFeaturedFeedEmpty = false;
+  private newsHeroAutoSlideId: number | null = null;
+  private newsHeroAutoSlidePaused = false;
+  private newsHeroPointerActive = false;
+  private newsHeroPointerStartX = 0;
+  private newsHeroPointerStartY = 0;
+  private newsHeroPointerLastX = 0;
+  private newsHeroPointerId: number | null = null;
+  private newsHeroSuppressClickUntil = 0;
 
   // --- Theme ---
   activeTheme: any = null;
@@ -125,6 +133,8 @@ export class CategoryHomeComponent implements OnInit {
     this.setupAuthSubscription();
     this.route.params.subscribe(() => this.resolveCategoryFromRoute());
     this.route.data.subscribe(() => this.resolveCategoryFromRoute());
+    this.startNewsHeroAutoSlide();
+    this.destroyRef.onDestroy(() => this.stopNewsHeroAutoSlide());
   }
 
   // ... existing methods ...
@@ -579,6 +589,65 @@ export class CategoryHomeComponent implements OnInit {
     return this.newsHeroSlides[this.newsHeroIndex] || null;
   }
 
+  onNewsHeroPointerDown(event: PointerEvent): void {
+    if (this.newsHeroSlides.length <= 1) return;
+    if (this.isInteractiveTarget(event.target as HTMLElement)) return;
+    this.newsHeroPointerActive = true;
+    this.newsHeroPointerStartX = event.clientX;
+    this.newsHeroPointerStartY = event.clientY;
+    this.newsHeroPointerLastX = event.clientX;
+    this.newsHeroPointerId = event.pointerId;
+    this.newsHeroAutoSlidePaused = true;
+    const target = event.currentTarget as HTMLElement | null;
+    target?.setPointerCapture?.(event.pointerId);
+  }
+
+  onNewsHeroPointerMove(event: PointerEvent): void {
+    if (!this.newsHeroPointerActive || (this.newsHeroPointerId !== null && event.pointerId !== this.newsHeroPointerId)) {
+      return;
+    }
+    this.newsHeroPointerLastX = event.clientX;
+  }
+
+  onNewsHeroPointerUp(event: PointerEvent): void {
+    if (!this.newsHeroPointerActive || (this.newsHeroPointerId !== null && event.pointerId !== this.newsHeroPointerId)) {
+      return;
+    }
+
+    const deltaX = this.newsHeroPointerLastX - this.newsHeroPointerStartX;
+    const deltaY = event.clientY - this.newsHeroPointerStartY;
+    const threshold = 50;
+    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold;
+
+    if (isHorizontalSwipe) {
+      if (deltaX < 0) {
+        this.nextNewsHero();
+      } else {
+        this.prevNewsHero();
+      }
+      this.newsHeroSuppressClickUntil = Date.now() + 400;
+    }
+
+    this.newsHeroPointerActive = false;
+    this.newsHeroPointerId = null;
+    this.newsHeroAutoSlidePaused = false;
+  }
+
+  pauseNewsHeroAutoSlide(): void {
+    this.newsHeroAutoSlidePaused = true;
+  }
+
+  resumeNewsHeroAutoSlide(): void {
+    this.newsHeroAutoSlidePaused = false;
+  }
+
+  onNewsHeroClick(event: MouseEvent): void {
+    if (Date.now() < this.newsHeroSuppressClickUntil) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
   nextNewsHero(): void {
     if (this.newsHeroSlides.length <= 1) return;
     this.newsHeroIndex = (this.newsHeroIndex + 1) % this.newsHeroSlides.length;
@@ -597,6 +666,27 @@ export class CategoryHomeComponent implements OnInit {
     this.newsHeroIndex = index;
     this.maybeLoadMoreNewsFeatured();
     this.cdr.markForCheck();
+  }
+
+  private startNewsHeroAutoSlide(): void {
+    if (typeof window === 'undefined') return;
+    if (this.newsHeroAutoSlideId !== null) return;
+    this.newsHeroAutoSlideId = window.setInterval(() => {
+      if (!this.isNewsCategory || this.newsHeroAutoSlidePaused) return;
+      if (this.newsHeroSlides.length <= 1) return;
+      this.nextNewsHero();
+    }, 5000);
+  }
+
+  private stopNewsHeroAutoSlide(): void {
+    if (this.newsHeroAutoSlideId === null) return;
+    window.clearInterval(this.newsHeroAutoSlideId);
+    this.newsHeroAutoSlideId = null;
+  }
+
+  private isInteractiveTarget(target: HTMLElement | null): boolean {
+    if (!target) return false;
+    return !!target.closest('button, a, input, textarea, select, label');
   }
 
   getNewsHeroSourceLabel(post: CategoryPost): string {

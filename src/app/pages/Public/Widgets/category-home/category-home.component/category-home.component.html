@@ -128,13 +128,19 @@
 
       <section class="news-hero-slider mb-5 fade-in-up" *ngIf="isNewsCategory && activeNewsHeroPost">
         <div class="news-hero-slider-shell">
-          <div class="news-hero-slider-main">
+          <div class="news-hero-slider-main"
+               (pointerdown)="onNewsHeroPointerDown($event)"
+               (pointermove)="onNewsHeroPointerMove($event)"
+               (pointerup)="onNewsHeroPointerUp($event)"
+               (pointercancel)="onNewsHeroPointerUp($event)"
+               (mouseenter)="pauseNewsHeroAutoSlide()"
+               (mouseleave)="resumeNewsHeroAutoSlide()">
             <button class="news-hero-nav prev" type="button" (click)="prevNewsHero()"
               [disabled]="newsHeroSlides.length <= 1" aria-label="Previous featured news">
               <i class="bi bi-arrow-left"></i>
             </button>
 
-            <div class="news-hero-slide">
+            <div class="news-hero-slide" (click)="onNewsHeroClick($event)">
               <app-article-hero [image]="getImg(activeNewsHeroPost)" [title]="activeNewsHeroPost.title || ''"
                 [description]="(activeNewsHeroPost.cleanDescription || activeNewsHeroPost.content) || ''"
                 [metaText]="'Published: ' + (activeNewsHeroPost.createdAt | date:'MMM d, y')"
