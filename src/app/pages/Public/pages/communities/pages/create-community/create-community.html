@@ -4,28 +4,12 @@
   </app-community-department-hero>
 
   <div class="community-create-wrap" style="width:min(calc(100% - 28px), 700px); max-width:700px; margin:28px auto 0;">
-    <section *ngIf="showLockedState" class="community-access-lock">
-      <p class="lock-kicker">Community Contributor Access Required</p>
-      <h2>Create Community is locked for this account</h2>
-      <p *ngIf="!hasGate1Eligibility">
-        A verified Resident, Organization, or Business account is required first. After that, request Community Leader access to unlock community creation.
-      </p>
-      <p *ngIf="hasGate1Eligibility && !hasCreateGateAccess">
-        Community creation unlocks after Community Leader or Community Organization approval. Request Community Leader access here, or use Contributor Activities for the organization listing path.
-      </p>
-      <div class="lock-actions">
-        <button type="button" class="btn-submit" (click)="openCreateAccessModal()">
-          {{ hasGate1Eligibility ? 'Request Community Leader Access' : 'Go to Verification Settings' }}
-        </button>
-        <button type="button" class="btn-cancel" routerLink="/community">
-          Back to Community
-        </button>
-      </div>
-    </section>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="community-create-form">
 
-    <form *ngIf="!showLockedState" [formGroup]="form" (ngSubmit)="submit()" class="community-create-form">
-      <div class="community-create-grid">
-        <section class="form-card card-basics">
+      <div class="form-card">
+
+        <!-- Basics -->
+        <section class="form-section">
           <h3><i class="bi bi-info-circle-fill"></i> Basics</h3>
 
           <div class="form-group">
@@ -54,8 +38,33 @@
           </div>
         </section>
 
-        <section class="form-card card-type">
+        <div class="section-divider"></div>
+
+        <!-- Community Category -->
+        <section class="form-section">
+          <h3><i class="bi bi-info-circle-fill"></i> Community Category</h3>
+          <div class="pill-list">
+            <button
+              type="button"
+              class="pill-btn"
+              *ngFor="let category of categoryOptions"
+              [class.active]="form.get('categoryCode')?.value === category.code"
+              (click)="onCategorySelect(category.code)"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+          <p class="card-hint">Select your community category.</p>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Community Type -->
+        <section class="form-section">
           <h3><i class="bi bi-info-circle-fill"></i> Community Type</h3>
+          <p class="selection-caption">
+            Showing types for <strong>{{ selectedCategory.name }}</strong>
+          </p>
           <div class="pill-list">
             <button
               type="button"
@@ -70,7 +79,70 @@
           <p class="card-hint">Select your community type.</p>
         </section>
 
-        <section class="form-card card-about">
+        <div class="section-divider"></div>
+
+        <!-- Community Division Tag -->
+        <section class="form-section">
+          <h3><i class="bi bi-info-circle-fill"></i> Community Division Tag</h3>
+          <div class="division-tags">
+            <button
+              type="button"
+              [ngClass]="['division-tag', tag.className, form.get('divisionTag')?.value === tag.id ? 'active' : '']"
+              *ngFor="let tag of divisionTagOptions"
+              (click)="onDivisionTagSelect(tag.id)"
+            >
+              <i class="bi" [ngClass]="tag.biIcon"></i>
+              {{ tag.name }}
+            </button>
+          </div>
+          <p class="card-hint">Communities must include specific division tags to improve discoverability.</p>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Location -->
+        <section class="form-section">
+          <h3><i class="bi bi-geo-alt-fill"></i> Location</h3>
+
+          <div class="form-group">
+            <label>Search Neighborhood <span class="req">*</span></label>
+            <div class="neighborhood-search-wrap">
+              <i class="bi bi-search neighborhood-search-icon"></i>
+              <input
+                type="text"
+                #locationInput
+                class="neighborhood-search-input"
+                (input)="searchNeighborhoods(locationInput.value)"
+                placeholder="Search Neighborhood..."
+              />
+              <div class="search-results" *ngIf="locationResults.length > 0">
+                <div
+                  class="search-item"
+                  *ngFor="let loc of locationResults"
+                  (click)="selectNeighborhoodResult(loc, locationInput)"
+                >
+                  <i class="bi bi-geo-alt-fill"></i>
+                  {{ loc.neighborhood }} ({{ loc.borough }})
+                  <span *ngIf="loc.zipCode"> — {{ loc.zipCode }}</span>
+                </div>
+              </div>
+            </div>
+            <small *ngIf="isSearchingLocations">Searching...</small>
+            <div class="error" *ngIf="form.get('neighborhood')?.touched && form.get('neighborhood')?.invalid">
+              Neighborhood selection is required.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Zip-code</label>
+            <input type="text" formControlName="zipCode" placeholder="Auto-filled from neighborhood" />
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- About -->
+        <section class="form-section">
           <h3><i class="bi bi-info-circle-fill"></i> About</h3>
           <div class="form-group">
             <label>Short Description <span class="req">*</span></label>
@@ -79,53 +151,19 @@
             <div class="error" *ngIf="form.get('description')?.touched && form.get('description')?.errors?.['required']">
               Description is required.
             </div>
+            <div class="error" *ngIf="form.get('description')?.touched && form.get('description')?.errors?.['minlength']">
+              Description is too short (min 10 characters).
+            </div>
             <div class="error" *ngIf="form.get('description')?.touched && form.get('description')?.errors?.['maxlength']">
-              Description is too long (max 500 characters).
+              Description is too long (max 1000 characters).
             </div>
           </div>
         </section>
 
-        <section class="form-card location-card card-location">
-          <h3><i class="bi bi-geo-alt-fill"></i> Location</h3>
-          <p class="hint">Optional. Search for a Borough, Neighborhood, or ZIP code if this community is location-based.</p>
+        <div class="section-divider"></div>
 
-          <div class="search-wrapper">
-            <input
-              type="text"
-              [formControl]="locationSearchControl"
-              placeholder="Search location... (e.g. Bronx)"
-              (blur)="onSearchBlur()"
-              (focus)="showLocationResults = true"
-              [class.valid]="selectedLocation"
-            />
-
-            <i class="bi bi-search search-icon" *ngIf="!isSearchingLocation"></i>
-            <div class="spinner-sm" *ngIf="isSearchingLocation"></div>
-
-            <div class="search-results" *ngIf="showLocationResults && locationResults.length > 0">
-              <div class="result-item" *ngFor="let loc of locationResults" (mousedown)="onLocationSelect(loc)">
-                <div class="loc-icon"><i class="bi bi-geo-alt"></i></div>
-                <div class="loc-info">
-                  <strong>{{ loc.neighborhood }}</strong>
-                  <span>{{ loc.borough }}, {{ loc.zipCode }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="search-results"
-              *ngIf="showLocationResults && locationResults.length === 0 && locationSearchControl.value?.length! > 2 && !isSearchingLocation"
-            >
-              <div class="no-result">No locations found.</div>
-            </div>
-          </div>
-
-          <div class="error" *ngIf="locationSearchControl.value && !selectedLocation">
-            Pick a location from the search results or clear the field.
-          </div>
-        </section>
-
-        <section class="form-card card-visuals">
+        <!-- Visuals -->
+        <section class="form-section">
           <h3><i class="bi bi-images"></i> Visuals</h3>
 
           <div
@@ -152,15 +190,33 @@
           </div>
         </section>
 
-        <section class="form-card privacy-card card-privacy">
+        <div class="section-divider"></div>
+
+        <!-- Submit inside card -->
+        <section class="form-section form-section--submit">
+          <div class="submission-note" *ngIf="!errorSummary">
+            <i class="bi bi-shield-check"></i>
+            Duplicate names, spam patterns, and invalid locations are reviewed before a community is created.
+          </div>
+          <div class="error-summary" *ngIf="errorSummary">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ errorSummary }}
+          </div>
+          <button type="submit" class="btn-submit btn-submit--full" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Creating...' : 'Create Community' }}
+          </button>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Privacy & Access -->
+        <section class="form-section privacy-card">
           <h3><i class="bi bi-shield-lock-fill"></i> Privacy & Access</h3>
 
           <div class="toggle-row access-row">
             <div class="toggle-info">
               <strong>{{ form.get('isPrivate')?.value ? 'Private Community' : 'Public Community' }}</strong>
-              <span>
-                {{ form.get('isPrivate')?.value ? 'Only approved members can find and join.' : 'Anyone can find and join.' }}
-              </span>
+              <span>{{ form.get('isPrivate')?.value ? 'Only approved members can find and join.' : 'Anyone can find and join.' }}</span>
             </div>
             <label class="switch">
               <input type="checkbox" formControlName="isPrivate" />
@@ -176,35 +232,12 @@
             </div>
           </div>
         </section>
-      </div>
 
-      <div class="error-summary" *ngIf="errorSummary">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        {{ errorSummary }}
-      </div>
-
-      <div class="submission-note" *ngIf="!errorSummary">
-        <i class="bi bi-shield-check"></i>
-        Duplicate names, spam patterns, and invalid locations are reviewed before a community is created.
-      </div>
+      </div><!-- /form-card -->
 
       <div class="actions-row">
         <button type="button" class="btn-cancel" routerLink="/community">Cancel</button>
-        <button type="submit" class="btn-submit" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Creating...' : 'Create Community' }}
-        </button>
       </div>
     </form>
   </div>
-
-  <app-community-leader-application-modal
-    *ngIf="isVerificationModalOpen"
-    [fullName]="contributorApplicationFullName"
-    [email]="contributorApplicationEmail"
-    [phoneNumber]="contributorApplicationPhoneNumber"
-    [availableOccupations]="verificationModalOccupations"
-    [preferredOccupationId]="preferredOccupationId"
-    (close)="closeVerificationModal()"
-    (verified)="onVerified()">
-  </app-community-leader-application-modal>
 </div>

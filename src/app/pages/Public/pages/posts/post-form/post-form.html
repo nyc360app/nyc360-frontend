@@ -1,4 +1,177 @@
-<div class="page-container luxury-theme">
+<!-- ===== COMMUNITY ARTICLE FORM ===== -->
+<div class="comm-article-page" *ngIf="isCommunityForm">
+  <div class="comm-article-wrapper">
+
+    <div class="comm-article-header">
+      <h1 class="comm-article-title">Publish News Article</h1>
+      <button type="button" (click)="goBack()" class="comm-btn-back">
+        <i class="bi bi-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <div class="comm-article-card">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <!-- Step 1: Title -->
+        <div class="article-step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <label class="step-label">Title <span class="req-star">*</span></label>
+            <input class="step-input" type="text" formControlName="title" placeholder="Enter article title...">
+            <small class="step-error" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+              Title is required (min 5 characters).
+            </small>
+          </div>
+        </div>
+
+        <!-- Step 2: Media -->
+        <div class="article-step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <label class="step-label">Media <span class="req-star">*</span></label>
+            <p class="step-sublabel">Upload Media</p>
+            <div class="comm-upload-zone">
+              <input type="file" id="commFileInput" multiple accept="image/*,video/*"
+                (change)="onFileSelect($event)" class="hidden-input">
+              <label for="commFileInput" class="comm-upload-label">
+                <div class="comm-upload-icon">
+                  <i class="bi bi-cloud-arrow-up-fill"></i>
+                </div>
+                <p class="comm-upload-text">Drag and drop here</p>
+                <small>Supports JPG, PNG, MP4. Max file size: 50MB per photo</small>
+                <span class="comm-select-btn">Select Files</span>
+              </label>
+            </div>
+            <input class="step-input mt-3" type="text" [(ngModel)]="mediaAltText"
+              [ngModelOptions]="{standalone: true}" placeholder="Add Media Alt Text">
+            <div class="comm-previews" *ngIf="imagePreviews.length > 0">
+              <div class="comm-preview-item" *ngFor="let item of imagePreviews; let i = index">
+                <img [src]="item.url" *ngIf="!item.isVideo" alt="preview">
+                <video [src]="item.url" *ngIf="item.isVideo" controls></video>
+                <button type="button" class="comm-remove-preview" (click)="removeFile(i)">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Author + Date -->
+        <div class="article-step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="author-date-row">
+              <div class="author-date-col">
+                <label class="step-label">Author <span class="req-star">*</span></label>
+                <div class="autofill-field">
+                  <div class="user-avatar-wrap" *ngIf="currentUserAvatar">
+                    <img [src]="currentUserAvatar" alt="avatar">
+                  </div>
+                  <div class="user-avatar-placeholder" *ngIf="!currentUserAvatar">
+                    <i class="bi bi-person-fill"></i>
+                  </div>
+                  <span class="autofill-value">{{ currentUserName }}</span>
+                </div>
+              </div>
+              <div class="author-date-col">
+                <label class="step-label">Date <span class="req-star">*</span></label>
+                <div class="autofill-field">
+                  <div class="date-icon-wrap">
+                    <i class="bi bi-calendar3"></i>
+                  </div>
+                  <span class="autofill-value">{{ currentDate | date:'MMMM d, yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Article Brief Sections -->
+        <div class="article-step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <label class="step-label">Article Brief Sections</label>
+            <textarea class="step-textarea" formControlName="briefContent"
+              placeholder="Community News" rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- Step 5: Article Body Sections -->
+        <div class="article-step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <label class="step-label">Article Body Sections <span class="req-star">*</span></label>
+            <textarea class="step-textarea" formControlName="content"
+              placeholder="Community News" rows="6"></textarea>
+            <small class="step-error" *ngIf="form.get('content')?.invalid && form.get('content')?.touched">
+              Article body is required (min 20 characters).
+            </small>
+          </div>
+        </div>
+
+        <!-- Step 6: Keywords -->
+        <div class="article-step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <label class="step-label">Keywords <span class="req-star">*</span></label>
+            <div class="keywords-grid">
+              <input class="keyword-input" type="text" placeholder="Keyword 1"
+                [(ngModel)]="keywords[0]" [ngModelOptions]="{standalone: true}">
+              <input class="keyword-input" type="text" placeholder="Keyword 2"
+                [(ngModel)]="keywords[1]" [ngModelOptions]="{standalone: true}">
+              <input class="keyword-input" type="text" placeholder="Keyword 3"
+                [(ngModel)]="keywords[2]" [ngModelOptions]="{standalone: true}">
+              <input class="keyword-input" type="text" placeholder="Keyword 4"
+                [(ngModel)]="keywords[3]" [ngModelOptions]="{standalone: true}">
+              <input class="keyword-input" type="text" placeholder="Keyword 5"
+                [(ngModel)]="keywords[4]" [ngModelOptions]="{standalone: true}">
+            </div>
+            <small class="keywords-hint">Add a minimum 5 Keywords</small>
+          </div>
+        </div>
+
+        <!-- Step 7: Article Division Tag -->
+        <div class="article-step">
+          <div class="step-num">7</div>
+          <div class="step-body">
+            <label class="step-label">Article Division Tag <span class="req-star">*</span></label>
+            <div class="division-tags-row">
+              <button type="button" class="div-tag"
+                [class.active]="isDivisionTagSelected(tag.id)"
+                *ngFor="let tag of divisionTags"
+                (click)="toggleDivisionTag(tag.id)"
+                [style.--tag-color]="tag.color">
+                {{ tag.name }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="article-submit-row">
+          <label class="terms-check">
+            <input type="checkbox" [(ngModel)]="agreedToTerms" [ngModelOptions]="{standalone: true}">
+            <span>I acknowledge that I am fully responsible for the content I publish and that it
+              complies with NYC360 community guidelines.</span>
+          </label>
+          <button type="submit" class="comm-btn-publish" [disabled]="isSubmitting || !agreedToTerms">
+            <span *ngIf="!isSubmitting">
+              <i class="bi bi-send-check-fill"></i> Publish News Article
+            </span>
+            <span *ngIf="isSubmitting" class="d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm"></span> Publishing...
+            </span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== STANDARD POST FORM ===== -->
+<div class="page-container luxury-theme" *ngIf="!isCommunityForm">
 
   <div class="page-header fade-in-down">
     <div class="title-section">

@@ -64,48 +64,21 @@
     </header>
 
     <div class="top-layout-grid">
-      <div class="featured-slider-shell" *ngIf="activeFeaturedPost">
-        <div class="featured-slider-header">
-          <span class="featured-kicker">Across NYC360</span>
-          <div class="featured-counter" *ngIf="featuredPosts.length > 1">
-            <span>{{ featuredIndex + 1 }}</span>
-            <span>/</span>
-            <span>{{ featuredPosts.length }}</span>
-          </div>
-        </div>
-
-        <div class="featured-slider">
-          <button class="slider-nav prev" (click)="prevFeatured()" [disabled]="featuredPosts.length <= 1">
-            <i class="bi bi-arrow-left"></i>
-          </button>
-
-          <div class="featured-slide" (click)="goToPost(activeFeaturedPost)">
-            <div class="card-img-container">
-              <img [src]="resolvePostImage(activeFeaturedPost)" [alt]="activeFeaturedPost.title" appImgFallback="post">
-              <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(activeFeaturedPost.category)">
-                <img [src]="getCategoryIcon(activeFeaturedPost.category)" alt="icon">
-                <span>{{ getCategoryName(activeFeaturedPost.category) }}</span>
-              </span>
-              <div class="card-overlay">
-                <h3>{{ activeFeaturedPost.title | slice:0:90 }}{{ activeFeaturedPost.title.length > 90 ? '...' : '' }}</h3>
-              </div>
-              <button class="save-btn" [class.saved]="activeFeaturedPost.isSaved"
-                (click)="onSavePost(activeFeaturedPost, $event)">
-                <i class="bi" [ngClass]="activeFeaturedPost.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
-              </button>
+      <div class="featured-cards-row">
+        <div class="feat-card-small" *ngFor="let post of featuredPosts" (click)="goToPost(post)">
+          <div class="card-img-container">
+            <img [src]="resolvePostImage(post)" [alt]="post.title" appImgFallback="post">
+            <span class="category-badge-top-left" [style.--badge-color]="getCategoryColor(post.category)">
+              <img [src]="getCategoryIcon(post.category)" alt="icon">
+              <span>{{ getCategoryName(post.category) }}</span>
+            </span>
+            <div class="card-overlay">
+              <h3>{{ post.title | slice:0:40 }}{{ post.title.length > 40 ? '...' : '' }}</h3>
             </div>
+            <button class="save-btn" [class.saved]="post.isSaved" (click)="onSavePost(post, $event)">
+              <i class="bi" [ngClass]="post.isSaved ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+            </button>
           </div>
-
-          <button class="slider-nav next" (click)="nextFeatured()" [disabled]="featuredPosts.length <= 1">
-            <i class="bi bi-arrow-right"></i>
-          </button>
-        </div>
-
-        <div class="featured-dots" *ngIf="featuredPosts.length > 1">
-          <button *ngFor="let post of featuredPosts; let i = index"
-            class="dot" [class.active]="i === featuredIndex" (click)="setFeaturedIndex(i)"
-            [attr.aria-label]="'Go to featured post ' + (i + 1)">
-          </button>
         </div>
       </div>
 

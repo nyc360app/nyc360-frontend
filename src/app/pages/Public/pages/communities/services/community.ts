@@ -78,6 +78,23 @@ export class CommunityService {
     return this.http.get<ApiResponse<LocationDto[]>>(`${this.locationsUrl}/search`, { params });
   }
 
+  // GET: Paginated community feed posts only
+  getCommunityFeed(page: number = 1, pageSize: number = 12): Observable<ApiResponse<{ data: any[]; totalCount: number }>> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<any>(`${this.baseUrl}/home`, { params }).pipe(
+      map((res) => ({
+        isSuccess: res.isSuccess,
+        data: {
+          data: Array.isArray(res.data?.feed?.data) ? res.data.feed.data : [],
+          totalCount: Number(res.data?.feed?.totalCount || 0)
+        },
+        error: res.error ?? null
+      }))
+    );
+  }
+
   getCommunityBadgeOptions(): Observable<BadgeOption[]> {
     return this.getCommunityHome(1, 1).pipe(
       map((response) => buildCommunityD01BadgeOptions(response?.data?.tags || []))

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { AuthService } from '../../../../Authentication/Service/auth';
 @Component({
   selector: 'app-post-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './post-form.html',
   styleUrls: ['./post-form.scss']
 })
@@ -70,10 +70,56 @@ export class PostFormComponent implements OnInit {
   selectedTags: any[] = []; // Array of objects {id, name}
   showTagDropdown = false;
 
+  // --- Community Article Form Fields ---
+  get isCommunityForm(): boolean {
+    return this.predefinedCategory === CategoryEnum.Community;
+  }
+
+  mediaAltText = '';
+  keywords: string[] = ['', '', '', '', ''];
+  selectedDivisionTags: string[] = [];
+  agreedToTerms = false;
+  currentDate = new Date();
+
+  get currentUserName(): string {
+    return this.authService.getUserName();
+  }
+
+  get currentUserAvatar(): string | null {
+    return this.authService.getAvatar();
+  }
+
+  divisionTags = [
+    { id: 'community', name: 'Community', color: '#FB7D3F' },
+    { id: 'culture', name: 'Culture', color: '#DD363A' },
+    { id: 'education', name: 'Education', color: '#0056b3' },
+    { id: 'health', name: 'Health', color: '#00c3ff' },
+    { id: 'housing', name: 'Housing', color: '#b59b62' },
+    { id: 'lifestyle', name: 'Lifestyle', color: '#8bc34a' },
+    { id: 'legal', name: 'Legal', color: '#102a43' },
+    { id: 'news', name: 'News', color: '#333333' },
+    { id: 'social', name: 'Social', color: '#17a2b8' },
+    { id: 'events', name: 'Events', color: '#b59b62' },
+  ];
+
+  isDivisionTagSelected(id: string): boolean {
+    return this.selectedDivisionTags.includes(id);
+  }
+
+  toggleDivisionTag(id: string): void {
+    const idx = this.selectedDivisionTags.indexOf(id);
+    if (idx >= 0) {
+      this.selectedDivisionTags.splice(idx, 1);
+    } else {
+      this.selectedDivisionTags.push(id);
+    }
+  }
+
   constructor() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
       content: ['', [Validators.required, Validators.minLength(20)]],
+      briefContent: [''],
       category: [7, Validators.required], // Default to 7 (News) - excluding Community, Housing, Professions
       type: [0, Validators.required],
       locationSearch: ['']
@@ -382,8 +428,61 @@ export class PostFormComponent implements OnInit {
     }
   }
 
+  // --- Community Article Submit ---
+  private submitCommunityArticle() {
+    if (this.form.get('title')?.invalid) {
+      this.form.markAllAsTouched();
+      this.toastService.error('Article title is required (min 5 characters).');
+      return;
+    }
+    if (!this.form.get('content')?.value || this.form.get('content')!.value.length < 20) {
+      this.form.get('content')?.markAsTouched();
+      this.toastService.error('Article body is required (min 20 characters).');
+      return;
+    }
+    if (this.selectedFiles.length === 0 && this.existingAttachments.length === 0) {
+      this.toastService.error('Please upload at least one media file.');
+      return;
+    }
+    if (this.selectedDivisionTags.length === 0) {
+      this.toastService.error('Please select at least one Article Division Tag.');
+      return;
+    }
+
+    this.isSubmitting = true;
+    const formData: any = {
+      title: this.form.get('title')?.value,
+      content: this.form.get('content')?.value,
+      category: CategoryEnum.Community,
+      type: 0,
+      locationId: 0,
+      tags: []
+    };
+
+    this.postsService.createPost(formData, this.selectedFiles).subscribe({
+      next: (res: any) => {
+        this.isSubmitting = false;
+        if (res.isSuccess) {
+          this.toastService.success('Community article published successfully!');
+          this.router.navigate(['/community']);
+        } else {
+          this.toastService.error(res.error?.message || 'Failed to publish article.');
+        }
+      },
+      error: () => {
+        this.isSubmitting = false;
+        this.toastService.error('Network error occurred. Please try again.');
+      }
+    });
+  }
+
   // --- Submit ---
   onSubmit() {
+    if (this.isCommunityForm) {
+      this.submitCommunityArticle();
+      return;
+    }
+
     const rawValue = this.form.getRawValue();
     const categoryId = Number(rawValue.category);
     const isNewsCategory = categoryId === CategoryEnum.News;

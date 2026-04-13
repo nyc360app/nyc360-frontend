@@ -20,6 +20,7 @@ export const PUBLIC_ROUTES: Routes = [
       // Community
       { path: 'community/listings/submit', data: { breadcrumb: 'Add Listing', categoryPath: 'community' }, loadComponent: () => import('../pages/Public/pages/space-listings/space-listing-request/space-listing-request').then(m => m.SpaceListingRequestComponent) },
       { path: 'community', data: { breadcrumb: 'Communities' }, loadComponent: () => import('../pages/Public/pages/communities/pages/community/community').then(m => m.CommunityComponent) },
+      { path: 'community/top-news', data: { breadcrumb: 'Community Top News' }, loadComponent: () => import('../pages/Public/pages/communities/pages/community-top-news/community-top-news').then(m => m.CommunityTopNewsComponent) },
       { path: 'create-community', data: { breadcrumb: 'Create Community' }, loadComponent: () => import('../pages/Public/pages/communities/pages/create-community/create-community').then(m => m.CreateCommunityComponent) },
       { path: 'community/:slug', data: { breadcrumb: 'Community Profile' }, loadComponent: () => import('../pages/Public/pages/communities/pages/community-profile/community-profile').then(m => m.CommunityProfileComponent) },
       { path: 'community/:slug/manage', data: { breadcrumb: 'Manage Community' }, loadComponent: () => import('../pages/Public/pages/communities/pages/community-management/community-management').then(m => m.CommunityManagementComponent) },

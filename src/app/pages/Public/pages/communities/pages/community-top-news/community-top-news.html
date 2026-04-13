@@ -1,0 +1,102 @@
+<div class="top-news-page">
+
+  <div class="page-inner">
+
+    <a class="back-link" routerLink="/community">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+
+    <h1 class="page-title">Community Top News</h1>
+
+    <!-- Loading -->
+    <div class="news-loading" *ngIf="isLoading">
+      <div class="skeleton-card" *ngFor="let n of [1,2,3]"></div>
+    </div>
+
+    <!-- List view (first 3 posts) -->
+    <div class="news-list" *ngIf="!isLoading">
+      <div class="news-list-card" *ngFor="let post of listPosts" [routerLink]="['/public/post', post.id]">
+        <div class="nlc-img">
+          <img *ngIf="hasMedia(post)" [src]="resolveImage(post.attachments[0]?.url)" alt="Post" />
+          <div class="nlc-img-placeholder" *ngIf="!hasMedia(post)">
+            <i class="bi bi-newspaper"></i>
+          </div>
+          <span class="nlc-badge">Community</span>
+        </div>
+        <div class="nlc-body">
+          <h3>{{ post.title }}</h3>
+          <p>{{ excerpt(post.content, 130) }}</p>
+          <div class="nlc-keywords" *ngIf="post.tags?.length">
+            <span>Keywords: </span>{{ post.tags!.join(', ') }},
+          </div>
+          <div class="nlc-date">Date: {{ formatDate(post.createdAt) }}</div>
+          <div class="nlc-author">
+            <div class="author-avatar" [style.background]="authorColor(post)">
+              {{ authorInitials(post) }}
+            </div>
+            <div class="author-info">
+              <span class="author-name">{{ authorName(post) }}</span>
+              <span class="author-org">{{ authorOrg(post) || 'NYC360 COMMUNITY' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid view (remaining posts) -->
+    <div class="news-grid" *ngIf="!isLoading && gridPosts.length > 0">
+      <div class="ngc-card" *ngFor="let post of gridPosts" [routerLink]="['/public/post', post.id]">
+        <div class="ngc-img">
+          <img *ngIf="hasMedia(post)" [src]="resolveImage(post.attachments[0]?.url)" alt="Post" />
+          <div class="ngc-img-placeholder" *ngIf="!hasMedia(post)">
+            <i class="bi bi-newspaper"></i>
+          </div>
+          <span class="ngc-badge">Community</span>
+        </div>
+        <div class="ngc-body">
+          <h4>{{ post.title }}</h4>
+          <p>{{ excerpt(post.content, 110) }}</p>
+          <a class="read-more">Read More <i class="bi bi-arrow-right"></i></a>
+          <div class="ngc-date">Date: {{ formatDate(post.createdAt) }}</div>
+          <div class="ngc-author">
+            <div class="author-avatar" [style.background]="authorColor(post)">
+              {{ authorInitials(post) }}
+            </div>
+            <div class="author-info">
+              <span class="author-name">{{ authorName(post) }}</span>
+              <span class="author-org">{{ authorOrg(post) || 'NYC360 COMMUNITY' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="!isLoading && allPosts.length === 0">
+      <i class="bi bi-newspaper"></i>
+      <p>No community posts yet.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" *ngIf="!isLoading && totalPages > 1">
+      <button class="pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      <ng-container *ngFor="let pg of visiblePages">
+        <span *ngIf="pg === -1" class="pg-ellipsis">...</span>
+        <button
+          *ngIf="pg !== -1"
+          class="pg-btn"
+          [class.active]="pg === currentPage"
+          (click)="goToPage(pg)"
+        >{{ pg }}</button>
+      </ng-container>
+
+      <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</div>

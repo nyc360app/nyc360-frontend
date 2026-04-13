@@ -53,6 +53,17 @@ export class CreateCommunityService {
 
     formData.append('type', String(data.type));
     formData.append('isPrivate', data.isPrivate ? 'true' : 'false');
+    formData.append('borough', data.borough);
+    formData.append('neighborhood', data.neighborhood);
+    formData.append('zipCode', data.zipCode);
+
+    if (data.categoryCode) {
+      formData.append('categoryCode', data.categoryCode);
+    }
+
+    if (data.divisionTag) {
+      formData.append('divisionTag', data.divisionTag);
+    }
 
     if (data.locationId) {
       formData.append('locationId', String(data.locationId));

@@ -45,6 +45,7 @@
                                 <option *ngFor="let language of languageOptions" [value]="language">{{ language }}</option>
                             </select>
                         </div>
+                        <small class="field-hint">Drop down menu with all list of Languages for example: English, Spanish</small>
                         <small class="field-error" *ngIf="hasControlError('Language')">
                             Select the primary publishing language for this feed.
                         </small>
@@ -56,7 +57,7 @@
                         <span class="step-index">2</span>
                         <div>
                             <h2>Feed Source Identity</h2>
-                            <p>Show who publishes the feed and how the source should be represented.</p>
+                            <p>This appears under imported articles.</p>
                         </div>
                     </div>
 
@@ -124,7 +125,7 @@
                                 {{ option }}
                             </button>
                         </div>
-                        <small class="field-hint">Select only one option that best represents this source.</small>
+                        <small class="field-hint">Select only one option that best applies.</small>
                         <small class="field-error" *ngIf="hasControlError('SourceCredibility')">
                             Select the credibility classification for this source.
                         </small>

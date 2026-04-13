@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../../environments/environment';
 import { CommunityService } from '../../services/community';
@@ -27,7 +27,7 @@ import { resolveCommunityMediaUrl } from '../../../../../../shared/utils/communi
   templateUrl: './community.html',
   styleUrls: ['./community.scss']
 })
-export class CommunityComponent implements OnInit {
+export class CommunityComponent implements OnInit, OnDestroy {
 
   private authService = inject(AuthService);
   private communityService = inject(CommunityService);
@@ -35,6 +35,11 @@ export class CommunityComponent implements OnInit {
   private router = inject(Router);
   private toastService = inject(ToastService);
   protected readonly environment = environment;
+
+  // Slider
+  sliderPosts: CommunityPost[] = [];
+  sliderIndex = 0;
+  private sliderTimer: ReturnType<typeof setInterval> | null = null;
 
   // UI State
   isActivityDropdownOpen = false;
@@ -151,9 +156,12 @@ export class CommunityComponent implements OnInit {
           if (allPosts.length > 0) {
             this.featuredPost = allPosts[0];
             this.posts = allPosts.slice(1);
+            this.sliderPosts = allPosts.slice(0, 8);
+            this.startSlider();
           } else {
             this.featuredPost = null;
             this.posts = [];
+            this.sliderPosts = [];
           }
 
           // 3. Local Tags (Optional fallback)
@@ -169,6 +177,32 @@ export class CommunityComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.stopSlider();
+  }
+
+  startSlider() {
+    this.stopSlider();
+    if (this.sliderPosts.length <= 1) return;
+    this.sliderTimer = setInterval(() => {
+      this.sliderIndex = (this.sliderIndex + 1) % this.sliderPosts.length;
+      this.cdr.detectChanges();
+    }, 5000);
+  }
+
+  stopSlider() {
+    if (this.sliderTimer) {
+      clearInterval(this.sliderTimer);
+      this.sliderTimer = null;
+    }
+  }
+
+  goToSlide(index: number) {
+    this.sliderIndex = index;
+    this.startSlider();
+    this.cdr.detectChanges();
   }
 
   onCommunitySearch(): void {

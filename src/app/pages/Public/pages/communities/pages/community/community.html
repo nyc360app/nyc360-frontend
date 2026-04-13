@@ -8,41 +8,39 @@
 
   <div class="content-wrapper">
 
-    <section class="featured-section" *ngIf="featuredPost && hasFeaturedMedia(featuredPost)">
-      <div class="featured-card">
-        <div class="feat-img">
-          <img class="feat-media-link"
-            [src]="resolvePostImage(featuredPost.attachments[0]?.url)"
-            alt="Featured" [routerLink]="['/public/post', featuredPost.id]">
-        </div>
-        <div class="feat-content">
-          <div class="tags-row">
-            <span class="badge-orange">COMMUNITY HIGHLIGHT</span>
-            <span class="read-time">{{ formatPostDate(featuredPost.createdAt) }}</span>
+    <!-- Top News Slider -->
+    <section class="top-news-slider" *ngIf="sliderPosts.length > 0">
+      <div class="slider-track">
+        <div class="slider-card" *ngFor="let post of sliderPosts; let i = index" [class.active]="i === sliderIndex">
+          <div class="slider-img" *ngIf="hasFeaturedMedia(post)">
+            <img [src]="resolvePostImage(post.attachments[0]?.url)" alt="Post image" [routerLink]="['/public/post', post.id]" />
           </div>
-          <h2 class="feat-title-link" [routerLink]="['/public/post', featuredPost.id]">
-            {{ getFeaturedTitle(featuredPost) }}
-          </h2>
-          <p>{{ getFeaturedExcerpt(featuredPost, 150) }}</p>
-          <button class="btn-read-full" [routerLink]="['/public/post', featuredPost.id]">Read Full Article</button>
+          <div class="slider-img slider-img--placeholder" *ngIf="!hasFeaturedMedia(post)">
+            <i class="bi bi-newspaper"></i>
+          </div>
+          <div class="slider-content">
+            <div class="slider-meta">
+              <span class="badge-orange">COMMUNITY HIGHLIGHT</span>
+              <span class="slider-date">{{ formatPostDate(post.createdAt) }} read</span>
+            </div>
+            <h2 [routerLink]="['/public/post', post.id]">{{ getFeaturedTitle(post) }}</h2>
+            <p>{{ getFeaturedExcerpt(post, 160) }}</p>
+            <button class="btn-read-full" [routerLink]="['/public/post', post.id]">Read Full Article</button>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section class="featured-section text-only-mode" *ngIf="featuredPost && !hasFeaturedMedia(featuredPost)">
-      <div class="featured-card featured-card-text">
-        <div class="feat-content feat-content-text w-100" [class.compact]="isCompactTextFeatured(featuredPost)">
-          <div class="tags-row">
-            <span class="badge-orange badge-soft-blue">LATEST UPDATE</span>
-            <span class="read-time">{{ formatPostDate(featuredPost.createdAt) }}</span>
-          </div>
-          <h2 class="feat-title-link text-only-title" [routerLink]="['/public/post', featuredPost.id]">
-            {{ getFeaturedTitle(featuredPost) }}
-          </h2>
-          <p class="text-only-desc">{{ getFeaturedExcerpt(featuredPost, 300) }}</p>
-          <button class="btn-read-full btn-outline" [routerLink]="['/public/post', featuredPost.id]">
-            Read Full Article <i class="bi bi-arrow-right ms-2"></i>
-          </button>
+      <div class="slider-footer">
+        <button class="btn-explore-news" routerLink="/community/top-news">
+          Explore more Community News
+        </button>
+        <div class="slider-dots">
+          <span
+            class="dot"
+            *ngFor="let post of sliderPosts; let i = index"
+            [class.active]="i === sliderIndex"
+            (click)="goToSlide(i)"
+          ></span>
         </div>
       </div>
     </section>

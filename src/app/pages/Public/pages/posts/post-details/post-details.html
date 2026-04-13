@@ -109,8 +109,8 @@
               <div class="menu-divider"></div>
 
               <button class="menu-item-btn" *ngIf="canFeaturePost" (click)="toggleFeatured()">
-                <div class="icon-box"><i class="bi" [ngClass]="post?.isFeatured ? 'bi-star-fill' : 'bi-star'"></i></div>
-                <span>{{ post?.isFeatured ? 'Remove from Featured' : 'Mark as Featured' }}</span>
+                <div class="icon-box"><i class="bi" [ngClass]="post.isFeatured ? 'bi-star-fill' : 'bi-star'"></i></div>
+                <span>{{ post.isFeatured ? 'Remove from Featured' : 'Mark as Featured' }}</span>
               </button>
 
               <button class="menu-item-btn" (click)="openReportModal()">

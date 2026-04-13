@@ -1,10 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
 import { CreateCommunityService } from '../../services/createcommunty';
-import { COMMUNITY_TYPES_LIST, LocationSearchResult } from '../../models/createcommunty';
+import {
+  COMMUNITY_CATEGORY_OPTIONS,
+  COMMUNITY_DIVISION_TAG_OPTIONS,
+  CommunityCategoryOption,
+  CommunityTypeOption,
+  LocationSearchResult,
+} from '../../models/createcommunty';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { CommunityDepartmentHeroComponent } from '../../../../Widgets/community-department-hero/community-department-hero.component';
 import { AuthService } from '../../../../../Authentication/Service/auth';
@@ -17,16 +22,17 @@ import {
   isCommunityGate1Eligible
 } from '../../../../../../shared/utils/community-contract';
 import { CommunityService } from '../../services/community';
-import { CommunityLeaderApplicationModalComponent } from '../../../../../../shared/components/community-leader-application-modal/community-leader-application-modal';
 
 @Component({
   selector: 'app-create-community',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, CommunityDepartmentHeroComponent, CommunityLeaderApplicationModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CommunityDepartmentHeroComponent],
   templateUrl: './create-community.html',
   styleUrls: ['./create-community.scss']
 })
 export class CreateCommunityComponent implements OnInit {
+  private readonly defaultCategory = COMMUNITY_CATEGORY_OPTIONS[0];
+  private readonly defaultDivisionTag = COMMUNITY_DIVISION_TAG_OPTIONS[0];
 
   private fb = inject(FormBuilder);
   private communityService = inject(CreateCommunityService);
@@ -36,7 +42,7 @@ export class CreateCommunityComponent implements OnInit {
   private authService = inject(AuthService);
 
   // Data
-  typesList = COMMUNITY_TYPES_LIST;
+  categoryOptions = COMMUNITY_CATEGORY_OPTIONS;
   isSubmitting = false;
   errorSummary: string | null = null;
 
@@ -46,12 +52,9 @@ export class CreateCommunityComponent implements OnInit {
   avatarPreview: string | null = null;
   coverPreview: string | null = null;
 
-  // Location Search Logic
-  locationSearchControl = new FormControl('');
+  divisionTagOptions = COMMUNITY_DIVISION_TAG_OPTIONS;
   locationResults: LocationSearchResult[] = [];
-  selectedLocation: LocationSearchResult | null = null;
-  isSearchingLocation = false;
-  showLocationResults = false;
+  isSearchingLocations = false;
   currentUserInfo: any | null = this.authService.getFullUserInfo();
   accessOptions: BadgeOption[] = [];
   isVerificationModalOpen = false;
@@ -62,8 +65,13 @@ export class CreateCommunityComponent implements OnInit {
   form: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     slug: ['', [Validators.pattern('^[a-z0-9-]+$')]],
-    description: ['', [Validators.required, Validators.maxLength(500)]],
-    type: [1, Validators.required],
+    description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+    categoryCode: [this.defaultCategory.code, Validators.required],
+    type: [this.defaultCategory.types[0]?.id ?? null, Validators.required],
+    divisionTag: [this.defaultDivisionTag.id, Validators.required],
+    borough: ['', Validators.required],
+    neighborhood: ['', Validators.required],
+    zipCode: [''],
     locationId: [null],
     isPrivate: [false]
   });
@@ -113,6 +121,45 @@ export class CreateCommunityComponent implements OnInit {
     return String(this.currentUserInfo?.phoneNumber || '').trim();
   }
 
+  get selectedCategory(): CommunityCategoryOption {
+    const categoryCode = this.form.get('categoryCode')?.value;
+    return this.categoryOptions.find((category) => category.code === categoryCode) || this.defaultCategory;
+  }
+
+  get typesList(): CommunityTypeOption[] {
+    return this.selectedCategory?.types || [];
+  }
+
+  searchNeighborhoods(query: string) {
+    this.form.patchValue({ neighborhood: '', borough: '', zipCode: '', locationId: null });
+    if (query.length < 2) {
+      this.locationResults = [];
+      return;
+    }
+    this.isSearchingLocations = true;
+    this.communityService.searchLocations(query).subscribe({
+      next: (res) => {
+        this.locationResults = res.isSuccess ? res.data : [];
+        this.isSearchingLocations = false;
+      },
+      error: () => {
+        this.locationResults = [];
+        this.isSearchingLocations = false;
+      }
+    });
+  }
+
+  selectNeighborhoodResult(loc: LocationSearchResult, inputEl: HTMLInputElement) {
+    this.form.patchValue({
+      neighborhood: loc.neighborhood,
+      borough: loc.borough,
+      zipCode: String(loc.zipCode),
+      locationId: loc.id
+    });
+    inputEl.value = `${loc.neighborhood} (${loc.borough})`;
+    this.locationResults = [];
+  }
+
   ngOnInit() {
     this.authService.fullUserInfo$.subscribe((info) => {
       this.currentUserInfo = info;
@@ -132,46 +179,9 @@ export class CreateCommunityComponent implements OnInit {
         this.isAccessLoading = false;
       }
     });
-
-    // Setup Location Search with Debounce
-    this.locationSearchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(term => (term || '').length >= 2), // Search only if 2+ chars
-      switchMap(term => {
-        this.isSearchingLocation = true;
-        this.showLocationResults = true;
-        return this.communityService.searchLocations(term || '');
-      })
-    ).subscribe({
-      next: (res) => {
-        this.isSearchingLocation = false;
-        if (res.isSuccess) {
-          this.locationResults = res.data || [];
-        } else {
-          this.locationResults = [];
-        }
-      },
-      error: () => {
-        this.isSearchingLocation = false;
-        this.locationResults = [];
-      }
-    });
   }
 
   // --- Actions ---
-
-  onLocationSelect(loc: LocationSearchResult) {
-    this.selectedLocation = loc;
-    this.form.get('locationId')?.setValue(loc.id);
-    this.locationSearchControl.setValue(`${loc.borough}, ${loc.neighborhood} (${loc.zipCode})`, { emitEvent: false });
-    this.showLocationResults = false;
-  }
-
-  // Hide results when clicking outside (handled simply by delay for now or overlay)
-  onSearchBlur() {
-    setTimeout(() => this.showLocationResults = false, 200);
-  }
 
   openCreateAccessModal(): void {
     if (!this.hasGate1Eligibility) {
@@ -212,9 +222,26 @@ export class CreateCommunityComponent implements OnInit {
     }
   }
 
+  onCategorySelect(categoryCode: string) {
+    const selectedCategory = this.categoryOptions.find((category) => category.code === categoryCode);
+    if (!selectedCategory) {
+      return;
+    }
+
+    this.form.patchValue({
+      categoryCode: selectedCategory.code,
+      type: selectedCategory.types[0]?.id ?? null
+    });
+  }
+
   onTypeSelect(typeId: number) {
     this.form.get('type')?.setValue(typeId);
   }
+
+  onDivisionTagSelect(tagId: string) {
+    this.form.get('divisionTag')?.setValue(tagId);
+  }
+
 
   // File Handlers
   onAvatarSelect(event: any) {
@@ -249,21 +276,10 @@ export class CreateCommunityComponent implements OnInit {
   }
 
   submit() {
-    if (!this.canSubmitCommunity) {
-      this.toastService.error('Create Community access is locked for this account.');
-      return;
-    }
-
     if (this.form.invalid) {
       this.errorSummary = 'Please fix the errors highlighted above.';
       this.form.markAllAsTouched();
-
-      // Detailed feedback
-      if (!this.selectedLocation && this.locationSearchControl.value) {
-        this.toastService.error('Please select a valid location from the list.');
-      } else {
-        this.toastService.error('Please fix the errors in the form before submitting.');
-      }
+      this.toastService.error('Please fix the errors in the form before submitting.');
       return;
     }
 
@@ -278,7 +294,7 @@ export class CreateCommunityComponent implements OnInit {
           this.isSubmitting = false;
           if (res.isSuccess) {
             this.toastService.success('Community created successfully!');
-            this.router.navigate(['/community']);
+            this.router.navigate(['/communities', res.data]);
           } else {
             this.toastService.error(getCommunityErrorMessage(res, 'Unable to create the community.'));
           }
